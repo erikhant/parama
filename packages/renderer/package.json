@@ -1,0 +1,45 @@
+{
+  "name": "@form-builder/renderer",
+  "version": "0.1.0",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "tsc && vite build",
+    "dev": "vite build --watch",
+    "clean": "rimraf dist node_modules"
+  },
+  "dependencies": {
+    "@form-builder/types": "workspace:*",
+    "@parama-ui/react": "workspace:*",
+    "@types/react-datepicker": "^7.0.0",
+    "@types/react-dropzone": "^5.1.0",
+    "@types/react-select": "^5.0.1",
+    "react": "^18.2.0",
+    "react-datepicker": "^8.3.0",
+    "react-dom": "18.2.0",
+    "react-dropzone": "^14.3.8",
+    "react-select": "^5.10.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "^22.15.18",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.4.1",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "rollup": "^3.29.5",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5",
+    "vite-plugin-dts": "^4.5.3"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

@@ -1,0 +1,55 @@
+@layer components {
+  .select-trigger {
+    @apply form-control flex items-center justify-between;
+  }
+
+  .select-trigger-icon {
+    @apply h-4 w-4 opacity-50;
+  }
+
+  .select-scroll-up,
+  .select-scroll-down {
+    @apply flex cursor-default items-center justify-center py-1;
+  }
+
+  .select-scroll-up svg,
+  .select-scroll-down svg {
+    @apply h-4 w-4;
+  }
+
+  .select-content {
+    @apply relative z-50 max-h-[--radix-select-content-available-height] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border border-slate-200 bg-white text-slate-950 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-select-content-transform-origin] dark:border-neutral-800 dark:bg-neutral-900 dark:text-slate-50;
+  }
+
+  .select-content-popper {
+    @apply data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1;
+  }
+
+  .select-content-viewport {
+    @apply p-1;
+  }
+
+  .select-content-viewport-popper {
+    @apply h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)];
+  }
+
+  .select-label {
+    @apply py-1.5 pl-8 pr-2 text-sm font-semibold dark:text-neutral-400;
+  }
+
+  .select-item {
+    @apply relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-slate-100 focus:text-slate-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-800 dark:focus:text-slate-50;
+  }
+
+  .select-item-indicator {
+    @apply absolute left-2 flex h-3.5 w-3.5 items-center justify-center;
+  }
+
+  .select-item-indicator svg {
+    @apply h-4 w-4;
+  }
+
+  .select-separator {
+    @apply -mx-1 my-1 h-px bg-slate-100 dark:bg-slate-800;
+  }
+}

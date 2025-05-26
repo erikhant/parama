@@ -1,0 +1,45 @@
+{
+  "name": "form-builder",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "build:types": "pnpm --filter @form-builder/types build",
+    "build:core": "pnpm --filter @form-builder/core build",
+    "build:renderer": "pnpm --filter @form-builder/renderer build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean:install": "turbo run clean && rimraf node_modules && pnpm install",
+    "clean:build": "pnpm -r exec rimraf dist node_modules/.cache",
+    "clean:types": "pnpm --filter @form-builder/types clean",
+    "prepare": "husky install",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.26.0",
+    "eslint": "^9.26.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "husky": "^8.0.3",
+    "prettier": "^3.1.1",
+    "rimraf": "^5.0.5",
+    "turbo": "^2.5.3",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.32.1"
+  },
+  "packageManager": "pnpm@10.11.0",
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "3.4.17"
+  }
+}

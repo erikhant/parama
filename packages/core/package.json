@@ -1,0 +1,25 @@
+{
+  "name": "@form-builder/core",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite build --watch",
+    "clean": "rimraf dist node_modules"
+  },
+  "dependencies": {
+    "@form-builder/types": "workspace:*",
+    "zustand": "^4.4.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "^22.15.18",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.7",
+    "rollup": "^3.29.5",
+    "typescript": "^5.3.3",
+    "vite": "^6.3.5",
+    "vite-plugin-dts": "^4.5.3"
+  }
+}

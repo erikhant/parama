@@ -1,0 +1,10 @@
+@layer components {
+  .form-label {
+    @apply text-sm text-gray-900 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-foreground-dark;
+  }
+
+  .form-label:has(~ [required]),
+  .form-label:has(+ div > select[required]) {
+    @apply after:content-['*'] after:ml-1 after:text-red-500;
+  }
+}

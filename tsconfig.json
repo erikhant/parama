@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "ESNext",
+    "module": "ESNext",
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "Bundler", // or "NodeNext"
+    "esModuleInterop": true,
+    "strict": true,
+    "jsx": "react-jsx",
+    "composite": true,
+    "declaration": true, // Add for all packages
+    "declarationMap": true, // Helps with debugging
+    "skipLibCheck": true,
+    "paths": {
+      "@form-builder/*": ["./packages/*/src"],
+      "@form-builder/core": ["./packages/core/src"],
+      "@form-builder/editor": ["./packages/editor/src"],
+      "@form-builder/renderer": ["./packages/renderer/src"],
+      "@form-builder/types": ["./packages/types/src"],
+      "@parama-ui/react": ["./packages/parama-ui/src"]
+    }
+  },
+  "references": [
+    { "path": "packages/types" },
+    { "path": "packages/core" },
+    { "path": "packages/renderer" },
+    { "path": "packages/parama-ui" }
+  ],
+  "exclude": ["node_modules"]
+}

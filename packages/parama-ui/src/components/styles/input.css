@@ -1,0 +1,17 @@
+@layer components {
+  .form-control {
+    @apply flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-base ring-offset-transparent file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-slate-950 placeholder:text-slate-400 focus-visible:outline-none focus-visible:border-primary/80 focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:border-background-dark dark:text-foreground-dark dark:focus-visible:border-primary/60 dark:bg-transparent dark:ring-offset-transparent dark:file:text-slate-50 dark:placeholder:text-foreground-dark/50 dark:focus-visible:ring-primary-light/60;
+  }
+
+  .form-control:has(+ .form-group-append) {
+    @apply pr-10;
+  }
+
+  .form-control:has(+ .form-addon-end) {
+    @apply rounded-r-none;
+  }
+
+  textarea.form-control {
+    @apply min-h-[60px];
+  }
+}

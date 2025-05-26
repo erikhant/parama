@@ -1,0 +1,17 @@
+@layer components {
+  .slider {
+    @apply relative flex w-full touch-none select-none items-center;
+  }
+
+  .slider-track {
+    @apply relative h-2 w-full grow overflow-hidden rounded-full bg-slate-100 dark:bg-foreground;
+  }
+
+  .slider-range {
+    @apply absolute h-full bg-primary/80 dark:bg-primary/50;
+  }
+
+  .slider-thumb {
+    @apply block h-5 w-5 rounded-full border border-secondary-dark shadow-md shadow-slate-300/40 bg-white ring-offset-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light/60 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-50 dark:shadow-slate-300/20 dark:bg-foreground-dark dark:ring-offset-foreground-dark dark:focus-visible:ring-primary-light/60;
+  }
+}

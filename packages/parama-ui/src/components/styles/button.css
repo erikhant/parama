@@ -1,0 +1,110 @@
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0;
+  }
+
+  /* FILL VARIANTS */
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark focus-visible:ring-primary dark:backdrop-blur-sm dark:bg-primary/85 dark:text-white dark:hover:bg-primary/80 dark:focus-visible:ring-primary-light/50;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-foreground focus-visible:ring-gray-600 border border-gray-300 dark:bg-white hover:bg-secondary-dark dark:hover:bg-secondary-light/80 dark:focus-visible:ring-secondary-light;
+  }
+
+  .btn-success {
+    @apply bg-success text-white hover:bg-success-dark focus-visible:ring-success;
+  }
+
+  .btn-warning {
+    @apply bg-warning shadow-warning/40 text-white hover:bg-warning-dark focus-visible:ring-warning;
+  }
+
+  .btn-danger {
+    @apply bg-danger text-white hover:bg-danger-dark focus-visible:ring-danger;
+  }
+
+  /* OUTLINE VARIANTS */
+  .btn-primary-outline {
+    @apply bg-transparent border border-primary text-primary hover:text-white hover:bg-primary dark:text-primary dark:hover:text-primary-light dark:bg-transparent dark:hover:bg-primary/10;
+  }
+
+  .btn-secondary-outline {
+    @apply bg-transparent text-foreground hover:bg-secondary-dark dark:border-secondary-dark dark:bg-transparent dark:text-gray-200 dark:hover:text-foreground-dark dark:hover:bg-secondary/10;
+  }
+
+  .btn-success-outline {
+    @apply bg-transparent border border-success text-success hover:text-white hover:bg-success dark:text-success dark:hover:text-success-light dark:bg-transparent dark:hover:bg-success/10;
+  }
+
+  .btn-warning-outline {
+    @apply bg-transparent border border-warning text-warning hover:text-white hover:bg-warning dark:text-warning dark:hover:text-warning-light dark:bg-transparent dark:hover:bg-warning/10;
+  }
+
+  .btn-danger-outline {
+    @apply bg-transparent border border-danger text-danger hover:text-white hover:bg-danger dark:text-danger dark:hover:text-danger-light dark:bg-transparent dark:hover:bg-danger/10;
+  }
+
+  /* GHOST VARIANTS */
+  .btn-primary-ghost {
+    @apply bg-transparent text-primary border-none hover:text-gray-50 hover:bg-primary dark:text-primary dark:bg-transparent dark:hover:text-gray-50 dark:hover:bg-primary/50;
+  }
+
+  .btn-secondary-ghost {
+    @apply bg-transparent text-foreground border-none hover:bg-secondary-dark dark:text-foreground-dark dark:hover:bg-secondary/90 dark:bg-transparent dark:hover:text-foreground;
+  }
+
+  .btn-success-ghost {
+    @apply bg-transparent text-success border-none hover:bg-success hover:text-white dark:bg-transparent dark:hover:text-white dark:hover:bg-success/50;
+  }
+
+  .btn-warning-ghost {
+    @apply bg-transparent text-warning border-none hover:bg-warning hover:text-white dark:bg-transparent dark:hover:text-white dark:hover:bg-warning/50;
+  }
+
+  .btn-danger-ghost {
+    @apply bg-transparent text-danger border-none hover:bg-danger hover:text-white dark:bg-transparent dark:hover:text-white dark:hover:bg-danger/50;
+  }
+
+  /* SHADOW VARIANTS */
+  .btn-primary-shadow {
+    @apply shadow-lg shadow-primary/40;
+  }
+
+  .btn-secondary-shadow {
+    @apply shadow-lg shadow-gray-300/40;
+  }
+
+  .btn-warning-shadow {
+    @apply shadow-lg shadow-warning/40;
+  }
+
+  .btn-success-shadow {
+    @apply shadow-lg shadow-success/40;
+  }
+
+  .btn-danger-shadow {
+    @apply shadow-lg shadow-danger/40;
+  }
+
+  /* SIZES */
+  .btn-default {
+    @apply h-10 px-4 py-2;
+  }
+
+  .btn-xs {
+    @apply h-7 rounded px-1.5;
+  }
+
+  .btn-sm {
+    @apply h-9 rounded-md px-3;
+  }
+
+  .btn-lg {
+    @apply h-11 rounded-md px-8;
+  }
+
+  .btn-icon {
+    @apply h-10 w-10;
+  }
+}

@@ -1,0 +1,40 @@
+# Node modules
+node_modules/
+
+# pnpm lock file
+pnpm-lock.yaml
+
+# pnpm workspace file
+pnpm-workspace.yaml
+
+# Build output directories
+dist/
+build/
+
+# Coverage reports
+coverage/
+
+# Temporary files
+*.log
+*.tmp
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+
+# IDE specific files
+.vscode/
+.idea/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Miscellaneous
+**/.turbo

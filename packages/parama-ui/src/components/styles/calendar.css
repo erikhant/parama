@@ -1,0 +1,97 @@
+@layer components {
+  .calendar {
+    @apply p-3;
+  }
+
+  .calendar-months {
+    @apply flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0;
+  }
+
+  .calendar-month {
+    @apply space-y-4;
+  }
+
+  .calendar-caption {
+    @apply flex justify-center pt-1 relative items-center;
+  }
+
+  .calendar-caption-label {
+    @apply text-sm font-medium dark:text-foreground-dark;
+  }
+
+  .calendar-nav {
+    @apply space-x-1 flex items-center;
+  }
+
+  .calendar-nav-button {
+    @apply h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100;
+  }
+
+  .calendar-prev-button {
+    @apply absolute left-1;
+  }
+
+  .calendar-next-button {
+    @apply absolute right-1;
+  }
+
+  .calendar-arrow-icon {
+    @apply h-4 w-4;
+  }
+
+  .calendar-table {
+    @apply w-full border-collapse space-y-1;
+  }
+
+  .calendar-head-row {
+    @apply flex;
+  }
+
+  .calendar-head-cell {
+    @apply text-slate-500 rounded-md w-9 font-normal text-[0.8rem] dark:text-foreground-dark/60;
+  }
+
+  .calendar-row {
+    @apply flex w-full mt-2;
+  }
+
+  .calendar-cell {
+    @apply h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-slate-100/50 [&:has([aria-selected])]:bg-slate-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 dark:[&:has([aria-selected].day-outside)]:bg-transparent dark:[&:has([aria-selected])]:bg-primary/10;
+  }
+
+  .calendar-cell-range {
+    @apply [&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md;
+  }
+
+  .calendar-cell-default {
+    @apply [&:has([aria-selected])]:rounded-md;
+  }
+
+  .calendar-day {
+    @apply h-9 w-9 p-0 font-normal aria-selected:opacity-100 text-slate-700 dark:text-foreground-dark;
+  }
+
+  .calendar-day-selected {
+    @apply bg-primary text-slate-50 border-none hover:bg-primary hover:text-slate-50 focus:bg-primary focus:text-slate-50 dark:bg-primary/60 dark:text-white dark:hover:bg-primary dark:hover:text-white dark:focus:bg-primary dark:focus:text-white;
+  }
+
+  .calendar-today {
+    @apply border border-primary-light dark:border-primary-light;
+  }
+
+  .calendar-day-outside {
+    @apply text-gray-400 aria-selected:bg-primary aria-selected:text-foreground-dark dark:text-foreground-dark/50 dark:aria-selected:bg-primary/50 dark:aria-selected:text-foreground-dark;
+  }
+
+  .calendar-day-disabled {
+    @apply text-secondary-dark opacity-50 dark:text-slate-400;
+  }
+
+  .calendar-day-range-mid {
+    @apply aria-selected:bg-slate-100 aria-selected:text-primary dark:aria-selected:bg-primary dark:aria-selected:text-slate-50;
+  }
+
+  .calendar-day-hidden {
+    @apply invisible;
+  }
+}
