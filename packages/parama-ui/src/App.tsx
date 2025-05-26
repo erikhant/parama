@@ -19,6 +19,7 @@ import { Checkbox } from './components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from './components/ui/radio-group';
 import { Slider } from './components/ui/slider';
 import { Switch } from './components/ui/switch';
+import { FormItem } from './components/ui/form-item';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -107,10 +108,10 @@ function App() {
         <div>
           <Slider defaultValue={[50]} max={100} step={1} className="w-[60%]" />
         </div>
-        <div className="flex items-center space-x-2">
+        <FormItem className="flex items-center space-x-2">
           <Switch id="airplane-mode" />
           <Label htmlFor="airplane-mode">Airplane Mode</Label>
-        </div>
+        </FormItem>
       </form>
     </>
   );

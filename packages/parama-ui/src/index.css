@@ -9,6 +9,8 @@
 @import './components/styles/checkbox.css';
 @import './components/styles/dialog.css';
 @import './components/styles/dropdown.css';
+@import './components/styles/form-group.css';
+@import './components/styles/form-item.css';
 @import './components/styles/input.css';
 @import './components/styles/label.css';
 @import './components/styles/select.css';

@@ -1,0 +1,21 @@
+@layer components {
+  .form-item {
+    @apply space-y-2;
+  }
+
+  .form-item-horizontal {
+    @apply grid grid-cols-5 gap-3;
+  }
+
+  .form-item-horizontal > .form-label {
+    @apply col-span-2;
+  }
+
+  .form-item-horizontal > .form-control {
+    @apply col-span-3;
+  }
+
+  .form-item-horizontal > .form-group {
+    @apply col-span-3;
+  }
+}
