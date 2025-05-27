@@ -4,14 +4,15 @@
   }
 
   .form-item-horizontal {
-    @apply grid grid-cols-5 gap-3;
+    @apply grid grid-cols-5 gap-3 space-y-0;
   }
 
   .form-item-horizontal > .form-label {
-    @apply col-span-2;
+    @apply col-span-2 inline-flex self-center;
   }
 
-  .form-item-horizontal > .form-control {
+  .form-item-horizontal > .form-control,
+  .form-item-horizontal > .switch {
     @apply col-span-3;
   }
 

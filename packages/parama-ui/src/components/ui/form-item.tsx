@@ -6,11 +6,12 @@ export type FormItemProps = React.ComponentProps<'div'> & {
 };
 
 export const FormItem = React.forwardRef<HTMLDivElement, FormItemProps>(
-  ({ orientation = 'vertical', ...props }, ref) => {
+  ({ orientation = 'vertical', className = '', ...props }, ref) => {
     return (
       <div
         className={cn(
-          `form-item ${orientation === 'horizontal' ? 'form-item-horizontal' : ''} ${props.className}`
+          `form-item ${orientation === 'horizontal' ? 'form-item-horizontal' : ''}`,
+          className
         )}
         {...props}
         ref={ref}>

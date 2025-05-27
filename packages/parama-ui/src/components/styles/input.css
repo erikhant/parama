@@ -4,11 +4,11 @@
   }
 
   .form-control:has(+ .form-group-suffix) {
-    @apply pr-10;
+    @apply pr-10 rounded-r-none;
   }
 
   .form-control:has(+ .form-group-addon-end) {
-    @apply rounded-r-none;
+    @apply pr-20;
   }
 
   textarea.form-control {

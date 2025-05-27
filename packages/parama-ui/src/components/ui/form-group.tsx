@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import React from 'react';
 
 type FormGroupProps = React.ComponentProps<'div'> & {
@@ -7,9 +8,9 @@ type FormGroupProps = React.ComponentProps<'div'> & {
   addOnEnd?: React.ReactNode;
 };
 export const FormGroup = React.forwardRef<HTMLDivElement, FormGroupProps>(
-  ({ prefix, suffix, addOnEnd, addOnStart, ...props }, ref) => {
+  ({ prefix, suffix, addOnEnd, addOnStart, className = '', ...props }, ref) => {
     return (
-      <div className={`form-group ${props.className}`} {...props} ref={ref}>
+      <div className={cn('form-group', className)} {...props} ref={ref}>
         {addOnStart && (
           <div className="form-group-addon-start">{addOnStart}</div>
         )}

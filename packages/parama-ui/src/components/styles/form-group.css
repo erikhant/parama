@@ -1,17 +1,21 @@
 .form-group {
-  @apply flex relative rounded-corner shadow-sm;
+  @apply flex relative rounded-lg shadow-sm;
 }
 
 .form-group-addon-start {
-  @apply pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3;
+  @apply absolute inset-y-0 left-0 inline-flex items-center pl-3 z-[1] max-w-20 truncate after:content-[''] after:h-1/2 after:w-[1px] after:bg-neutral-300;
 }
 
 .form-group-addon-end {
-  @apply pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3;
+  @apply absolute inset-y-0 right-0 inline-flex items-center pr-3 z-[1] max-w-20 truncate before:content-[''] before:h-1/2 before:w-[1px] before:bg-neutral-300;
 }
 
 .form-group-addon-start + .form-control {
-  @apply pl-10;
+  @apply pl-20;
+}
+
+.form-group-addon-start + .form-group-prefix {
+  @apply pl-20;
 }
 
 .form-group-addon-start:has(select),
@@ -21,15 +25,15 @@
 
 .form-group-addon-start select,
 .form-group-addon-end select {
-  @apply h-full rounded-corner border-0 bg-transparent py-0 pl-3 pr-7 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm;
+  @apply h-full rounded-lg border-0 bg-transparent py-0 pl-3 pr-7 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm;
 }
 
 .form-group-addon-start button {
-  @apply relative -mr-px inline-flex items-center gap-x-1.5 rounded-l-corner px-3 py-[0.4rem] text-sm font-semibold text-gray-900;
+  @apply relative -mr-px inline-flex items-center gap-x-1.5 rounded-l-lg px-3 py-[0.4rem] text-sm font-medium text-neutral-800;
 }
 
 .form-group-addon-end button {
-  @apply relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-corner px-3 py-[0.4rem] text-sm font-semibold text-gray-900;
+  @apply relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-lg px-3 py-[0.4rem] text-sm font-medium text-neutral-800;
 }
 
 .form-group-addon-start:has(button),
@@ -37,14 +41,18 @@
   @apply p-0;
 }
 
-.form-group-suffix {
-  @apply inline-flex items-center rounded-l-corner border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm;
+.form-group-prefix {
+  @apply inline-flex items-center rounded-l-lg border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm;
 }
 
-.form-group-suffix + .form-control {
+.form-group-prefix + .form-control {
   @apply rounded-l-none;
 }
 
-.form-group-prefix {
-  @apply inline-flex items-center rounded-r-corner border border-l-0 border-gray-300 px-3 text-gray-500 sm:text-sm shadow-sm;
+.form-group-suffix {
+  @apply inline-flex items-center rounded-r-lg border border-l-0 border-gray-300 px-3 text-gray-500 sm:text-sm;
+}
+
+.form-group-suffix:has(+ .form-group-addon-end) {
+  @apply pr-20;
 }

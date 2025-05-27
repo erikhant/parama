@@ -20,6 +20,7 @@ import { RadioGroup, RadioGroupItem } from './components/ui/radio-group';
 import { Slider } from './components/ui/slider';
 import { Switch } from './components/ui/switch';
 import { FormItem } from './components/ui/form-item';
+import { FormGroup } from './components/ui/form-group';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -108,9 +109,19 @@ function App() {
         <div>
           <Slider defaultValue={[50]} max={100} step={1} className="w-[60%]" />
         </div>
-        <FormItem className="flex items-center space-x-2">
-          <Switch id="airplane-mode" />
+        <FormItem orientation="horizontal">
           <Label htmlFor="airplane-mode">Airplane Mode</Label>
+          <Switch id="airplane-mode" className="ml-auto" />
+        </FormItem>
+        <FormItem>
+          <Label htmlFor="mail">Email</Label>
+          <FormGroup
+            prefix="yourname@mail.com"
+            suffix=".com"
+            addOnStart={<button>Search</button>}
+            addOnEnd={<button>Search</button>}>
+            <Input type="email" />
+          </FormGroup>
         </FormItem>
       </form>
     </>
