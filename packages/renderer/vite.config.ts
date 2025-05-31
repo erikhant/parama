@@ -20,7 +20,7 @@ export default defineConfig({
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'FormBuilderRenderer',
       fileName: (format) => `index.${format}.js`,
-      formats: ['es', 'umd']
+      formats: ['es', 'umd', 'cjs']
     },
     rollupOptions: {
       external: [
@@ -42,30 +42,27 @@ export default defineConfig({
   },
   resolve: {
     alias: [
-      // {
-      //   find: 'react',
-      //   replacement: path.resolve(__dirname, 'react/package.json')
-      // },
-      // {
-      //   find: 'react-dom',
-      //   replacement: path.resolve(__dirname, 'react-dom/package.json')
-      // },
       { find: '@', replacement: path.resolve(__dirname, 'src') },
       {
         find: '@form-builder/core',
-        replacement: path.resolve(__dirname, '../core/dist') // Point to DIST
+        replacement: path.resolve(__dirname, '../core/dist')
       },
       {
         find: '@form-builder/types',
-        replacement: path.resolve(__dirname, '../types/dist') // Point to DIST
+        replacement: path.resolve(__dirname, '../types/dist/index.d.ts')
+      },
+      {
+        find: '@parama-ui/react',
+        replacement: path.resolve(__dirname, '../parama-ui/dist/index.es.js')
+      },
+      {
+        find: '@parama-ui/react/parama-ui.min.css',
+        replacement: path.resolve(
+          __dirname,
+          '../parama-ui/dist/parama-ui.min.css'
+        )
       }
     ]
-    // alias: {
-    //   '@': path.resolve(__dirname, 'src'),
-    //   // Add these to ensure workspace dependencies resolve correctly
-    //   '@form-builder/core': path.resolve(__dirname, '../core/src'),
-    //   '@form-builder/types': path.resolve(__dirname, '../types/src')
-    // }
   },
   optimizeDeps: {
     include: ['react', 'react-dom']

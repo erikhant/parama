@@ -1,18 +1,82 @@
-import React from 'react';
-import DatePicker from 'react-datepicker';
+import React, { useState } from 'react';
 import Dropzone from 'react-dropzone';
-import Select from 'react-select';
+// import Select from 'react-select';
 import { useFormBuilder } from '@form-builder/core';
+import {
+  Button,
+  Checkbox,
+  DatePicker,
+  FormItem,
+  Input,
+  Label,
+  RadioGroup,
+  RadioGroupItem,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea
+} from '@parama-ui/react';
 import type { FormField as FormFieldType } from '@form-builder/types';
-import 'react-datepicker/dist/react-datepicker.css';
+import '../../parama-ui/dist/parama-ui.min.css';
 
 export const FormField: React.FC<{ field: FormFieldType }> = ({ field }) => {
   const { formData, actions } = useFormBuilder();
   const value = formData[field.id] ?? field.defaultValue;
-
+  const [date, setDate] = useState<Date | undefined>(
+    value ? new Date(value) : undefined
+  );
+  const handleDateChange = (date: Date | undefined) => {
+    setDate(date);
+    actions.updateFieldValue(
+      field.id,
+      date ? date.toLocaleDateString() : undefined
+    );
+    actions.validateField(field.id);
+  };
   const handleChange = (value: any) => {
     actions.updateFieldValue(field.id, value);
     actions.validateField(field.id);
+  };
+
+  const getValidationValue = (validationName: string) => {
+    if (field.type === 'submit') return false;
+    if (!field.validation) return false;
+    if (
+      typeof (field.validation as Record<string, unknown>)?.[validationName] ===
+      'boolean'
+    ) {
+      return (
+        (field.validation as Record<string, unknown>)[validationName] === true
+      );
+    } else {
+      return (
+        field.validation as Record<string, { value: unknown; message: string }>
+      )[validationName]?.value;
+    }
+  };
+
+  const evaluateVisibility = (field: FormFieldType) => {
+    if (!field.conditions?.visibility) return true;
+    const { dependsOn, operator, value } = field.conditions.visibility;
+    const dependentValue = formData[dependsOn];
+    switch (operator) {
+      case 'Equals':
+        return dependentValue === value;
+      case 'NotEqual':
+        return dependentValue !== value;
+      case 'GreaterThan':
+        return dependentValue > value;
+      case 'LessThan':
+        return dependentValue < value;
+      case 'LessOrEqual':
+        return dependentValue <= value;
+      case 'GreaterOrEqual':
+        return dependentValue >= value;
+      default:
+        return true;
+    }
   };
 
   const renderInput = () => {
@@ -22,7 +86,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = ({ field }) => {
       case 'password':
       case 'number':
         return (
-          <input
+          <Input
             id={field.id}
             name={field.name}
             type={field.type}
@@ -30,88 +94,115 @@ export const FormField: React.FC<{ field: FormFieldType }> = ({ field }) => {
             disabled={field.disabled}
             readOnly={field.readOnly}
             placeholder={field.placeholder}
+            required={getValidationValue('required') as boolean}
             onChange={(e) => handleChange(e.target.value)}
             onFocus={() => actions.selectField(field.id)}
-            className={`border rounded p-2 w-full ${field.error ? 'border-red-500' : 'border-gray-300'}`}
+            className={`${field.error ? 'border-red-500' : ''}`}
           />
         );
       case 'textarea':
         return (
-          <textarea
+          <Textarea
+            id={field.id}
             name={field.name}
             defaultValue={value || ''}
-            onChange={(e) => handleChange(e.target.value)}
+            required={getValidationValue('required') as boolean}
             rows={field.rows || 3}
-            className={`w-full p-2 border rounded ${field.error ? 'border-red-500' : 'border-gray-300'}`}
+            className={`${field.error ? 'border-red-500' : ''}`}
             placeholder={field.placeholder}
+            disabled={field.disabled}
+            readOnly={field.readOnly}
+            onChange={(e) => handleChange(e.target.value)}
+            onFocus={() => actions.selectField(field.id)}
           />
         );
       case 'date':
         return (
           <DatePicker
+            {...(field.mode === 'single' ? { mode: 'single' } : {})}
+            required={getValidationValue('required') as boolean}
+            disabled={field.disabled}
+            placeholder={field.placeholder}
             name={field.name}
-            selected={value ? new Date(value) : null}
-            onChange={(date) => handleChange(date?.toISOString())}
+            selected={date}
+            container={document.getElementById(`item__${field.id}`)}
+            onSelect={handleDateChange}
             className={`w-full p-2 border rounded ${field.error ? 'border-red-500' : 'border-gray-300'}`}
           />
         );
       case 'radio':
         return (
-          <div
-            className={`flex w-full ${field.appearance?.position === 'horizontal' ? 'flex-row space-x-4' : 'flex-col space-y-2'}`}>
+          <RadioGroup
+            name={field.name}
+            defaultValue={field.defaultValue}
+            disabled={field.disabled}
+            required={getValidationValue('required') as boolean}
+            onValueChange={(value) => handleChange(value)}
+            orientation={field.appearance?.position}>
             {field.items?.map((item) => (
-              <label key={item.id} className="flex items-center gap-2">
-                <input
-                  name={field.name}
-                  type="radio"
-                  defaultChecked={value === item.value}
-                  onChange={() => handleChange(item.value)}
-                  className="mr-2"
-                />
-                {item.label}
-              </label>
+              <div key={item.id} className="flex items-center space-x-2">
+                <RadioGroupItem value={item.value} id={item.id as string} />
+                <Label htmlFor={item.id as string}>{item.label}</Label>
+              </div>
             ))}
-          </div>
+          </RadioGroup>
         );
       case 'checkbox':
         return (
-          <div
-            className={`flex w-full ${field.appearance?.position === 'horizontal' ? 'flex-row space-x-4' : 'flex-col space-y-2'}`}>
+          <>
             {field.items?.map((item) => (
-              <label key={item.id} className="flex items-center">
-                <input
+              <div className="flex items-center space-x-2" key={item.id}>
+                <Checkbox
+                  id={item.id as string}
                   name={field.name}
-                  type="checkbox"
+                  required={getValidationValue('required') as boolean}
+                  disabled={item.disabled}
+                  value={item.value}
                   defaultChecked={value?.includes(item.value)}
-                  onChange={(e) => {
-                    const newValue = e.target.checked
+                  onCheckedChange={(e) => {
+                    const newValue = e
                       ? [...(value || []), item.value]
                       : (value || []).filter((v: any) => v !== item.value);
                     handleChange(newValue);
                   }}
                   className="mr-2"
                 />
-                {item.label}
-              </label>
+                <Label htmlFor={item.id as string}>{item.label}</Label>
+              </div>
             ))}
-          </div>
+          </>
         );
       case 'select':
         return (
           <Select
             name={field.name}
-            options={field.options}
-            defaultValue={
-              Array.isArray(value)
-                ? field.options?.filter((opt) => value.includes(opt.value))
-                : field.options?.find((opt) => opt.value === value)
-            }
-            isMulti={field.multiple}
-            onChange={(selected) => handleChange(selected)}
-            className={`react-select-container ${field.error ? 'border-red-500' : ''}`}
-            classNamePrefix="react-select"
-          />
+            defaultValue={value}
+            disabled={field.disabled}
+            required={getValidationValue('required') as boolean}
+            onValueChange={(selectedValue) => {
+              handleChange(selectedValue);
+            }}>
+            <SelectTrigger
+              className="w-full"
+              onFocus={() => actions.selectField(field.id)}>
+              <SelectValue
+                className="text-slate-400"
+                placeholder={field.placeholder || 'Select an option'}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {/* <SelectGroup>
+                <SelectLabel>Fruits</SelectLabel>
+              </SelectGroup> */}
+              {field.options?.map((opt) => (
+                <SelectItem key={opt.id} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         );
+
       case 'file':
         <Dropzone
           accept={field.validation?.accept}
@@ -137,13 +228,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = ({ field }) => {
         </Dropzone>;
 
       case 'submit':
-        return (
-          <button
-            type="submit"
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors">
-            {field.label}
-          </button>
-        );
+        return <Button type="submit">{field.label}</Button>;
 
       default:
         return <div>Unsupported field type</div>;
@@ -151,22 +236,31 @@ export const FormField: React.FC<{ field: FormFieldType }> = ({ field }) => {
   };
 
   return (
-    <div className={`column-span-${field.width} flex flex-col`}>
-      {field.type !== 'submit' && (
-        <label className="block text-sm font-medium mb-1">
-          {field.label}
-          {field.validation?.required && (
+    evaluateVisibility(field) && (
+      <FormItem
+        id={`item__${field.id}`}
+        className={`column-span-${field.width}`}
+        orientation={
+          field.type === 'checkbox' || field.type === 'radio'
+            ? field.appearance?.position
+            : 'vertical'
+        }>
+        {field.type !== 'submit' && (
+          <Label>
+            {field.label}
+            {/* {field.validation?.required && (
             <span className="text-red-500">*</span>
-          )}
-        </label>
-      )}
-      {renderInput()}
-      {field.type !== 'submit' && field.error && (
-        <span className="text-red-500 text-sm mt-1">{field.error}</span>
-      )}
-      {field.type !== 'submit' && field.helpText && (
-        <span className="text-gray-500 text-sm mt-1">{field.helpText}</span>
-      )}
-    </div>
+          )} */}
+          </Label>
+        )}
+        {renderInput()}
+        {field.type !== 'submit' && field.error && (
+          <span className="text-red-500 text-sm mt-1">{field.error}</span>
+        )}
+        {field.type !== 'submit' && field.helpText && (
+          <span className="form-description">{field.helpText}</span>
+        )}
+      </FormItem>
+    )
   );
 };

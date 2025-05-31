@@ -1,9 +1,10 @@
-@import 'tailwindcss/base';
+/* @import 'tailwindcss/base'; */
 @import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+/* @import 'tailwindcss/utilities'; */
 @import './components/styles/variables.css';
 @import './components/styles/popover.css';
 @import './components/styles/button.css';
+@import './components/styles/badge.css';
 @import './components/styles/calendar.css';
 @import './components/styles/command.css';
 @import './components/styles/checkbox.css';

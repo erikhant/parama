@@ -2,8 +2,8 @@ import { cn } from '@/lib/utils';
 import React from 'react';
 
 type FormGroupProps = React.ComponentProps<'div'> & {
-  prefix?: string;
-  suffix?: string;
+  prefix?: React.ReactNode;
+  suffix?: React.ReactNode;
   addOnStart?: React.ReactNode;
   addOnEnd?: React.ReactNode;
 };

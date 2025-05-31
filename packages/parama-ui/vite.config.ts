@@ -1,5 +1,6 @@
 import path from 'path';
 import react from '@vitejs/plugin-react';
+import dts from 'vite-plugin-dts';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 
@@ -7,12 +8,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: __dirname,
-  plugins: [react()],
+  plugins: [
+    react(),
+    dts({
+      insertTypesEntry: true,
+      exclude: ['**/__tests__/**'],
+      rollupTypes: true
+    })
+  ],
   resolve: {
     alias: {
-      // Add this to share React instance
-      // 'react': path.resolve(__dirname, 'react/package.json'),
-      // 'react-dom': path.resolve(__dirname, 'react-dom/package.json'),
       '@': path.resolve(__dirname, 'src')
     }
   },
@@ -23,14 +28,13 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'ParamaUI',
-      fileName: () => 'parama-ui',
+      fileName: (format) => `index.${format}.js`,
       formats: ['es', 'cjs']
     },
     rollupOptions: {
-      // Dev only
       external: ['react', 'react-dom'],
       // Production mode
-      //input: path.resolve(__dirname, 'index.html'),
+      // input: path.resolve(__dirname, 'index.ts'),
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith('.css')) {

@@ -9,6 +9,11 @@ import {
   useSensor,
   useSensors
 } from '@dnd-kit/core';
+import type {
+  CheckboxField,
+  FieldGroupItem,
+  FormField as FormFieldType
+} from '@form-builder/types';
 import { arrayMove } from '@dnd-kit/sortable';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useFormBuilder } from '@form-builder/core';
@@ -16,11 +21,6 @@ import { useEditor } from './store/useEditor';
 import { FieldOverlay, FormCanvas } from './canvas';
 import { DragPreview } from './components/DragPreview';
 import { ToolboxItemOverlay, ToolboxPanel } from './toolbox';
-import type {
-  CheckboxField,
-  FieldGroupItem,
-  FormField as FormFieldType
-} from '@form-builder/types';
 import { PropertiesPanel } from './properties/PropertiesPanel';
 
 const definedDefaultValue = (type: string): FormFieldType => {

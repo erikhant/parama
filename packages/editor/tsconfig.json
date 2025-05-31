@@ -7,7 +7,8 @@
   "references": [
     { "path": "../types" },
     { "path": "../core" },
-    { "path": "../renderer" }
+    { "path": "../renderer" },
+    { "path": "../parama-ui" }
   ],
   "include": ["src/**/*"]
 }

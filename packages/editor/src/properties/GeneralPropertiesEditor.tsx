@@ -1,4 +1,6 @@
 import { FieldGroupItem, FormField } from '@form-builder/types';
+import { FormItem, Label, Input, FormGroup, Button } from '@parama-ui/react';
+import { Plus, Trash2 } from 'lucide-react';
 
 type GeneralPropertiesEditorProps = {
   field: FormField;
@@ -16,58 +18,92 @@ export const GeneralPropertiesEditor: React.FC<
       case 'email':
       case 'textarea':
         return (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Placeholder</label>
-            <input
+          <FormItem>
+            <Label>Placeholder</Label>
+            <Input
               type="text"
               value={field.placeholder || ''}
               onChange={(e) => onChange({ placeholder: e.target.value })}
-              className="w-full p-2 border rounded"
             />
-          </div>
+          </FormItem>
         );
       case 'select':
         return (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Options</label>
+          <>
+            <FormItem>
+              <Label>Placeholder</Label>
+              <Input
+                type="text"
+                value={field.placeholder || ''}
+                onChange={(e) => onChange({ placeholder: e.target.value })}
+              />
+            </FormItem>
+            <div className="flex justify-between items-center">
+              <Label>Options</Label>
+              <Button
+                onClick={() => {
+                  const newOption = {
+                    label: `Option label ${(field.options?.length || 0) + 1}`,
+                    value: `option-${(field.options?.length || 0) + 1}`
+                  };
+                  onChange({
+                    options: [
+                      ...(field.options || []),
+                      newOption
+                    ] as FieldGroupItem[]
+                  });
+                }}
+                size="xs"
+                color="secondary"
+                variant="ghost">
+                <Plus size={15} />
+              </Button>
+            </div>
             {field.options?.map((option, index) => (
-              <div key={option.value} className="flex space-x-2">
-                <input
-                  type="text"
-                  value={option.label}
-                  onChange={(e) => {
-                    const newOptions = [...field.options!];
-                    newOptions[index].label = e.target.value;
-                    onChange({ options: newOptions });
-                  }}
-                  className="flex-1 p-2 border rounded"
-                />
-                <button
-                  onClick={() => {
-                    const newOptions = field.options!.filter(
-                      (_, i) => i !== index
-                    );
-                    onChange({ options: newOptions });
-                  }}
-                  className="px-2 text-red-500">
-                  ×
-                </button>
-              </div>
+              <FormItem
+                key={option.value}
+                orientation="horizontal"
+                className="space-x-0 items-center pl-3 border-l-4 border-gray-200">
+                <div className="col-span-4 space-y-2">
+                  <Input
+                    type="text"
+                    placeholder="Option label"
+                    value={option.label}
+                    onChange={(e) => {
+                      const newOptions = [...field.options!];
+                      newOptions[index].label = e.target.value;
+                      onChange({ options: newOptions });
+                    }}
+                  />
+                  <Input
+                    type="text"
+                    value={option.value}
+                    placeholder="Option value"
+                    onChange={(e) => {
+                      const newOptions = [...field.options!];
+                      newOptions[index].value = e.target.value;
+                      onChange({ options: newOptions });
+                    }}
+                  />
+                </div>
+                <div className="col-span-1 shrink-0">
+                  <Button
+                    className="self-center"
+                    variant="ghost"
+                    size="xs"
+                    color="secondary"
+                    onClick={() => {
+                      const newOptions = field.options!.filter(
+                        (_, i) => i !== index
+                      );
+                      onChange({ options: newOptions });
+                    }}>
+                    <Trash2 size={15} />
+                  </Button>
+                </div>
+              </FormItem>
             ))}
-            <button
-              onClick={() => {
-                const newOption = { label: '', value: `opt-${Date.now()}` };
-                onChange({
-                  options: [
-                    ...(field.options || []),
-                    newOption
-                  ] as FieldGroupItem[]
-                });
-              }}
-              className="mt-2 px-3 py-1 bg-blue-100 text-blue-600 rounded text-sm">
-              + Add Option
-            </button>
-          </div>
+          </>
         );
 
       // Add more field type cases as needed

@@ -7,6 +7,6 @@ module.exports = {
   theme: {
     extend: {}
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animate')],
   presets: [require('../../apps/demo/tailwind.config.js')]
 };

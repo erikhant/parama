@@ -1,7 +1,4 @@
 import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
 import { Button } from './components/ui/button';
 import { Calendar } from './components/ui/calendar';
 import { Input } from './components/ui/input';
@@ -21,22 +18,20 @@ import { Slider } from './components/ui/slider';
 import { Switch } from './components/ui/switch';
 import { FormItem } from './components/ui/form-item';
 import { FormGroup } from './components/ui/form-group';
+import { Eye, EyeClosed, Mail, User } from 'lucide-react';
+import { Badge } from './components/ui/badge';
+import { DatePicker } from './components/ui/datepicker';
 
 function App() {
   const [count, setCount] = useState(0);
+  const [type, setType] = useState<'text' | 'password'>('password');
   const [date, setDate] = useState<Date>();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
+    <div className="p-5 space-y-5">
+      <Badge color="danger" variant="shadow" size="sm">
+        Vite + React
+      </Badge>
       <div className="card">
         <Calendar
           mode="single"
@@ -60,11 +55,20 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
       <form className="space-y-3">
-        <div>
+        <FormItem>
           <Label htmlFor="name">Name</Label>
           <Input id="name" placeholder="Your name" />
-        </div>
-        <div>
+        </FormItem>
+        <FormItem id="birthdate">
+          <Label>Birthdate</Label>
+          <DatePicker
+            mode="single"
+            selected={date}
+            onSelect={setDate}
+            container={document.getElementById('birthdate')}
+          />
+        </FormItem>
+        <FormItem>
           <Select>
             <SelectTrigger className="w-full">
               <SelectValue
@@ -83,7 +87,7 @@ function App() {
               </SelectGroup>
             </SelectContent>
           </Select>
-        </div>
+        </FormItem>
         <div>
           <div className="flex items-center space-x-2">
             <Checkbox id="terms" />
@@ -115,16 +119,39 @@ function App() {
         </FormItem>
         <FormItem>
           <Label htmlFor="mail">Email</Label>
+          <FormGroup suffix=".com" prefix={(<Mail size={16} />) as any}>
+            <Input type="email" id="mail" />
+          </FormGroup>
+        </FormItem>
+        <FormItem orientation="vertical">
+          <Label htmlFor="username">Username</Label>
+          <FormGroup prefix={(<User size={16} />) as any}>
+            <Input id="username" placeholder="Enter your username" />
+          </FormGroup>
+          <p className="form-description">Enter your best username</p>
+        </FormItem>
+        <FormItem orientation="horizontal">
+          <div className="form-captions">
+            <Label htmlFor="password">Password</Label>
+            <p className="form-description">Enter your best password</p>
+          </div>
           <FormGroup
-            prefix="yourname@mail.com"
-            suffix=".com"
-            addOnStart={<button>Search</button>}
-            addOnEnd={<button>Search</button>}>
-            <Input type="email" />
+            addOnEnd={
+              <button
+                type="button"
+                onClick={() => setType(type === 'text' ? 'password' : 'text')}>
+                {type === 'text' ? <Eye size={16} /> : <EyeClosed size={16} />}
+              </button>
+            }>
+            <Input
+              type={type}
+              id="password"
+              placeholder="Enter your password"
+            />
           </FormGroup>
         </FormItem>
       </form>
-    </>
+    </div>
   );
 }
 

@@ -6,11 +6,16 @@ import { cn } from '@/lib/utils';
 
 const RadioGroup = React.forwardRef<
   React.ComponentRef<typeof RadioGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
->(({ className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> & {
+    orientation?: 'horizontal' | 'vertical';
+  }
+>(({ className, orientation, ...props }, ref) => {
   return (
     <RadioGroupPrimitive.Root
-      className={cn('radio-group', className)}
+      className={cn(
+        orientation === 'horizontal' ? 'radio-group-horizontal' : 'radio-group',
+        className
+      )}
       {...props}
       ref={ref}
     />

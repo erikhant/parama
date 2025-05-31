@@ -3,6 +3,10 @@
     @apply grid gap-2;
   }
 
+  .radio-group-horizontal {
+    @apply inline-flex gap-8;
+  }
+
   .radio-item {
     @apply aspect-square h-4 w-4 rounded-full border border-gray-300 text-primary ring-offset-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-light focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-background-dark dark:text-primary dark:ring-offset-foreground dark:focus-visible:border-primary/60 dark:focus-visible:ring-primary-light/60;
   }

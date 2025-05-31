@@ -3,15 +3,16 @@
   "main": "./dist/index.js",
   "version": "0.1.0",
   "types": "./dist/index.d.ts",
+  "type": "module",
   "scripts": {
-    "build": "tsc --emitDeclarationOnly --outDir dist",
+    "bundle": "pnpm exec rollup -c rollup.config.js",
     "dev": "tsc --watch --emitDeclarationOnly --outDir dist",
     "clean": "rimraf dist"
   },
   "devDependencies": {
     "@types/node": "^22.15.18",
-    "@types/react": "^18.3.21",
-    "@types/react-dom": "^18.3.7",
+    "rollup": "^3.29.5",
+    "rollup-plugin-dts": "^6.2.1",
     "typescript": "^5.3.3"
   }
 }

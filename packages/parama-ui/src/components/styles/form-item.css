@@ -1,6 +1,6 @@
 @layer components {
   .form-item {
-    @apply space-y-2;
+    @apply space-y-2 text-left;
   }
 
   .form-item-horizontal {
@@ -11,12 +11,16 @@
     @apply col-span-2 inline-flex self-center;
   }
 
+  .form-item-horizontal > .form-captions {
+    @apply col-span-2;
+  }
+
   .form-item-horizontal > .form-control,
   .form-item-horizontal > .switch {
     @apply col-span-3;
   }
 
   .form-item-horizontal > .form-group {
-    @apply col-span-3;
+    @apply col-span-3 h-fit;
   }
 }

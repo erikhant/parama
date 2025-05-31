@@ -1,0 +1,81 @@
+@layer components {
+  .badge {
+    @apply inline-flex items-center rounded-full border border-slate-200 px-2.5 py-0.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/80 focus:ring-offset-1 dark:border-slate-800 dark:focus:ring-primary-light/60;
+  }
+
+  /* SIZES */
+  .badge-xs {
+    @apply font-normal text-[10px] px-1.5 py-0;
+  }
+
+  .badge-sm {
+    @apply font-medium text-xs px-2 py-0.5;
+  }
+
+  .badge-lg {
+    @apply font-medium text-sm px-2.5 py-0.5;
+  }
+
+  /* FILL VARIANTS */
+  .badge-primary {
+    @apply border-transparent bg-primary text-slate-50 hover:bg-primary-dark/80 dark:bg-primary/80 dark:text-white dark:hover:bg-primary-light/60;
+  }
+
+  .badge-secondary {
+    @apply border-neutral-500 bg-secondary text-foreground hover:bg-secondary-dark/30 dark:bg-secondary-light/80 dark:text-foreground-dark dark:hover:bg-secondary/90;
+  }
+
+  .badge-success {
+    @apply border-transparent bg-success text-slate-50 hover:bg-success-dark/80 dark:bg-success/80 dark:text-white dark:hover:bg-success-light/60;
+  }
+
+  .badge-warning {
+    @apply border-transparent bg-warning text-slate-50 hover:bg-warning-dark/80 dark:bg-warning/80 dark:text-white dark:hover:bg-warning-light/60;
+  }
+
+  .badge-danger {
+    @apply border-transparent bg-danger text-slate-50 hover:bg-danger-dark dark:bg-danger/80 dark:text-white dark:hover:bg-danger-light/60;
+  }
+
+  /* OUTLINE VARIANTS */
+  .badge-primary-outline {
+    @apply border border-primary text-primary bg-transparent hover:bg-primary/10 dark:text-primary dark:hover:bg-primary/20;
+  }
+
+  .badge-secondary-outline {
+    @apply border border-neutral-500 text-foreground bg-transparent hover:bg-secondary-dark/60 dark:text-foreground-dark dark:hover:bg-secondary/20;
+  }
+
+  .badge-success-outline {
+    @apply border border-success text-success bg-transparent hover:bg-success/10 dark:text-success-dark dark:hover:bg-success/20;
+  }
+
+  .badge-warning-outline {
+    @apply border border-warning text-warning bg-transparent hover:bg-warning/10 dark:text-warning-dark dark:hover:bg-warning/20;
+  }
+
+  .badge-danger-outline {
+    @apply border border-danger text-danger bg-transparent hover:bg-danger/10 dark:text-danger-dark dark:hover:bg-danger/20;
+  }
+
+  /* SHADOW VARIANTS */
+  .badge-primary-shadow {
+    @apply shadow-lg shadow-primary/40;
+  }
+
+  .badge-secondary-shadow {
+    @apply shadow-lg shadow-gray-300/40;
+  }
+
+  .badge-warning-shadow {
+    @apply shadow-lg shadow-warning/40;
+  }
+
+  .badge-success-shadow {
+    @apply shadow-lg shadow-success/40;
+  }
+
+  .badge-danger-shadow {
+    @apply shadow-lg shadow-danger/40;
+  }
+}

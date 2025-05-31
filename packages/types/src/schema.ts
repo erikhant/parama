@@ -61,6 +61,10 @@ export interface FieldGroupItem {
   label: string;
   value: any;
   description?: string;
+  disabled?: boolean;
+  icon?: {
+    type: string;
+  };
 }
 
 interface FieldConditions {
@@ -83,13 +87,23 @@ export interface TextField extends BaseField {
   validation?: TextValidation;
   rows?: number;
   appearance?: {
-    icon?: {
-      type: string;
-      placement: 'front' | 'behind';
+    prefix?: {
+      type: 'text' | 'icon';
+      content: string;
     };
-    hint?: {
-      text: string;
-      placement: 'front' | 'behind';
+    suffix?: {
+      type: 'text' | 'icon';
+      content: string;
+    };
+    addOnStart?: {
+      type: 'button' | 'select';
+      label: string;
+      options?: FieldGroupItem[];
+    };
+    addOnEnd?: {
+      type: 'button' | 'select';
+      label: string;
+      options?: FieldGroupItem[];
     };
   };
 }
@@ -130,12 +144,18 @@ export interface FileField extends BaseField {
 
 export interface DateField extends BaseField {
   type: 'date';
+  placeholder?: string;
+  mode: 'single' | 'multiple' | 'range' | 'default';
+  appearance?: {
+    dateFormat?: string;
+  };
   validation?: BaseValidation;
 }
 
 export interface SelectField extends BaseField {
   type: 'select';
   multiple: boolean;
+  placeholder?: string;
   options: FieldGroupItem[];
   validation?: BaseValidation;
 }

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc && vite build",
     "dev": "vite build --watch",
-    "clean": "rimraf dist node_modules"
+    "clean": "rimraf dist node_modules .vite"
   },
   "dependencies": {
     "@form-builder/types": "workspace:*",
