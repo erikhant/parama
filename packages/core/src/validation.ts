@@ -1,13 +1,6 @@
-import {
-  FormField,
-  TextValidation,
-  ValidatorRegistry
-} from '@form-builder/types';
+import { FormField, TextValidation, ValidatorRegistry } from '@form-builder/types';
 
-export const runBasicValidations = (
-  field: FormField,
-  value: any
-): string | undefined => {
+export const runBasicValidations = (field: FormField, value: any): string | undefined => {
   if (field.type == 'submit') return undefined;
   if (!field.validation) return undefined;
 
@@ -27,11 +20,7 @@ export const runBasicValidations = (
   }
 
   // Text-specific validations
-  if (
-    field.type === 'text' ||
-    field.type === 'textarea' ||
-    field.type === 'email'
-  ) {
+  if (field.type === 'text' || field.type === 'textarea' || field.type === 'email') {
     const textValidation = field.validation as TextValidation;
 
     if (textValidation.minLength && value) {
@@ -64,8 +53,7 @@ export const runBasicValidations = (
 
     if (textValidation.pattern && value) {
       const patternConfig =
-        typeof textValidation.pattern === 'object' &&
-        'test' in textValidation.pattern
+        typeof textValidation.pattern === 'object' && 'test' in textValidation.pattern
           ? { value: textValidation.pattern, message: 'Invalid format' }
           : textValidation.pattern;
 

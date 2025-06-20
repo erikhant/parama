@@ -22,10 +22,7 @@ export const DroppableContainer = ({
   });
 
   return (
-    <div
-      ref={setNodeRef}
-      data-id="droppable-area"
-      className={`relative ${className}`}>
+    <div ref={setNodeRef} data-id="droppable-area" className={`relative ${className}`}>
       {children}
     </div>
   );

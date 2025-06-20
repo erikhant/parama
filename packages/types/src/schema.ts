@@ -30,6 +30,7 @@ export interface FormBuilderProps {
   validators?: ValidatorRegistry;
   data?: Record<string, any>;
   templates?: FormTemplate[];
+  variables?: Record<string, any>;
 }
 
 export interface FormTemplate {
@@ -38,6 +39,16 @@ export interface FormTemplate {
   description: string;
   schema: FormSchema;
   thumbnail?: string;
+}
+
+export interface ExternalDataSource<TData = any> {
+  source: string;
+  params?: Record<string, any>;
+  headers?: Record<string, string>;
+  mapper?: {
+    dataSource: string;
+    dataMapper: TData;
+  };
 }
 
 export interface BaseField {
@@ -51,7 +62,9 @@ export interface BaseField {
   value: any;
   helpText?: string;
   readOnly: boolean;
+  placeholder?: string;
   width: number;
+  appearance?: Record<string, any>;
   conditions?: FieldConditions;
   // ... common properties
 }
@@ -67,18 +80,16 @@ export interface FieldGroupItem {
   };
 }
 
-interface FieldConditions {
-  visibility?: {
-    dependsOn: string;
-    operator:
-      | 'Equals'
-      | 'NotEqual'
-      | 'GreaterThan'
-      | 'LessThan'
-      | 'LessOrEqual'
-      | 'GreaterOrEqual';
-    value: string | number;
-  };
+interface Condition {
+  dependsOn: string;
+  operator: 'Equals' | 'NotEqual' | 'GreaterThan' | 'LessThan' | 'LessOrEqual' | 'GreaterOrEqual';
+  value: any;
+}
+
+export interface FieldConditions {
+  visibility?: Condition;
+  disabled?: Condition;
+  readOnly?: Condition;
 }
 
 export interface TextField extends BaseField {
@@ -145,9 +156,16 @@ export interface FileField extends BaseField {
 export interface DateField extends BaseField {
   type: 'date';
   placeholder?: string;
-  mode: 'single' | 'multiple' | 'range' | 'default';
-  appearance?: {
+  mode: 'single' | 'multiple' | 'range';
+  options?: {
     dateFormat?: string;
+    max?: number;
+    min?: number;
+    dropdownType?: string;
+    disabledPast?: boolean;
+    disabledFuture?: boolean;
+    disabledWeekdays?: number[];
+    restrictedMonths?: string[];
   };
   validation?: BaseValidation;
 }
@@ -157,7 +175,13 @@ export interface SelectField extends BaseField {
   multiple: boolean;
   placeholder?: string;
   options: FieldGroupItem[];
+  optionGroups?: {
+    id: string;
+    label: string;
+    items: FieldGroupItem[];
+  }[];
   validation?: BaseValidation;
+  external?: ExternalDataSource<FieldGroupItem>;
 }
 
 export interface SubmitForm extends BaseField {

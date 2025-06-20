@@ -18,10 +18,13 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@form-builder/core": "workspace:*",
     "@form-builder/types": "workspace:*",
+    "@monaco-editor/react": "4.7.0",
     "@parama-ui/react": "workspace:*",
     "framer-motion": "^12.12.1",
     "lucide-react": "^0.510.0",
-    "react": "^18.2.0"
+    "postcss": "8.5.3",
+    "react": "^18.2.0",
+    "react-error-boundary": "^6.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",

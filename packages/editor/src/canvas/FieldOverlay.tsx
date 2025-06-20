@@ -8,6 +8,5 @@ type FieldOverlayProps = {
 export const FieldOverlay: React.FC<FieldOverlayProps> = ({ id }) => {
   const { actions } = useFormBuilder();
   const field = actions.getField(id);
-  console.log(field);
   return field ? <FormField field={field} /> : null;
 };

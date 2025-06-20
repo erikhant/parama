@@ -8,14 +8,12 @@ export const FormCanvas = () => {
   const { canvas } = useEditor();
 
   return (
-    <div
-      className="grow flex-1 max-h-screen"
-      onClick={() => actions.selectField(null)}>
+    <div className="grow flex-1 max-h-screen relative" onClick={() => actions.selectField(null)}>
       <SortableList
         id="canvas"
         items={schema.fields.map((f) => f.id)}
-        className={`grid column-${schema.layout.colSize} gap-size-${schema.layout.gap} p-8 pb-16 overflow-auto my-5`}
-        classNameIndicator="column-span-12 h-14 ml-6"
+        className={`grid column-${schema.layout.colSize} gap-size-${schema.layout.gap} ${schema.fields.length > 0 ? 'pb-16 my-5 p-8' : 'py-12 px-8 h-full'} overflow-auto`}
+        classNameIndicator="column-span-12 h-14 ml-4"
         useDynamicIndicator>
         {schema.fields.map((field, index) => (
           <EditableField key={field.id} field={field} index={index} />
@@ -23,8 +21,8 @@ export const FormCanvas = () => {
       </SortableList>
       {/* Empty state drop zone */}
       {canvas.currentInsertionIndex == null && schema.fields.length === 0 && (
-        <div className="col-span-12 h-full w-full flex justify-center items-center text-gray-400">
-          Drag fields here
+        <div className="absolute inset-0 text-gray-200/80 flex items-center justify-center text-4xl font-bold">
+          Drag field here
         </div>
       )}
     </div>

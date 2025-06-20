@@ -15,6 +15,7 @@ interface FormBuilderState {
   selectedFieldId: string | null;
   templates: FormTemplate[];
   actions: {
+    updateLayout: (layout: FormSchema['layout']) => void;
     initialize: (props: FormBuilderProps) => void;
     addField: (field: FormField) => void;
     getField: (id: string) => FormField | undefined;
@@ -54,6 +55,14 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => ({
         validators,
         templates
       });
+    },
+    updateLayout: (layout) => {
+      set((state) => ({
+        schema: {
+          ...state.schema,
+          layout: { ...state.schema.layout, ...layout }
+        }
+      }));
     },
     addField: (field) =>
       set((state) => ({
@@ -149,9 +158,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => ({
       set((state) => ({
         schema: {
           ...state.schema,
-          fields: state.schema.fields.map((f) =>
-            f.id === fieldId ? { ...f, error } : f
-          )
+          fields: state.schema.fields.map((f) => (f.id === fieldId ? { ...f, error } : f))
         }
       }));
 

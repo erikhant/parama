@@ -5,10 +5,7 @@ type FieldHighligterProps = {
   children: React.ReactNode;
 };
 
-export const FieldHighligter: React.FC<FieldHighligterProps> = ({
-  id,
-  children
-}) => {
+export const FieldHighligter: React.FC<FieldHighligterProps> = ({ id, children }) => {
   const { selectedFieldId, actions } = useFormBuilder();
   const isActive = selectedFieldId === id;
   const activateField = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

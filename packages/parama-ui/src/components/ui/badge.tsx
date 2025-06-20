@@ -23,18 +23,10 @@ export interface BadgeProps
   variant?: 'fill' | 'outline' | 'shadow';
 }
 
-function Badge({
-  className,
-  size,
-  variant = 'fill',
-  color = 'primary',
-  ...props
-}: BadgeProps) {
+function Badge({ className, size, variant = 'fill', color = 'primary', ...props }: BadgeProps) {
   const composedClassName = cn(
     badgeVariants({ size }),
-    variant === 'fill'
-      ? `badge-${color}`
-      : `badge-${color} badge-${color}-${variant}`,
+    variant === 'fill' ? `badge-${color}` : `badge-${color} badge-${color}-${variant}`,
     className
   );
 

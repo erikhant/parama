@@ -22,6 +22,8 @@ import { FieldOverlay, FormCanvas } from './canvas';
 import { DragPreview } from './components/DragPreview';
 import { ToolboxItemOverlay, ToolboxPanel } from './toolbox';
 import { PropertiesPanel } from './properties/PropertiesPanel';
+import { ErrorBoundary } from 'react-error-boundary';
+import FallbackException from './components/FallbackException';
 
 const definedDefaultValue = (type: string): FormFieldType => {
   const newField = {
@@ -38,25 +40,32 @@ const definedDefaultValue = (type: string): FormFieldType => {
       const checkbox: FieldGroupItem[] = [
         {
           id: `field-${Date.now() + 1}`,
-          label: 'Option 1',
-          value: 'option-1'
+          label: 'Item 1',
+          value: 'item-1'
         },
         {
           id: `field-${Date.now() + 2}`,
-          label: 'Option 2',
-          value: 'option-2'
+          label: 'Item 2',
+          value: 'item-2'
         },
         {
           id: `field-${Date.now() + 3}`,
-          label: 'Option 3',
-          value: 'option-3'
+          label: 'Item 3',
+          value: 'item-3'
         }
       ];
       return {
         ...(newField as CheckboxField),
         items: checkbox
       };
-
+    case 'date':
+      return {
+        ...newField,
+        mode: 'single',
+        options: {
+          dateFormat: 'dd/MM/yyyy'
+        }
+      } as FormFieldType;
     default:
       return newField as FormFieldType;
   }
@@ -93,8 +102,7 @@ export const FormEditor = () => {
         const rect = overElement.getBoundingClientRect();
         const midpoint = rect.top + rect.height / 2;
         const shouldInsertAfter =
-          event.delta.y > 0 ||
-          event.active.rect.current.translated?.top! > midpoint;
+          event.delta.y > 0 || event.active.rect.current.translated?.top! > midpoint;
         editor.setInsertionIndex(shouldInsertAfter ? overIndex + 1 : overIndex);
       }
     }
@@ -109,8 +117,7 @@ export const FormEditor = () => {
     editor.setInsertionIndex(null);
 
     if (!over) return;
-    if (active.data.current?.fromToolbox && over.data.current?.fromToolbox)
-      return;
+    if (active.data.current?.fromToolbox && over.data.current?.fromToolbox) return;
 
     // Handle toolbox -> canvas drop
     if (active.data.current?.fromToolbox) {
@@ -146,9 +153,13 @@ export const FormEditor = () => {
       onDragEnd={handleDragEnd}
       onDragMove={handleDragMove}>
       <div className="editor-container flex h-screen overflow-hidden">
-        <ToolboxPanel />
-        <FormCanvas />
-        <PropertiesPanel />
+        <ErrorBoundary
+          FallbackComponent={FallbackException}
+          onReset={() => actions.updateFields([])}>
+          <ToolboxPanel />
+          <FormCanvas />
+          <PropertiesPanel />
+        </ErrorBoundary>
       </div>
       {activeId && (
         <DragPreview>

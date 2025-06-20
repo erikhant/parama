@@ -1,4 +1,3 @@
-// import './index.css';
 export * from './components/ui/badge';
 export * from './components/ui/button';
 export * from './components/ui/calendar';
@@ -18,3 +17,6 @@ export * from './components/ui/slider';
 export * from './components/ui/switch';
 export * from './components/ui/textarea';
 export * from './components/ui/tooltip';
+export * from './components/ui/tabs';
+export * from './lib/utils';
+export type { DateRange } from 'react-day-picker';

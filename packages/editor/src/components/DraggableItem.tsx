@@ -18,11 +18,10 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
   useHandle,
   data
 }) => {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id,
-      data
-    });
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id,
+    data
+  });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),

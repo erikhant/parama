@@ -23,12 +23,7 @@ export default defineConfig({
       formats: ['es', 'umd', 'cjs']
     },
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        '@form-builder/core',
-        '@form-builder/types'
-      ],
+      external: ['react', 'react-dom', '@form-builder/core', '@form-builder/types'],
       output: {
         globals: {
           react: 'React',
@@ -41,28 +36,18 @@ export default defineConfig({
     sourcemap: true
   },
   resolve: {
-    alias: [
-      { find: '@', replacement: path.resolve(__dirname, 'src') },
-      {
-        find: '@form-builder/core',
-        replacement: path.resolve(__dirname, '../core/dist')
-      },
-      {
-        find: '@form-builder/types',
-        replacement: path.resolve(__dirname, '../types/dist/index.d.ts')
-      },
-      {
-        find: '@parama-ui/react',
-        replacement: path.resolve(__dirname, '../parama-ui/dist/index.es.js')
-      },
-      {
-        find: '@parama-ui/react/parama-ui.min.css',
-        replacement: path.resolve(
-          __dirname,
-          '../parama-ui/dist/parama-ui.min.css'
-        )
-      }
-    ]
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      // Link to other workspace packages
+      '@form-builder/core': path.resolve(__dirname, '../core/src'),
+      '@form-builder/types': path.resolve(__dirname, '../types/src'),
+      '@form-builder/renderer': path.resolve(__dirname, '../renderer/src'),
+      '@parama-ui/react': path.resolve(__dirname, '../parama-ui/dist/index.es.js'),
+      '@parama-ui/react/parama-ui.min.css': path.resolve(
+        __dirname,
+        '../parama-ui/dist/parama-ui.min.css'
+      )
+    }
   },
   optimizeDeps: {
     include: ['react', 'react-dom']

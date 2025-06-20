@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  SortableContext,
-  verticalListSortingStrategy
-} from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { DroppableContainer, DroppableIndicator } from '../components';
 import { useEditor } from '../store/useEditor';
 
@@ -28,7 +25,7 @@ export const SortableList: React.FC<SortableListProps> = ({
   const { canvas } = useEditor();
 
   return (
-    <div className={className}>
+    <div id={id} className={className}>
       <SortableContext
         id={id}
         items={items}

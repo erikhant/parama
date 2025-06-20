@@ -4,10 +4,6 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "references": [
-    { "path": "../types" },
-    { "path": "../core" },
-    { "path": "../parama-ui" }
-  ],
+  "references": [{ "path": "../types" }, { "path": "../core" }, { "path": "../parama-ui" }],
   "include": ["src/**/*"]
 }

@@ -42,9 +42,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : 'button';
 
     const composedClassName = cn(
-      variant === 'fill'
-        ? `btn-${color}`
-        : `btn-${color} btn-${color}-${variant}`,
+      variant === 'fill' ? `btn-${color}` : `btn-${color} btn-${color}-${variant}`,
       buttonVariants({ size }),
       isIcon ? 'btn-icon' : undefined,
       className

@@ -9,10 +9,7 @@ type EditableFieldProps = {
   index: number;
 };
 
-export const EditableField: React.FC<EditableFieldProps> = ({
-  field,
-  index
-}) => {
+export const EditableField: React.FC<EditableFieldProps> = ({ field, index }) => {
   const { actions } = useFormBuilder();
   return (
     <SortableItem

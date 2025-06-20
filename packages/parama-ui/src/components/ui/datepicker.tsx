@@ -1,20 +1,19 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Calendar } from './calendar';
-import { DayPicker } from 'react-day-picker';
 import { CalendarIcon } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
-import { FormGroup } from './form-group';
+import { Calendar } from './calendar';
 import { Input } from './input';
+import { FormGroup } from './form-group';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
-type DatePickerProps = React.ComponentProps<typeof DayPicker> & {
+type DatePickerProps = React.ComponentProps<typeof Calendar> & {
   container?: Element | DocumentFragment | null | undefined;
   placeholder?: string;
   popoverClassName?: string;
   dateFormat?: string;
   name?: string;
-  disabled?: boolean;
+  disabledInput?: boolean;
 };
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -23,7 +22,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   popoverClassName,
   dateFormat = 'dd/MM/yyyy',
   name,
-  disabled = false,
+  disabledInput = false,
   ...props
 }: DatePickerProps) => {
   return (
@@ -34,11 +33,21 @@ const DatePicker: React.FC<DatePickerProps> = ({
             name={name}
             type="text"
             readOnly
-            disabled={disabled}
+            disabled={disabledInput}
             value={
-              props.selected
-                ? format(props.selected as Date, dateFormat)
-                : (placeholder ?? `Pick a date`)
+              props.mode == 'single'
+                ? props.selected
+                  ? format(props.selected as Date, dateFormat)
+                  : (placeholder ?? `Pick a date`)
+                : props.mode == 'multiple'
+                  ? props.selected
+                    ? (props.selected as Date[]).map((date) => format(date, dateFormat)).join(', ')
+                    : (placeholder ?? `Pick multiple dates`)
+                  : props.mode == 'range'
+                    ? props.selected
+                      ? `${format(props.selected.from as Date, dateFormat)} - ${format(props.selected.to as Date, dateFormat)}`
+                      : (placeholder ?? `Pick a date range`)
+                    : ''
             }
           />
         </FormGroup>

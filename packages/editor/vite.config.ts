@@ -37,16 +37,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'src'),
       // Link to other workspace packages
-      '@form-builder/core': path.resolve(__dirname, '../core/dist/index.es.js'),
-      '@form-builder/types': path.resolve(__dirname, '../types/dist'),
-      '@form-builder/renderer': path.resolve(
-        __dirname,
-        '../renderer/dist/index.es.js'
-      ),
-      '@parama-ui/react': path.resolve(
-        __dirname,
-        '../parama-ui/dist/index.es.js'
-      )
+      '@form-builder/core': path.resolve(__dirname, '../core/src'),
+      '@form-builder/types': path.resolve(__dirname, '../types/src'),
+      '@form-builder/renderer': path.resolve(__dirname, '../renderer/src'),
+      '@parama-ui/react': path.resolve(__dirname, '../parama-ui/dist/index.es.js')
     }
   },
   server: {

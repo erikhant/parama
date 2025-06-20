@@ -4,12 +4,14 @@ import { useSortable } from '@dnd-kit/sortable';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { useEditor } from '../store/useEditor';
 import { DroppableIndicator } from './DroppableIndicator';
+import { cn } from '@parama-ui/react';
 
 export type SortableItemProps = {
   id: string | number;
   children: React.ReactNode;
   className?: string;
   classNameIndicator?: string;
+  handleClassName?: string;
   useHandle?: boolean;
   removable?: boolean;
   index: number | null;
@@ -29,17 +31,11 @@ export const SortableItem: React.FC<SortableItemProps> = ({
   index = null,
   className = '',
   classNameIndicator = '',
+  handleClassName = '',
   useDynamicIndicator = true,
   onRemove
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     data
   });
@@ -52,8 +48,7 @@ export const SortableItem: React.FC<SortableItemProps> = ({
   };
 
   const attrs = !useHandle ? { ...listeners, ...attributes } : {};
-  const isUseDynamic =
-    useDynamicIndicator && canvas.currentInsertionIndex !== null;
+  const isUseDynamic = useDynamicIndicator && canvas.currentInsertionIndex !== null;
 
   return (
     <React.Fragment>
@@ -68,12 +63,14 @@ export const SortableItem: React.FC<SortableItemProps> = ({
         {...attrs}
         className={`relative group flex items-center ${!useHandle ? ' cursor-grab ' : ' '}${className}`}>
         <div
-          className={`${!useHandle ? 'w-0 opacity-0' : 'w-7 border-none ring-1 ring-gray-200 opacity-0 group-hover:opacity-100 shrink-0 self-stretch flex flex-col items-center justify-evenly gap-1 bg-gray-50 rounded-tl-md rounded-bl-md'}`}>
+          className={cn(
+            !useHandle
+              ? 'w-0 opacity-0'
+              : 'w-7 border-none ring-1 ring-gray-200 opacity-0 group-hover:opacity-100 shrink-0 self-stretch flex flex-col items-center justify-evenly gap-1 bg-gray-50 rounded-tl-md rounded-bl-md',
+            handleClassName
+          )}>
           {useHandle && (
-            <button
-              {...listeners}
-              {...attributes}
-              className="p-1 text-gray-500 cursor-grab">
+            <button {...listeners} {...attributes} className="p-1 text-gray-500 cursor-grab">
               <GripVertical size={16} />
             </button>
           )}

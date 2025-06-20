@@ -28,10 +28,7 @@ const RadioGroupItem = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
 >(({ className, ...props }, ref) => {
   return (
-    <RadioGroupPrimitive.Item
-      ref={ref}
-      className={cn('radio-item', className)}
-      {...props}>
+    <RadioGroupPrimitive.Item ref={ref} className={cn('radio-item', className)} {...props}>
       <RadioGroupPrimitive.Indicator className="radio-item-indicator">
         <Circle />
       </RadioGroupPrimitive.Indicator>

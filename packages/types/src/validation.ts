@@ -1,8 +1,6 @@
 import { FormField } from './schema';
 
-export type ValidatorFunction = (
-  field: FormField
-) => Promise<boolean> | boolean;
+export type ValidatorFunction = (field: FormField) => Promise<boolean> | boolean;
 export type ValidatorRegistry = Record<string, ValidatorFunction>;
 
 export interface BaseValidation {

@@ -9,9 +9,7 @@ export const TemplateSelector = () => {
 
   return (
     <div className="mb-6">
-      <label className="block text-sm font-medium mb-2">
-        Start with a template
-      </label>
+      <label className="block text-sm font-medium mb-2">Start with a template</label>
       <div className="grid grid-cols-3 gap-4">
         {templates.map((template: FormTemplate) => (
           <div
