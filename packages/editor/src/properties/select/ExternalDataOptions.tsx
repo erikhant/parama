@@ -68,6 +68,7 @@ export function ExternalDataOptions({
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [apiUrl, setApiUrl] = useState('');
 
   const addHeader = () => {
     const newHeader: Header = {
@@ -132,6 +133,12 @@ export function ExternalDataOptions({
       });
   };
 
+  const isValidUrl = (url: string) => {
+    const urlPattern =
+      /^(https?:\/\/)(localhost|127\.0\.0\.1|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(\/.*)?$/;
+    return urlPattern.test(url);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -152,16 +159,22 @@ export function ExternalDataOptions({
           <div className="flex items-center justify-between mb-2">
             <FormGroup prefix="GET" className="w-full">
               <Input
-                value={externalData.url || ''}
+                value={apiUrl}
                 className="rounded-tr-none rounded-br-none"
                 placeholder="https://api.example.com/data"
-                onChange={(e) => setExternal({ ...externalData, url: e.target.value })}
+                onChange={(e) => {
+                  setApiUrl(e.target.value);
+                  console.log('API URL changed:', isValidUrl(e.target.value));
+                  if (isValidUrl(e.target.value)) {
+                    setExternal({ ...externalData, url: e.target.value });
+                  }
+                }}
               />
             </FormGroup>
             <Button
               color="success"
               className="rounded-tl-none rounded-bl-none"
-              disabled={loading || externalData.url === ''}
+              disabled={loading || !isValidUrl(apiUrl)}
               onClick={sendRequest}>
               Send
             </Button>
@@ -178,7 +191,7 @@ export function ExternalDataOptions({
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="mapper">Mapper</TabsTrigger>
+              <TabsTrigger value="mapper">Data mapper</TabsTrigger>
             </TabsList>
             <TabsContent value="headers">
               <div className="overflow-x-auto">
@@ -267,7 +280,7 @@ export function ExternalDataOptions({
             </TabsContent>
             <TabsContent value="mapper">
               <div className="overflow-x-auto">
-                {externalData.mapper ? (
+                {result || externalData.mapper ? (
                   <>
                     <p className="text-blue-700 leading-relaxed text-sm my-2 p-3 bg-blue-100 rounded border border-blue-200">
                       <strong>Note:</strong> The mapper is used to transform the response data into
