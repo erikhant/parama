@@ -1,10 +1,4 @@
-import {
-  BaseValidation,
-  CheckboxValidation,
-  FileValidation,
-  TextValidation,
-  ValidatorRegistry
-} from './validation';
+import { ValidationRule, ValidatorRegistry } from './validation';
 
 export interface FormSchema {
   title: string;
@@ -29,7 +23,7 @@ export interface FormBuilderProps {
   schema: FormSchema;
   validators?: ValidatorRegistry;
   data?: Record<string, any>;
-  templates?: FormTemplate[];
+  // templates?: FormTemplate[];
   variables?: Record<string, any>;
 }
 
@@ -42,13 +36,57 @@ export interface FormTemplate {
 }
 
 export interface ExternalDataSource<TData = any> {
-  source: string;
+  url: string;
   params?: Record<string, any>;
   headers?: Record<string, string>;
   mapper?: {
     dataSource: string;
     dataMapper: TData;
   };
+}
+
+export interface LogicalCondition {
+  operator: 'Equals' | 'NotEqual' | 'GreaterThan' | 'LessThan' | 'LessOrEqual' | 'GreaterOrEqual';
+}
+
+export interface Condition {
+  expression: string;
+  fallback?: any;
+}
+
+export interface FieldConditions {
+  render?: Condition;
+  visibility?: Condition;
+  disabled?: Condition;
+  readOnly?: Condition;
+}
+
+export interface Events {
+  type: 'fetch' | 'setValue' | 'reset';
+  target?: string;
+  params?: Record<string, any>;
+  config?: Record<string, any>;
+}
+
+export interface DynamicOptions {
+  url: string;
+  dependsOn?: string[];
+  queryParams?: Record<string, string>;
+  headers?: Record<string, string>;
+  dataPath?: string;
+  cache?: boolean;
+  cacheKey?: string;
+  cacheDuration?: number;
+}
+
+export interface FileOptions {
+  accept: {
+    [x: string]: string[];
+  };
+  maxSize?: number; // in bytes
+  maxFiles?: number;
+  server: string;
+  instantUpload: boolean;
 }
 
 export interface BaseField {
@@ -66,6 +104,8 @@ export interface BaseField {
   width: number;
   appearance?: Record<string, any>;
   conditions?: FieldConditions;
+  events?: Events[];
+  validations?: ValidationRule[];
   // ... common properties
 }
 
@@ -80,22 +120,9 @@ export interface FieldGroupItem {
   };
 }
 
-interface Condition {
-  dependsOn: string;
-  operator: 'Equals' | 'NotEqual' | 'GreaterThan' | 'LessThan' | 'LessOrEqual' | 'GreaterOrEqual';
-  value: any;
-}
-
-export interface FieldConditions {
-  visibility?: Condition;
-  disabled?: Condition;
-  readOnly?: Condition;
-}
-
 export interface TextField extends BaseField {
-  type: 'text' | 'email' | 'textarea' | 'password' | 'number';
+  type: 'text' | 'email' | 'textarea' | 'password' | 'number' | 'tel' | 'url' | 'hidden';
   placeholder?: string;
-  validation?: TextValidation;
   rows?: number;
   appearance?: {
     prefix?: {
@@ -126,7 +153,6 @@ export interface RadioField extends BaseField {
     position?: 'horizontal' | 'vertical';
     bordered?: boolean;
   };
-  validation?: BaseValidation;
 }
 
 export interface CheckboxField extends BaseField {
@@ -136,17 +162,12 @@ export interface CheckboxField extends BaseField {
     position?: 'horizontal' | 'vertical';
     bordered?: boolean;
   };
-  validation?: CheckboxValidation;
 }
 
 export interface FileField extends BaseField {
   type: 'file';
   multiple: boolean;
-  validation?: FileValidation;
-  options?: {
-    server: string;
-    instantUpload: boolean;
-  };
+  options?: FileOptions;
   appearance?: {
     droppable: boolean;
   };
@@ -167,7 +188,6 @@ export interface DateField extends BaseField {
     disabledWeekdays?: number[];
     restrictedMonths?: string[];
   };
-  validation?: BaseValidation;
 }
 
 export interface SelectField extends BaseField {
@@ -180,8 +200,8 @@ export interface SelectField extends BaseField {
     label: string;
     items: FieldGroupItem[];
   }[];
-  validation?: BaseValidation;
   external?: ExternalDataSource<FieldGroupItem>;
+  // dynamicOptions?: DynamicOptions;
 }
 
 export interface SubmitForm extends BaseField {

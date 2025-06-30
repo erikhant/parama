@@ -93,7 +93,6 @@ const SelectItem = React.forwardRef<
         <Check />
       </SelectPrimitive.ItemIndicator>
     </span>
-
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
   </SelectPrimitive.Item>
 ));

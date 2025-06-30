@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@form-builder/types": "workspace:*",
+    "@types/lodash-es": "^4.17.12",
+    "lodash-es": "^4.17.21",
     "zustand": "^4.4.1"
   },
   "devDependencies": {

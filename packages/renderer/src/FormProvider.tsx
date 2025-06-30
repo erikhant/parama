@@ -1,20 +1,28 @@
-import React from 'react';
+import { useEffect, useMemo, Fragment, useRef } from 'react';
 import { createValidatorRegistry, useFormBuilder } from '@form-builder/core';
 import { FormBuilderProps } from '@form-builder/types';
+import { isEqual } from 'lodash-es';
 
 export const FormProvider: React.FC<FormBuilderProps & { children: React.ReactNode }> = ({
   schema,
   validators = {},
   data = {},
-  templates = [],
   children
 }) => {
   const { initialize } = useFormBuilder().actions;
 
-  React.useEffect(() => {
-    const mergedValidators = createValidatorRegistry(validators);
-    initialize({ schema, validators: mergedValidators, data, templates });
-  }, [schema, validators, data, templates]);
+  const prevValues = useRef({ schema, validators, data });
 
-  return <React.Fragment>{children}</React.Fragment>;
+  // const mergedValidators = useMemo(() => createValidatorRegistry(validators), [validators]);
+
+  useEffect(() => {
+    const currentValues = { schema, validators, data };
+
+    if (!isEqual(prevValues.current, currentValues)) {
+      initialize({ schema, data });
+      prevValues.current = currentValues;
+    }
+  }, [schema, data, validators, initialize]);
+
+  return <Fragment>{children}</Fragment>;
 };

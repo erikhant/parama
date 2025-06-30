@@ -8,7 +8,9 @@ export const FormCanvas = () => {
   const { canvas } = useEditor();
 
   return (
-    <div className="grow flex-1 max-h-screen relative" onClick={() => actions.selectField(null)}>
+    <div
+      className="grow flex-1 max-h-screen relative overflow-y-auto"
+      onClick={() => actions.selectField(null)}>
       <SortableList
         id="canvas"
         items={schema.fields.map((f) => f.id)}

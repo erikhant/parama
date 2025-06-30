@@ -13,7 +13,7 @@ import {
 } from '@parama-ui/react';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
-import { IconPicker } from './IconPicker';
+import { IconPicker } from '../components/IconPicker';
 import { ManageOptions } from './select/ManageOptions';
 
 type AppearanceEditorProps = {
@@ -452,6 +452,26 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
             </FormItem>
           </>
         );
+      case 'textarea':
+        return (
+          <FormItem>
+            <Label>Row size</Label>
+            <Input
+              type="number"
+              min={3}
+              value={field.rows || ''}
+              onChange={(e) => {
+                const rows = parseInt(e.target.value, 10);
+                if (!isNaN(rows) && rows > 0) {
+                  onChange({ rows: rows });
+                } else {
+                  onChange({ rows: undefined });
+                }
+              }}
+            />
+          </FormItem>
+        );
+
       case 'date':
         const [enableSelectionMonth, setEnableSelectionMonth] = useState(
           field.options?.dropdownType !== undefined &&
@@ -465,11 +485,11 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
         return (
           <>
             <FormItem orientation="horizontal">
-              <div className="form-captions !col-span-4">
+              <div className="form-captions !col-span-3">
                 <Label htmlFor="enable-selection-month">Selection month</Label>
                 <p className="form-description">Enable month selection</p>
               </div>
-              <div className="col-span-2 flex justify-end">
+              <div className="col-span-2 flex items-center justify-end">
                 <Switch
                   id="enable-selection-month"
                   checked={
@@ -496,11 +516,11 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
               </div>
             </FormItem>
             <FormItem orientation="horizontal">
-              <div className="form-captions !col-span-4">
+              <div className="form-captions !col-span-3">
                 <Label htmlFor="enable-selection-year">Selection year</Label>
                 <p className="form-description">Enable year selection</p>
               </div>
-              <div className="col-span-2 flex justify-end">
+              <div className="col-span-2 flex items-center justify-end">
                 <Switch
                   id="enable-selection-year"
                   checked={

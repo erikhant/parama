@@ -14,6 +14,8 @@
     "build:renderer": "pnpm --filter @form-builder/renderer build",
     "build:editor": "pnpm --filter @form-builder/editor build",
     "build:parama-ui": "pnpm --filter @parama-ui/react build",
+    "editor": "pnpm dev --filter @form-builder/editor",
+    "parama-ui": "pnpm dev --filter @parama-ui/react",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",

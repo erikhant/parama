@@ -7,7 +7,7 @@ import {
   DialogTitle
 } from '@parama-ui/react';
 
-export default function FallbackException({
+export function FallbackException({
   error,
   resetErrorBoundary
 }: {

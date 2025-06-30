@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   DndContext,
   DragEndEvent,
   DragMoveEvent,
   DragStartEvent,
+  KeyboardSensor,
   PointerSensor,
   rectIntersection,
   useSensor,
@@ -14,16 +15,17 @@ import type {
   FieldGroupItem,
   FormField as FormFieldType
 } from '@form-builder/types';
-import { arrayMove } from '@dnd-kit/sortable';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
-import { useFormBuilder } from '@form-builder/core';
+import { setupWorkflowDebugger, useFormBuilder } from '@form-builder/core';
 import { useEditor } from './store/useEditor';
 import { FieldOverlay, FormCanvas } from './canvas';
 import { DragPreview } from './components/DragPreview';
 import { ToolboxItemOverlay, ToolboxPanel } from './toolbox';
 import { PropertiesPanel } from './properties/PropertiesPanel';
 import { ErrorBoundary } from 'react-error-boundary';
-import FallbackException from './components/FallbackException';
+import { FallbackException } from './components/FallbackException';
+import { Toolbar } from './components/Toolbar';
 
 const definedDefaultValue = (type: string): FormFieldType => {
   const newField = {
@@ -77,11 +79,21 @@ export const FormEditor = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor)
-    // useSensor(KeyboardSensor, {
-    //   coordinateGetter: sortableKeyboardCoordinates
-    // })
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates
+    })
   );
+
+  useEffect(() => {
+    // Enable all debug features
+    const cleanupDebugger = setupWorkflowDebugger();
+
+    return () => {
+      // Cleanup debugger on unmount
+      cleanupDebugger?.();
+    };
+  }, []);
 
   const handleDragStart = ({ active }: DragStartEvent) => {
     setActiveId(active.id as string);
@@ -145,32 +157,31 @@ export const FormEditor = () => {
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={rectIntersection}
-      modifiers={[restrictToWindowEdges]}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onDragMove={handleDragMove}>
-      <div className="editor-container flex h-screen overflow-hidden">
-        <ErrorBoundary
-          FallbackComponent={FallbackException}
-          onReset={() => actions.updateFields([])}>
+    <ErrorBoundary FallbackComponent={FallbackException} onReset={() => actions.updateFields([])}>
+      <Toolbar />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={rectIntersection}
+        modifiers={[restrictToWindowEdges]}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragMove={handleDragMove}>
+        <div className="editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden">
           <ToolboxPanel />
           <FormCanvas />
           <PropertiesPanel />
-        </ErrorBoundary>
-      </div>
-      {activeId && (
-        <DragPreview>
-          <FieldOverlay id={activeId} />
-        </DragPreview>
-      )}
-      {activeId && (
-        <DragPreview>
-          <ToolboxItemOverlay id={activeId} />
-        </DragPreview>
-      )}
-    </DndContext>
+        </div>
+        {activeId && (
+          <DragPreview>
+            <FieldOverlay id={activeId} />
+          </DragPreview>
+        )}
+        {activeId && (
+          <DragPreview>
+            <ToolboxItemOverlay id={activeId} />
+          </DragPreview>
+        )}
+      </DndContext>
+    </ErrorBoundary>
   );
 };

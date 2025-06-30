@@ -9,6 +9,6 @@ export default {
     },
     extend: {}
   },
-  plugins: [require('tailwindcss-animate')],
-  presets: [require('../../apps/demo/tailwind.config.js')]
+  plugins: [require('tailwindcss-animate')]
+  // presets: [require('../../apps/demo/tailwind.config.js')]
 };

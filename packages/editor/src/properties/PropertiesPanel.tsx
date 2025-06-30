@@ -91,51 +91,55 @@ export const PropertiesPanel: React.FC = () => {
           </div>
           <div className="p-4 space-y-3 border-t border-gray-200">
             <h6 className="font-semibold uppercase text-xs text-gray-400">General</h6>
-            <FormItem>
-              <Label className="block text-sm font-medium">Label</Label>
-              <Input
-                type="text"
-                placeholder="Field label"
-                value={properties.localField.label || ''}
-                onChange={(e) => handleFieldChange({ label: e.target.value })}
-              />
-            </FormItem>
-            <FormItem>
-              <Label className="block text-sm font-medium">Description</Label>
-              <Input
-                type="text"
-                placeholder="Describe this field"
-                value={properties.localField.helpText || ''}
-                onChange={(e) => handleFieldChange({ helpText: e.target.value })}
-              />
-            </FormItem>
-            <FormItem>
-              <Label className="block text-sm font-medium">Width</Label>
-              <div className="grid grid-cols-4 gap-x-3">
-                <Slider
-                  value={[widthValue]}
-                  onValueChange={(value) => handleWidthChange(value[0])}
-                  min={1}
-                  max={12}
-                  step={1}
-                  className="col-span-3"
-                />
-                <Input
-                  type="number"
-                  min={1}
-                  max={12}
-                  step={1}
-                  value={widthValue}
-                  onChange={(e) => {
-                    const width = parseInt(e.target.value, 10);
-                    if (!isNaN(width) && width >= 1 && width <= 12) {
-                      handleWidthChange(width);
-                    }
-                  }}
-                  className="col-span-1 pr-0"
-                />
-              </div>
-            </FormItem>
+            {properties.localField.type !== 'hidden' && (
+              <>
+                <FormItem>
+                  <Label className="block text-sm font-medium">Label</Label>
+                  <Input
+                    type="text"
+                    placeholder="Field label"
+                    value={properties.localField.label || ''}
+                    onChange={(e) => handleFieldChange({ label: e.target.value })}
+                  />
+                </FormItem>
+                <FormItem>
+                  <Label className="block text-sm font-medium">Description</Label>
+                  <Input
+                    type="text"
+                    placeholder="Describe this field"
+                    value={properties.localField.helpText || ''}
+                    onChange={(e) => handleFieldChange({ helpText: e.target.value })}
+                  />
+                </FormItem>
+                <FormItem>
+                  <Label className="block text-sm font-medium">Width</Label>
+                  <div className="grid grid-cols-4 gap-x-3">
+                    <Slider
+                      value={[widthValue]}
+                      onValueChange={(value) => handleWidthChange(value[0])}
+                      min={1}
+                      max={12}
+                      step={1}
+                      className="col-span-3"
+                    />
+                    <Input
+                      type="number"
+                      min={1}
+                      max={12}
+                      step={1}
+                      value={widthValue}
+                      onChange={(e) => {
+                        const width = parseInt(e.target.value, 10);
+                        if (!isNaN(width) && width >= 1 && width <= 12) {
+                          handleWidthChange(width);
+                        }
+                      }}
+                      className="col-span-1 pr-0"
+                    />
+                  </div>
+                </FormItem>
+              </>
+            )}
           </div>
           <div className="p-4 space-y-3 border-t border-gray-200">
             <GeneralPropertiesEditor field={properties.localField} onChange={handleFieldChange} />

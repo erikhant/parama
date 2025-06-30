@@ -14,7 +14,7 @@ export const FormRenderer = () => {
 
   return (
     <form
-      className={`grid grid-cols-${schema.layout.colSize} gap-${schema.layout.gap}`}
+      className={`grid column-${schema.layout.colSize} gap-size-${schema.layout.gap}`}
       onSubmit={onSubmit}>
       {schema.fields.map((field) => (
         <FormField key={field.id} field={field} />

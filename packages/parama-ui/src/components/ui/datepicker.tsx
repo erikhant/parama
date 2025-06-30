@@ -40,11 +40,11 @@ const DatePicker: React.FC<DatePickerProps> = ({
                   ? format(props.selected as Date, dateFormat)
                   : (placeholder ?? `Pick a date`)
                 : props.mode == 'multiple'
-                  ? props.selected
+                  ? props.selected && Array.isArray(props.selected)
                     ? (props.selected as Date[]).map((date) => format(date, dateFormat)).join(', ')
                     : (placeholder ?? `Pick multiple dates`)
                   : props.mode == 'range'
-                    ? props.selected
+                    ? props.selected && props.selected.from && props.selected.to
                       ? `${format(props.selected.from as Date, dateFormat)} - ${format(props.selected.to as Date, dateFormat)}`
                       : (placeholder ?? `Pick a date range`)
                     : ''

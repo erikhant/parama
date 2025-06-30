@@ -12,7 +12,11 @@
   }
 
   .dialog-close svg {
-    @apply h-4 w-4;
+    @apply size-4;
+  }
+
+  .dialog-close-icon + .sr {
+    @apply sr-only;
   }
 
   .dialog-header {
