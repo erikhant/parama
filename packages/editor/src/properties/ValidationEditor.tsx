@@ -1,7 +1,19 @@
-import { FormItem, Input, Label, Switch } from '@parama-ui/react';
+import {
+  Button,
+  FormItem,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch
+} from '@parama-ui/react';
 import type { FormField, ValidationRule } from '@form-builder/types';
 import { SectionPanel } from './SectionPanel';
 import React, { useMemo, useCallback } from 'react';
+import { builtInValidatorTemplate, useFormBuilder } from '@form-builder/core';
 
 type ValidationEditorProps = {
   field: FormField;
@@ -9,9 +21,18 @@ type ValidationEditorProps = {
 };
 
 export default function ValidationEditor({ field, onChange }: ValidationEditorProps) {
+  const { getFieldValue } = useFormBuilder().actions;
   const validations = useMemo(() => field.validations || [], [field.validations]);
+  const builtInTextValidatorTemplate = useMemo(
+    () => builtInValidatorTemplate.filter((r) => r.name !== 'passwordStrength'),
+    []
+  );
+  const builtInPasswordValidatorTemplate = useMemo(
+    () => builtInValidatorTemplate.filter((r) => r.name === 'passwordStrength')[0],
+    []
+  );
 
-  const getValidation = useCallback(
+  const getValidationByType = useCallback(
     (type: ValidationRule['type']) => validations.find((v) => v.type === type),
     [validations]
   );
@@ -50,7 +71,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         <Label className="!col-span-4">Required field</Label>
         <Switch
           className="!col-span-1"
-          checked={!!getValidation('required')}
+          checked={!!getValidationByType('required')}
           onCheckedChange={(checked) => {
             if (checked) {
               handleValidationChange({
@@ -65,50 +86,86 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         />
       </FormItem>
     ),
-    [getValidation, handleValidationChange, removeValidation]
+    [getValidationByType, handleValidationChange, removeValidation]
   );
-
-  const renderValidatorTemplate = useMemo(
+  const renderPasswordValidation = useMemo(
     () => (
-      <SectionPanel title="Custom Validation">
+      <SectionPanel title="Validation">
+        {renderRequiredValidation}
         <FormItem orientation="horizontal">
-          <Label className="!col-span-3">Validation Type</Label>
-          <Input
-            type="text"
-            value={getValidation('custom')?.type ?? ''}
-            placeholder="Validation type (e.g., custom)"
-            className="!col-span-2"
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === '') {
-                removeValidation('custom');
-                return;
+          <Label className="!col-span-4">Enable strength password</Label>
+          <Switch
+            className="!col-span-1"
+            checked={!!getValidationByType('pattern')}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                handleValidationChange({
+                  ...builtInPasswordValidatorTemplate,
+                  value: getFieldValue(field.id)
+                });
+              } else {
+                removeValidation('pattern');
               }
-              handleValidationChange({
-                trigger: 'change',
-                type: 'custom',
-                value: val,
-                message: `Custom validation of type ${val}`
-              });
             }}
           />
         </FormItem>
       </SectionPanel>
     ),
-    [getValidation, handleValidationChange, removeValidation]
+    [getValidationByType, handleValidationChange, removeValidation, validations]
+  );
+
+  const renderTextValidatorTemplate = useMemo(
+    () => (
+      <FormItem className="py-2">
+        <div className="flex items-center justify-between">
+          <Label>Validation template</Label>
+          {getValidationByType('pattern') && (
+            <Button
+              color="secondary"
+              variant="ghost"
+              size="xs"
+              className="text-xs text-gray-500"
+              onClick={() => removeValidation('pattern')}>
+              Remove
+            </Button>
+          )}
+        </div>
+        <Select
+          defaultValue={getValidationByType('pattern')?.name}
+          onValueChange={(value) => {
+            const rule = builtInTextValidatorTemplate.find((rule) => rule.name === value);
+            if (!rule) return;
+            handleValidationChange({ ...rule, value: getFieldValue(field.id) });
+          }}>
+          <SelectTrigger className="whitespace-nowrap capitalize">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {builtInTextValidatorTemplate.map((option) => (
+              <SelectItem key={option.name} value={option.name as string} className="capitalize">
+                {option.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="form-description">Choose validation template </p>
+      </FormItem>
+    ),
+    [getValidationByType, handleValidationChange, removeValidation, validations]
   );
 
   const renderTextValidations = useMemo(
     () => (
       <SectionPanel title="Validation">
         {renderRequiredValidation}
+        {renderTextValidatorTemplate}
         <FormItem orientation="horizontal">
           <Label className="!col-span-3">Min length</Label>
           <Input
             type="number"
             min={0}
             title="Minimum character length"
-            value={getValidation('minLength')?.value ?? ''}
+            value={getValidationByType('minLength')?.value ?? ''}
             placeholder="Minimum character length"
             className="!col-span-2"
             onChange={(e) => {
@@ -121,7 +178,6 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
               if (!isNaN(minLength) && minLength >= 0) {
                 handleValidationChange({
                   trigger: 'change',
-
                   type: 'minLength',
                   value: minLength,
                   message: `Minimum length is ${minLength}`
@@ -136,7 +192,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             type="number"
             min={0}
             title="Maximum character length"
-            value={getValidation('maxLength')?.value ?? ''}
+            value={getValidationByType('maxLength')?.value ?? ''}
             placeholder="Maximum character length"
             className="!col-span-2"
             onChange={(e) => {
@@ -159,7 +215,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         </FormItem>
       </SectionPanel>
     ),
-    [getValidation, handleValidationChange, removeValidation]
+    [getValidationByType, handleValidationChange, removeValidation]
   );
 
   const renderNumberValidations = useMemo(
@@ -172,7 +228,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             type="number"
             min={0}
             title="Minimum value"
-            value={getValidation('min')?.value ?? ''}
+            value={getValidationByType('min')?.value ?? ''}
             placeholder="Minimum value"
             className="!col-span-2"
             onChange={(e) => {
@@ -199,7 +255,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             type="number"
             min={0}
             title="Maximum value"
-            value={getValidation('max')?.value ?? ''}
+            value={getValidationByType('max')?.value ?? ''}
             placeholder="Maximum value"
             className="!col-span-2"
             onChange={(e) => {
@@ -222,7 +278,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         </FormItem>
       </SectionPanel>
     ),
-    [getValidation, handleValidationChange, removeValidation]
+    [getValidationByType, handleValidationChange, removeValidation]
   );
 
   const renderEmailValidation = useMemo(
@@ -232,7 +288,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         <FormItem orientation="horizontal">
           <Label className="!col-span-4">Enable Email Validation</Label>
           <Switch
-            checked={!!getValidation('pattern')}
+            checked={!!getValidationByType('pattern')}
             onCheckedChange={(checked) => {
               if (checked) {
                 handleValidationChange({
@@ -249,18 +305,18 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         </FormItem>
       </SectionPanel>
     ),
-    [getValidation, handleValidationChange, removeValidation]
+    [getValidationByType, handleValidationChange, removeValidation]
   );
 
   switch (field.type) {
     case 'text':
-    case 'password':
     case 'textarea':
+    case 'email':
       return renderTextValidations;
     case 'number':
       return renderNumberValidations;
-    case 'email':
-      return renderEmailValidation;
+    case 'password':
+      return renderPasswordValidation;
     default:
       return null;
   }

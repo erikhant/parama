@@ -24,6 +24,7 @@ export const evaluateValidations = async (
       return !!value || rule.message;
     case 'pattern':
       if (rule.name === 'email') {
+        if (!value) return true;
         return validator.isEmail(value) || rule.message;
       }
       if (rule.name === 'url') {

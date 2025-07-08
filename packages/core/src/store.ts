@@ -42,6 +42,7 @@ export interface FormBuilderState {
     addField: (field: FormField) => void;
     getField: (id: string) => FormField | undefined;
     getFields: () => FormField[];
+    getFieldValue: (id: string) => any | undefined;
     updateFields: (fields: FormField[]) => void;
     updateField: (id: string, updates: Partial<FormField>) => void;
     insertField: (index: number, field: FormField) => void;
@@ -304,6 +305,10 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @returns Array of all fields
        */
       getFields: () => get().schema.fields,
+
+      getFieldValue: (id) => {
+        return get().formData[id] ?? get().actions.getField(id)?.defaultValue;
+      },
 
       /**
        * Selects a field (for editing)
