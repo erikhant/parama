@@ -46,6 +46,7 @@ import { OptionGroup } from './select/OptionGroup';
 import { OptionItem } from './select/OptionItem';
 import { DefaultValue } from './common/DefaultValue';
 import { useFormBuilder } from '@form-builder/core';
+import { SectionPanel } from './SectionPanel';
 
 type GeneralPropertiesEditorProps = {
   field: FormField;
@@ -285,7 +286,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
       case 'email':
       case 'textarea':
         return (
-          <>
+          <SectionPanel title="Properties">
             <FormItem>
               <Label>Placeholder</Label>
               <Input
@@ -300,11 +301,11 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               onChange={handleDefaultValueChange}
             />
             <NameField value={field.name || ''} onChange={handleNameChange} />
-          </>
+          </SectionPanel>
         );
       case 'password':
         return (
-          <>
+          <SectionPanel title="Properties">
             <FormItem>
               <Label>Placeholder</Label>
               <Input
@@ -314,11 +315,11 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               />
             </FormItem>
             <NameField value={field.name || ''} onChange={handleNameChange} />
-          </>
+          </SectionPanel>
         );
       case 'select':
         return (
-          <>
+          <SectionPanel title="Properties">
             <FormItem>
               <Label>Placeholder</Label>
               <Input
@@ -446,12 +447,12 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                 </div>
               </div>
             )}
-          </>
+          </SectionPanel>
         );
       case 'checkbox':
       case 'radio':
         return (
-          <>
+          <SectionPanel title="Properties">
             <NameField value={field.name || ''} onChange={handleNameChange} />
             <div className="flex justify-between items-center">
               <Label>{field.type === 'checkbox' ? 'Checkbox' : 'Radio'} items</Label>
@@ -539,11 +540,11 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                 </Button>
               )}
             </Accordion>
-          </>
+          </SectionPanel>
         );
       case 'date':
         return (
-          <>
+          <SectionPanel title="Properties">
             <FormItem>
               <Label>Mode</Label>
               <Select
@@ -821,25 +822,19 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                 </DropdownMenu>
               </div>
             </FormItem>
-          </>
+          </SectionPanel>
         );
 
       case 'file':
         return (
-          <>
-            <FormItem>
-              <Label>Multiple Files</Label>
-              <Input
-                type="checkbox"
-                checked={field.multiple || false}
-                onChange={(e) => onChange({ multiple: e.target.checked })}
-              />
-            </FormItem>
+          <SectionPanel title="Properties">
+            <NameField value={field.name || ''} onChange={handleNameChange} />
             <FormItem>
               <Label>Server URL</Label>
               <Input
                 type="text"
                 value={field.options?.server || ''}
+                placeholder="https://api.example.com/data"
                 onChange={(e) =>
                   onChange({
                     options: {
@@ -850,38 +845,52 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                 }
               />
             </FormItem>
-            <FormItem>
-              <Label>Instant Upload</Label>
-              <Input
-                type="checkbox"
-                checked={field.options?.instantUpload || false}
-                onChange={(e) =>
-                  onChange({
-                    options: {
-                      ...field.options,
-                      instantUpload: e.target.checked
-                    } as typeof field.options
-                  })
-                }
-              />
+            <FormItem orientation="horizontal">
+              <div className="col-span-4 space-y-1">
+                <Label htmlFor="multiple-files">Multiple files</Label>
+                <p className="form-description">Upload multiple files at once</p>
+              </div>
+              <div className="flex items-center justify-end">
+                <Switch
+                  id="multiple-files"
+                  checked={field.options.multiple || false}
+                  onCheckedChange={(checked) => {
+                    onChange({ options: { ...field.options, multiple: checked } });
+                  }}
+                />
+              </div>
             </FormItem>
-            <FormItem>
-              <Label>Appearance</Label>
-              <Input
-                type="checkbox"
-                checked={field.appearance?.droppable || false}
-                onChange={(e) =>
-                  onChange({
-                    appearance: {
-                      ...field.appearance,
-                      droppable: e.target.checked
-                    }
-                  })
-                }
-              />
-              <span className="ml-2">Droppable</span>
+            <FormItem orientation="horizontal">
+              <div className="col-span-4 space-y-1">
+                <Label htmlFor="instant-upload">Instant upload</Label>
+                <p className="form-description">Upload file instantly after selection or dropped</p>
+              </div>
+              <div className="col-span-1 flex items-center justify-end">
+                <Switch
+                  id="instant-upload"
+                  checked={field.options.instantUpload || false}
+                  onCheckedChange={(checked) => {
+                    onChange({ options: { ...field.options, instantUpload: checked } });
+                  }}
+                />
+              </div>
             </FormItem>
-          </>
+            <FormItem orientation="horizontal">
+              <div className="col-span-4 space-y-1">
+                <Label htmlFor="bulk-upload">Bulk upload</Label>
+                <p className="form-description">Upload files in bulk mode</p>
+              </div>
+              <div className="col-span-1 flex items-center justify-end">
+                <Switch
+                  id="bulk-upload"
+                  checked={field.options.bulkUpload || false}
+                  onCheckedChange={(checked) => {
+                    onChange({ options: { ...field.options, bulkUpload: checked } });
+                  }}
+                />
+              </div>
+            </FormItem>
+          </SectionPanel>
         );
 
       default:
@@ -908,12 +917,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
     onChange
   ]);
 
-  return (
-    <div className="w-full space-y-4">
-      <h6 className="font-semibold uppercase text-xs text-gray-400">Properties</h6>
-      {renderTypeSpecificProperties}
-    </div>
-  );
+  return renderTypeSpecificProperties;
 });
 
 GeneralPropertiesEditor.displayName = 'GeneralPropertiesEditor';

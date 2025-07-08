@@ -1,6 +1,7 @@
-import { MonitorIcon, SaveIcon, SmartphoneIcon, TabletIcon } from 'lucide-react';
 import { useFormBuilder } from '@form-builder/core';
 import { Button } from '@parama-ui/react';
+import { MonitorIcon, SaveIcon, SmartphoneIcon, TabletIcon } from 'lucide-react';
+import { SchemaViewer } from './SchemaViewer';
 import { Preview } from './Preview';
 
 export const Toolbar = () => {
@@ -35,6 +36,7 @@ export const Toolbar = () => {
           <SaveIcon size={16} />
           Save
         </Button>
+        <SchemaViewer schema={schema} />
       </div>
     </div>
   );

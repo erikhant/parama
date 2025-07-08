@@ -19,6 +19,7 @@ export interface ValidationRule {
     | 'cross-field'
     | 'json-schema';
   message: string;
+  name?: string;
   trigger?: ValidationTrigger;
   pattern?: RegExp;
   expression?: string;

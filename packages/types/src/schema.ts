@@ -81,12 +81,14 @@ export interface DynamicOptions {
 
 export interface FileOptions {
   accept: {
-    [x: string]: string[];
+    [key: string]: readonly string[];
   };
   maxSize?: number; // in bytes
   maxFiles?: number;
+  multiple?: boolean;
   server: string;
-  instantUpload: boolean;
+  instantUpload?: boolean;
+  bulkUpload?: boolean;
 }
 
 export interface BaseField {
@@ -166,8 +168,8 @@ export interface CheckboxField extends BaseField {
 
 export interface FileField extends BaseField {
   type: 'file';
-  multiple: boolean;
-  options?: FileOptions;
+  options: FileOptions;
+  formExtension?: Record<string, any>;
   appearance?: {
     droppable: boolean;
   };

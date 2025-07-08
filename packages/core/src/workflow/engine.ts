@@ -80,8 +80,12 @@ export class WorkflowEngine {
     });
 
     // 3. Run validations SECOND
+    console.log('Run validations', field.validations && field.validations.length > 0);
     if (field.validations && field.validations.length > 0) {
-      const isValid = await state.actions.validateField(fieldId);
+      const isValid = await state.actions.validateField(fieldId, 'change');
+      // REMOVE or comment out these lines in production:
+      // console.log(`form data:`, state.actions.getFormData());
+      // console.log(`validation state:`, state.actions.getFieldValidation(fieldId));
 
       // 4. Execute onValueChange actions LAST
       if (isValid && field.events && field.events.length > 0) {
@@ -172,10 +176,6 @@ export class WorkflowEngine {
   public evaluateConditions(): void {
     const state = this.getState();
     const fields = state.schema.fields;
-    console.log(
-      'Evaluating conditions for fields:',
-      fields.map((f) => f.id)
-    );
 
     fields.forEach((field) => {
       this.evaluateDependentConditions(field);

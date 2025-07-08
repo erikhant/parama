@@ -8,6 +8,7 @@ import { Button, FormItem, Input, Label, Slider } from '@parama-ui/react';
 import { ArrowLeftToLine, ArrowRightToLine } from 'lucide-react';
 import { LayoutPropertiesEditor } from './LayoutPropertiesEditor';
 import { AppearanceEditor } from './AppearanceEditor';
+import ValidationEditor from './ValidationEditor';
 
 export const PropertiesPanel: React.FC = () => {
   const { selectedFieldId, schema, actions } = useFormBuilder();
@@ -141,12 +142,9 @@ export const PropertiesPanel: React.FC = () => {
               </>
             )}
           </div>
-          <div className="p-4 space-y-3 border-t border-gray-200">
-            <GeneralPropertiesEditor field={properties.localField} onChange={handleFieldChange} />
-          </div>
-          <div className="p-4 space-y-3 border-t border-gray-200">
-            <AppearanceEditor field={properties.localField} onChange={handleFieldChange} />
-          </div>
+          <GeneralPropertiesEditor field={properties.localField} onChange={handleFieldChange} />
+          <AppearanceEditor field={properties.localField} onChange={handleFieldChange} />
+          <ValidationEditor field={properties.localField} onChange={handleFieldChange} />
         </>
       )}
     </div>

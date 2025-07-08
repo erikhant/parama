@@ -15,6 +15,7 @@ import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { IconPicker } from '../components/IconPicker';
 import { ManageOptions } from './select/ManageOptions';
+import { SectionPanel } from './SectionPanel';
 
 type AppearanceEditorProps = {
   field: FormField;
@@ -29,7 +30,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
       case 'number':
       case 'password':
         return (
-          <>
+          <SectionPanel title="Appearance">
             <FormItem orientation="horizontal">
               {/* PREFIX PROPERTIES */}
               <div className="form-captions !col-span-4">
@@ -450,26 +451,28 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 </div>
               )}
             </FormItem>
-          </>
+          </SectionPanel>
         );
       case 'textarea':
         return (
-          <FormItem>
-            <Label>Row size</Label>
-            <Input
-              type="number"
-              min={3}
-              value={field.rows || ''}
-              onChange={(e) => {
-                const rows = parseInt(e.target.value, 10);
-                if (!isNaN(rows) && rows > 0) {
-                  onChange({ rows: rows });
-                } else {
-                  onChange({ rows: undefined });
-                }
-              }}
-            />
-          </FormItem>
+          <SectionPanel title="Appearance">
+            <FormItem>
+              <Label>Row size</Label>
+              <Input
+                type="number"
+                min={3}
+                value={field.rows || ''}
+                onChange={(e) => {
+                  const rows = parseInt(e.target.value, 10);
+                  if (!isNaN(rows) && rows > 0) {
+                    onChange({ rows: rows });
+                  } else {
+                    onChange({ rows: undefined });
+                  }
+                }}
+              />
+            </FormItem>
+          </SectionPanel>
         );
 
       case 'date':
@@ -483,7 +486,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
         );
 
         return (
-          <>
+          <SectionPanel title="Appearance">
             <FormItem orientation="horizontal">
               <div className="form-captions !col-span-3">
                 <Label htmlFor="enable-selection-month">Selection month</Label>
@@ -546,17 +549,12 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 />
               </div>
             </FormItem>
-          </>
+          </SectionPanel>
         );
       default:
         return null;
     }
   };
 
-  return (
-    <div className="w-full space-y-4">
-      <h6 className="font-semibold uppercase text-xs text-gray-400">Appearance</h6>
-      {renderAppearanceOptions()}
-    </div>
-  );
+  return renderAppearanceOptions();
 };

@@ -60,6 +60,9 @@ export interface FormBuilderState {
     validateForm: () => Promise<boolean>;
     getFieldValidation: (id: string) => ValidationState;
     clearValidation: (id?: string) => void;
+    setFieldError: (fieldId: string, error: string) => void;
+    clearFieldError: (fieldId: string) => void;
+    clearErrors: () => void;
 
     // Conditional logic
     refreshFieldOptions: (fieldId: string) => Promise<void>;
@@ -184,11 +187,6 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
             }
           }
         }));
-        // Register field dependencies in workflow engine
-        workflowEngine.registerDependencies(field);
-
-        // Evaluate initial conditions after all fields are registered
-        workflowEngine.evaluateConditions();
       },
 
       /**
@@ -203,40 +201,8 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
             ...state.schema,
             fields
           },
-          selectedFieldId: null,
-          validation: {
-            ...state.validation,
-            ...fields.reduce(
-              (acc, field) => {
-                acc[field.id] = {
-                  isValid: true,
-                  isPending: false,
-                  messages: [],
-                  lastValidated: 0
-                };
-                return acc;
-              },
-              {} as Record<string, ValidationState>
-            )
-          },
-          visibleFields: new Set(
-            Array.from(state.visibleFields).filter((id) => !fields.some((f) => f.id === id))
-          ),
-          disabledFields: new Set(
-            Array.from(state.disabledFields).filter((id) => !fields.some((f) => f.id === id))
-          ),
-          debouncedValidators: Object.fromEntries(
-            Object.entries(state.debouncedValidators).filter(
-              ([key]) => !fields.some((f) => f.id === key)
-            )
-          )
+          selectedFieldId: null
         }));
-
-        // Register dependencies for all updated fields
-        fields.forEach((field) => workflowEngine.registerDependencies(field));
-
-        // Re-evaluate conditions after bulk update
-        workflowEngine.evaluateConditions();
       },
 
       /**
@@ -260,7 +226,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
             )
           }
         }));
-        const field = get().schema.fields.find((f) => f.id === id);
+        const field = get().actions.getField(id);
         if (field) {
           workflowEngine.registerDependencies(field);
           // Re-evaluate conditions for this field
@@ -320,7 +286,6 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
             Array.from(state.disabledFields).filter((fieldId) => fieldId !== id)
           )
         }));
-        console.log('Removing field', id);
         workflowEngine.removeField(id);
         workflowEngine.evaluateConditions();
       },
@@ -373,10 +338,6 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @param value - New field value
        */
       updateFieldValue: (fieldId, value) => {
-        set((state) => ({
-          formData: { ...state.formData, [fieldId]: value }
-        }));
-
         // Initialize debounced validator if not exists
         if (!get().debouncedValidators[fieldId]) {
           set((state) => ({
@@ -390,14 +351,52 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
           }));
         }
 
-        // // Trigger immediate validation for required fields
-        // const field = get().actions.getField(fieldId);
-        // if (field?.validations?.some((r) => r.type === 'required')) {
-        //   get().debouncedValidators[fieldId](value);
-        // }
+        set((state) => ({
+          formData: { ...state.formData, [fieldId]: value }
+        }));
 
-        // Process workflow changes
         workflowEngine.processFieldChange(fieldId);
+      },
+
+      /**
+       * Sets an error message for a specific field
+       * @param fieldId - Field ID to set error for
+       * @param error - Error message to set
+       */
+      setFieldError: (fieldId: string, error: string) => {
+        set((state) => ({
+          schema: {
+            ...state.schema,
+            fields: state.schema.fields.map((f) => (f.id === fieldId ? { ...f, error } : f))
+          }
+        }));
+      },
+
+      /**
+       * Clears the error message for a specific field
+       * @param fieldId - Field ID to clear error for
+       */
+      clearFieldError: (fieldId: string) => {
+        set((state) => ({
+          schema: {
+            ...state.schema,
+            fields: state.schema.fields.map((f) =>
+              f.id === fieldId ? { ...f, error: undefined } : f
+            )
+          }
+        }));
+      },
+
+      /**
+       * Clears all error messages in the form
+       */
+      clearErrors: () => {
+        set((state) => ({
+          schema: {
+            ...state.schema,
+            fields: state.schema.fields.map((f) => ({ ...f, error: undefined }))
+          }
+        }));
       },
 
       /**
@@ -430,7 +429,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
           field.validations
             .filter((rule) => !rule.trigger || rule.trigger === trigger)
             .map(async (rule) => {
-              await evaluateValidations(fieldId, rule, value, get().formData);
+              return await evaluateValidations(fieldId, rule, value, get().formData);
             })
         );
 
@@ -447,13 +446,6 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
               messages,
               lastValidated: Date.now()
             }
-          },
-          // Maintain backward compatibility with error property
-          schema: {
-            ...state.schema,
-            fields: state.schema.fields.map((f) =>
-              f.id === fieldId ? { ...f, error: isValid ? undefined : messages[0] } : f
-            )
           }
         }));
 
@@ -466,7 +458,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        */
       validateForm: async () => {
         const validationResults = await Promise.all(
-          get().schema.fields.map((field) => get().actions.validateField(field.id, 'submit'))
+          get().schema.fields.map((field) => get().actions.validateField(field.id))
         );
         return validationResults.every((result) => result);
       },
@@ -506,14 +498,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
                   return acc;
                 },
                 {} as Record<string, ValidationState>
-              ),
-          // Clear legacy error states too
-          schema: {
-            ...state.schema,
-            fields: state.schema.fields.map((field) =>
-              !id || field.id === id ? { ...field, error: undefined } : field
-            )
-          }
+              )
         }));
       },
 
@@ -555,21 +540,13 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * Resets form data while keeping schema
        */
       resetForm: () => {
-        set({
-          formData: {},
-          validation: Object.keys(get().validation).reduce(
-            (acc, key) => {
-              acc[key] = {
-                isValid: true,
-                isPending: false,
-                messages: [],
-                lastValidated: 0
-              };
-              return acc;
-            },
-            {} as Record<string, ValidationState>
-          )
-        });
+        set((state) => ({
+          ...state,
+          formData: {}
+        }));
+        // Clear all validation states and errors
+        get().actions.clearValidation();
+        get().actions.clearErrors();
       },
 
       /**

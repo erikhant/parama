@@ -68,6 +68,23 @@ const definedDefaultValue = (type: string): FormFieldType => {
           dateFormat: 'dd/MM/yyyy'
         }
       } as FormFieldType;
+    case 'file':
+      return {
+        ...newField,
+        options: {
+          multiple: false,
+          maxFiles: 5,
+          maxSize: 5 * 1024 * 1024, // 5MB
+          accept: {
+            'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
+            'application/pdf': ['.pdf'],
+            'text/plain': ['.txt']
+          },
+          instantUpload: false,
+          bulkUpload: false,
+          server: ''
+        }
+      } as unknown as FormFieldType;
     default:
       return newField as FormFieldType;
   }
@@ -85,15 +102,15 @@ export const FormEditor = () => {
     })
   );
 
-  useEffect(() => {
-    // Enable all debug features
-    const cleanupDebugger = setupWorkflowDebugger();
+  // useEffect(() => {
+  //   // Enable all debug features
+  //   const cleanupDebugger = setupWorkflowDebugger();
 
-    return () => {
-      // Cleanup debugger on unmount
-      cleanupDebugger?.();
-    };
-  }, []);
+  //   return () => {
+  //     // Cleanup debugger on unmount
+  //     cleanupDebugger?.();
+  //   };
+  // }, []);
 
   const handleDragStart = ({ active }: DragStartEvent) => {
     setActiveId(active.id as string);

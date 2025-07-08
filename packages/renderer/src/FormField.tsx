@@ -24,9 +24,11 @@ import {
 } from '@parama-ui/react';
 import * as LucideIcons from 'lucide-react';
 import { interpolate } from '@form-builder/core';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import Dropzone from 'react-dropzone';
+import { FileUpload } from './FileUpload';
 import '../../parama-ui/dist/parama-ui.min.css';
+import { useDebounce } from 'use-debounce';
 
 // Memoized components remain the same
 const MemoizedIcon = memo(({ iconName, size = 15 }: { iconName: string; size?: number }) => {
@@ -129,10 +131,13 @@ const MemoizedCheckboxItems = memo(
 export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) => {
   const { formData, actions, visibleFields, disabledFields, readOnlyFields, mode } =
     useFormBuilder();
-  const value = mode === 'editor' ? field.defaultValue : formData[field.id];
+  const value = formData[field.id] ?? field.defaultValue;
   const validationState = actions.getFieldValidation(field.id);
 
-  // Memoized handlers
+  const [textValue, setTextValue] = useState<string>(value || '');
+  const [debouncedTextValue] = useDebounce(textValue, 300);
+  const [firstRender, setFirstRender] = useState(true);
+
   const handleChange = useCallback(
     (value: any) => {
       actions.updateFieldValue(field.id, value);
@@ -140,7 +145,15 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     [actions, field.id]
   );
 
-  // Memoized appearance renderer
+  // Handle text input changes
+  useEffect(() => {
+    if (firstRender) {
+      setFirstRender(false);
+      return;
+    }
+    handleChange(debouncedTextValue);
+  }, [debouncedTextValue]);
+
   const renderAppearance = useCallback(
     ({
       type,
@@ -204,13 +217,6 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
       return false;
     }
   }, [field.validations]);
-
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      handleChange(e.target.value);
-    },
-    [handleChange]
-  );
 
   const handleSelectChange = useCallback(
     (selectedValue: string) => {
@@ -311,6 +317,15 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     [handleChange]
   );
 
+  const handleFileChange = useCallback(
+    (files: File[]) => {
+      console.log('Selected files:', files);
+      // setFiles(files);
+      handleChange(files);
+    },
+    [handleChange]
+  );
+
   // Memoized disabled dates (same as before)
   const disabledDates = useMemo(() => {
     const disabled: any = {};
@@ -333,9 +348,6 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
       delete disabled.dayOfWeek;
     }
 
-    console.log('field', (field as DateField).options);
-    console.log('disabled', disabled);
-
     return Object.keys(disabled).length > 0 ? disabled : undefined;
   }, [
     (field as DateField).options?.disabledPast,
@@ -351,9 +363,17 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
       disabled: isDisabled,
       placeholder: field.placeholder,
       required: isRequired,
-      className: !validationState.isValid ? 'border-red-500' : ''
+      className: !validationState.isValid || field.error ? 'border-red-500' : ''
     }),
-    [field.id, field.name, field.placeholder, isDisabled, isRequired, validationState.isValid]
+    [
+      field.id,
+      field.name,
+      field.placeholder,
+      field.error,
+      isDisabled,
+      isRequired,
+      validationState.isValid
+    ]
   );
 
   // Memoized appearance props (same as before)
@@ -408,9 +428,9 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
               field.type === 'hidden' && mode === 'editor' ? 'bg-void' : ''
             )}
             type={field.type === 'hidden' && mode === 'editor' ? 'text' : field.type}
-            value={value || ''}
+            value={textValue}
             readOnly={isReadOnly}
-            onChange={handleInputChange}
+            onChange={(e) => setTextValue(e.target.value || '')}
           />
         );
 
@@ -419,19 +439,17 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
         ) : (
           inputElement
         );
-
       case 'textarea':
         return (
           <Textarea
             {...commonInputProps}
-            value={value || ''}
+            value={textValue}
             readOnly={isReadOnly}
             disabled={isDisabled}
             rows={field.rows || 3}
-            onChange={handleInputChange}
+            onChange={(e) => setTextValue(e.target.value || '')}
           />
         );
-
       case 'date':
         const commonDateProps = {
           name: field.name,
@@ -540,30 +558,49 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
 
       case 'file':
         return (
-          <Dropzone
-            accept={field.options?.accept}
+          <FileUpload
+            accept={field.options.accept}
+            server={field.options.server}
+            name={field.name}
             disabled={isDisabled}
-            maxFiles={field.options?.maxFiles}
-            maxSize={field.options?.maxSize}
-            multiple={field.multiple}>
-            {({ getRootProps, getInputProps, acceptedFiles }) => (
-              <div
-                {...getRootProps()}
-                className={`border-2 border-dashed rounded-md p-4 ${
-                  !validationState.isValid ? 'border-red-500' : 'border-gray-300'
-                }`}>
-                <input {...getInputProps()} name={field.name} />
-                <p className="text-center">
-                  {field.label ?? 'Drag & drop files here, or click to browse'}
-                </p>
-                <ul>
-                  {acceptedFiles.map((file, index) => (
-                    <li key={`${file.name}_${index}`}>{file.name}</li>
-                  ))}
-                </ul>
-              </div>
+            required={isRequired}
+            multiple={field.options.multiple}
+            maxFiles={field.options.maxFiles}
+            maxSize={field.options.maxSize}
+            instantUpload={field.options.instantUpload}
+            onFilesChange={handleFileChange}
+            onError={(error) => {
+              console.error(validationState);
+              actions.setFieldError(field.id, error.message || 'File upload failed');
+            }}
+            className={cn(
+              !validationState.isValid || field.error ? 'border-red-500 bg-red-50' : ''
             )}
-          </Dropzone>
+          />
+          // <Dropzone
+          //   accept={field.options?.accept}
+          //   disabled={isDisabled}
+          //   maxFiles={field.options?.maxFiles}
+          //   maxSize={field.options?.maxSize}
+          //   multiple={field.multiple}>
+          //   {({ getRootProps, getInputProps, acceptedFiles }) => (
+          //     <div
+          //       {...getRootProps()}
+          //       className={`border-2 border-dashed rounded-md p-4 ${
+          //         !validationState.isValid ? 'border-red-500' : 'border-gray-300'
+          //       }`}>
+          //       <input {...getInputProps()} name={field.name} />
+          //       <p className="text-center">
+          //         {field.label ?? 'Drag & drop files here, or click to browse'}
+          //       </p>
+          //       <ul>
+          //         {acceptedFiles.map((file, index) => (
+          //           <li key={`${file.name}_${index}`}>{file.name}</li>
+          //         ))}
+          //       </ul>
+          //     </div>
+          //   )}
+          // </Dropzone>
         );
 
       case 'submit':
@@ -574,6 +611,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     }
   }, [
     field,
+    field.error,
     value,
     mode,
     commonInputProps,
@@ -585,8 +623,8 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     multipleDates,
     dateRange,
     disabledDates,
+    textValue,
     validationState.isValid,
-    handleInputChange,
     handleSingleDateChange,
     handleMultipleDateChange,
     handleDateRangeChange,
@@ -607,13 +645,21 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
           : 'vertical'
       }>
       {field.type !== 'submit' && <Label>{field.label}</Label>}
-      {renderInput}
-      {field.type !== 'submit' && (!validationState.isValid || field.error) && (
-        <span className="text-red-500 text-sm mt-1">
-          {validationState.messages[0] || field.error}
-        </span>
+      {field.type === 'file' && field.helpText && (
+        <p className="form-description">{field.helpText}</p>
       )}
-      {field.type !== 'submit' && field.helpText && (
+      {field.type === 'file' && (!validationState.isValid || field.error) && (
+        <p className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</p>
+      )}
+      {renderInput}
+      {field.type !== 'submit' &&
+        field.type !== 'file' &&
+        (!validationState.isValid || field.error) && (
+          <span className="text-red-500 text-sm mt-1">
+            {validationState.messages[0] || field.error}
+          </span>
+        )}
+      {field.type !== 'submit' && field.type !== 'file' && field.helpText && (
         <span className="form-description">{field.helpText}</span>
       )}
     </FormItem>

@@ -1,3 +1,4 @@
+import { useFormBuilder } from '@form-builder/core';
 import { FormBuilder } from '@form-builder/renderer';
 import { FormSchema } from '@form-builder/types';
 import {
@@ -20,6 +21,7 @@ interface PreviewProps {
 }
 
 export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange }) => {
+  const { resetForm } = useFormBuilder().actions;
   return (
     <Sheet onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
@@ -38,11 +40,11 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
           <SheetTitle>{schema.title || 'Preview'}</SheetTitle>
           <SheetDescription>{schema.description || ''}</SheetDescription>
         </SheetHeader>
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4 px-1 py-4 min-h-[calc(100vh-120px)] overflow-y-auto">
           <FormBuilder schema={schema} />
         </div>
         <SheetFooter>
-          <SheetClose asChild>
+          <SheetClose asChild onClick={resetForm}>
             <Button type="submit">Save</Button>
           </SheetClose>
         </SheetFooter>

@@ -1,7 +1,8 @@
-import { ValidationRule, ValidatorRegistry } from '@form-builder/types';
+import _ from 'lodash';
+import type { ValidationRule } from '@form-builder/types';
 import { interpolate, objectToQueryString } from '../utils';
 import { JsonValidator } from './json';
-import _ from 'lodash';
+import validator from 'validator';
 
 export const evaluateValidations = async (
   fieldId: string,
@@ -22,6 +23,50 @@ export const evaluateValidations = async (
       }
       return !!value || rule.message;
     case 'pattern':
+      if (rule.name === 'email') {
+        return validator.isEmail(value) || rule.message;
+      }
+      if (rule.name === 'url') {
+        return validator.isURL(value) || rule.message;
+      }
+      if (rule.name === 'phone') {
+        return validator.isMobilePhone(value, 'id-ID') || rule.message;
+      }
+      if (rule.name === 'postalCode') {
+        return validator.isPostalCode(value, 'ID') || rule.message;
+      }
+      if (rule.name === 'ip') {
+        return validator.isIP(value) || rule.message;
+      }
+      if (rule.name === 'creditCard') {
+        return validator.isCreditCard(value) || rule.message;
+      }
+      if (rule.name === 'port') {
+        return validator.isPort(value) || rule.message;
+      }
+      if (rule.name === 'passport') {
+        return validator.isPassportNumber(value, 'ID') || rule.message;
+      }
+      if (rule.name === 'passwordStrength') {
+        return (
+          validator.isStrongPassword(value, {
+            minLength: 8,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1
+          }) || rule.message
+        );
+      }
+      // If a custom pattern is provided, use it for validation
+      if (!rule.pattern) {
+        return true; // No pattern defined, skip validation
+      }
+      if (!(rule.pattern instanceof RegExp)) {
+        const pattern = new RegExp(rule.pattern);
+        return pattern.test(value || '') || rule.message;
+      }
+      // Use the provided pattern for validation
       return rule.pattern!.test(value || '') || rule.message;
     case 'cross-field':
     case 'custom':
@@ -89,31 +134,69 @@ export const evaluateValidations = async (
   }
 };
 
-export const createValidatorRegistry = (
-  customValidators: ValidatorRegistry = {}
-): ValidatorRegistry => {
-  return {
-    // ...builtInValidators,
-    ...customValidators
-  };
-};
-
-// export const builtInValidators: ValidatorRegistry = {
-//   minSelected: (field) => {
-//     if (field.type == 'checkbox') {
-//       const min = field.validations?.minSelected ?? 1;
-//       const selected = Array.isArray(field.value) ? field.value.length : 0;
-//       return selected >= min;
-//     }
-//     return true;
-//   },
-//   maxSelected: (field) => {
-//     if (field.type == 'checkbox') {
-//       const max = field.validations?.maxSelected ?? Infinity;
-//       const selected = Array.isArray(field.value) ? field.value.length : 0;
-//       return selected <= max;
-//     }
-//     return true;
-//   }
-//   // Add more built-in validators
+// export const createValidatorRegistry = (
+//   customValidators: ValidatorRegistry = {}
+// ): ValidatorRegistry => {
+//   return {
+//     // ...builtInValidators,
+//     ...customValidators
+//   };
 // };
+
+export const builtInValidatorTemplate: ValidationRule[] = [
+  {
+    type: 'pattern',
+    name: 'email',
+    message: 'Invalid email format',
+    trigger: 'change'
+  },
+  {
+    type: 'pattern',
+    name: 'url',
+    message: 'Invalid URL format',
+    trigger: 'change'
+  },
+  {
+    type: 'pattern',
+    name: 'phone',
+    message: 'Invalid phone number format',
+    trigger: 'change'
+  },
+  {
+    type: 'pattern',
+    name: 'ip',
+    message: 'Invalid IP address format',
+    trigger: 'change'
+  },
+  {
+    type: 'pattern',
+    name: 'port',
+    message: 'Invalid port number format',
+    trigger: 'change'
+  },
+  {
+    type: 'pattern',
+    name: 'passport',
+    message: 'Invalid passport number format',
+    trigger: 'change'
+  },
+  {
+    type: 'pattern',
+    name: 'passwordStrength',
+    message:
+      'Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters',
+    trigger: 'change'
+  },
+  {
+    type: 'pattern',
+    name: 'creditCard',
+    message: 'Invalid credit card number format',
+    trigger: 'change'
+  },
+  {
+    type: 'pattern',
+    name: 'postalCode',
+    message: 'Invalid postal code format',
+    trigger: 'change'
+  }
+];
