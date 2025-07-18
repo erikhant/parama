@@ -1,5 +1,5 @@
-import { useEffect, useMemo, Fragment, useRef } from 'react';
-import { createValidatorRegistry, useFormBuilder } from '@form-builder/core';
+import { useEffect, Fragment, useRef } from 'react';
+import { useFormBuilder } from '@form-builder/core';
 import { FormBuilderProps } from '@form-builder/types';
 import { isEqual } from 'lodash-es';
 
@@ -12,15 +12,21 @@ export const FormProvider: React.FC<FormBuilderProps & { children: React.ReactNo
   const { initialize } = useFormBuilder().actions;
 
   const prevValues = useRef({ schema, validators, data });
-
-  // const mergedValidators = useMemo(() => createValidatorRegistry(validators), [validators]);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     const currentValues = { schema, validators, data };
 
-    if (!isEqual(prevValues.current, currentValues)) {
+    // Always initialize on first render, or if schema reference changed, or if deep comparison shows changes
+    const shouldReinitialize =
+      isFirstRender.current ||
+      prevValues.current.schema !== schema || // Reference comparison for schema
+      !isEqual(prevValues.current, currentValues);
+
+    if (shouldReinitialize) {
       initialize({ schema, data });
       prevValues.current = currentValues;
+      isFirstRender.current = false;
     }
   }, [schema, data, validators, initialize]);
 

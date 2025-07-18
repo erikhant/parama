@@ -140,6 +140,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
 
   const handleChange = useCallback(
     (value: any) => {
+      console.log(value);
       actions.updateFieldValue(field.id, value);
     },
     [actions, field.id]

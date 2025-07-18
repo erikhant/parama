@@ -6,13 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@parama-ui/react';
 
 export const ToolboxPanel = () => {
   const { toolbox } = useEditor();
-  const { templates } = useFormBuilder();
-  const templateList: FieldTypeDef[] = templates.map((template) => ({
-    id: template.id,
-    label: template.name,
-    description: template.description,
-    group: 'other'
-  }));
+  // const { templates } = useFormBuilder();
+  // const templateList: FieldTypeDef[] = templates.map((template) => ({
+  //   id: template.id,
+  //   label: template.name,
+  //   description: template.description,
+  //   group: 'other'
+  // }));
 
   return (
     <div
@@ -40,10 +40,10 @@ export const ToolboxPanel = () => {
           <ToolboxList items={toolbox.fields} />
         </TabsContent>
         <TabsContent value="presets">
-          <ToolboxList items={templateList} />
+          <ToolboxList items={[]} />
         </TabsContent>
         <TabsContent value="templates">
-          <ToolboxList items={templateList} />
+          <ToolboxList items={[]} />
         </TabsContent>
       </Tabs>
     </div>

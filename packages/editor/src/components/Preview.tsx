@@ -21,7 +21,21 @@ interface PreviewProps {
 }
 
 export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange }) => {
-  const { resetForm } = useFormBuilder().actions;
+  const { actions, screenSize } = useFormBuilder();
+
+  // Get responsive sheet width based on screen size
+  const getSheetWidth = () => {
+    switch (screenSize) {
+      case 'mobile':
+        return 'max-w-sm'; // 384px
+      case 'tablet':
+        return 'max-w-2xl'; // 672px
+      case 'desktop':
+      default:
+        return 'max-w-4xl'; // 896px
+    }
+  };
+
   return (
     <Sheet onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
@@ -35,7 +49,7 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
           Preview
         </Button>
       </SheetTrigger>
-      <SheetContent className="max-w-2xl">
+      <SheetContent className={getSheetWidth()}>
         <SheetHeader>
           <SheetTitle>{schema.title || 'Preview'}</SheetTitle>
           <SheetDescription>{schema.description || ''}</SheetDescription>
@@ -44,7 +58,7 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
           <FormBuilder schema={schema} />
         </div>
         <SheetFooter>
-          <SheetClose asChild onClick={resetForm}>
+          <SheetClose asChild onClick={actions.resetForm}>
             <Button type="submit">Save</Button>
           </SheetClose>
         </SheetFooter>

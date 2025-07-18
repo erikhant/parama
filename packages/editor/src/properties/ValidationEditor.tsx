@@ -131,14 +131,17 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
           )}
         </div>
         <Select
-          defaultValue={getValidationByType('pattern')?.name}
+          value={getValidationByType('pattern')?.name || ''}
           onValueChange={(value) => {
             const rule = builtInTextValidatorTemplate.find((rule) => rule.name === value);
             if (!rule) return;
             handleValidationChange({ ...rule, value: getFieldValue(field.id) });
           }}>
           <SelectTrigger className="whitespace-nowrap capitalize">
-            <SelectValue />
+            <SelectValue
+              className="!text-gray-500 dark:text-gray-600"
+              placeholder="Choose template"
+            />
           </SelectTrigger>
           <SelectContent>
             {builtInTextValidatorTemplate.map((option) => (
