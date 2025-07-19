@@ -20,8 +20,8 @@ import {
   TooltipTrigger
 } from '@parama-ui/react';
 import type { ExternalDataSource, FieldGroupItem } from '@form-builder/types';
-import { useState } from 'react';
-import { CircleAlertIcon, HelpCircleIcon, PlusIcon, Trash2Icon } from 'lucide-react';
+import React, { useState } from 'react';
+import { CircleAlertIcon, HelpCircleIcon, Loader2Icon, PlusIcon, Trash2Icon } from 'lucide-react';
 import { Editor } from '@monaco-editor/react';
 
 type ExternalDataOptionsProps = {
@@ -56,19 +56,19 @@ const arrayHeaders = (headersObj: Record<string, string>) => {
   }));
 };
 
-export function ExternalDataOptions({
+export const ExternalDataOptions = ({
   children,
   external = { url: '' },
   onChange
-}: ExternalDataOptionsProps) {
+}: ExternalDataOptionsProps) => {
   const [headers, setHeaders] = useState<Header[]>(arrayHeaders(external.headers || {}));
   const [externalData, setExternal] = useState<ExternalDataSource<FieldGroupItem>>(external);
   const [tab, setTab] = useState<'headers' | 'result' | 'mapper'>('headers');
   const [open, setOpen] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [apiUrl, setApiUrl] = useState('');
+  const [error, setError] = useState<Error | null>(null);
+  const [apiUrl, setApiUrl] = useState(external.url || '');
 
   const addHeader = () => {
     const newHeader: Header = {
@@ -102,7 +102,8 @@ export function ExternalDataOptions({
     // Implement the logic to send the request to the data source URL
     // This could involve using fetch or axios to make the API call
     // and then updating the external.result with the response.
-    console.log('Sending request to:', externalData.url);
+    setError(null);
+
     if (!externalData.url) {
       console.error('No source URL provided');
       return;
@@ -141,15 +142,17 @@ export function ExternalDataOptions({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children ? (
-          children
-        ) : (
+      {children ? (
+        <DialogTrigger asChild>
+          {React.isValidElement(children) ? children : <span>{children}</span>}
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
           <Button variant="ghost" size="sm" color="secondary">
             API source
           </Button>
-        )}
-      </DialogTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-gray-700">API source</DialogTitle>
@@ -184,7 +187,7 @@ export function ExternalDataOptions({
               <TabsTrigger value="headers">Headers</TabsTrigger>
               <TabsTrigger value="result">
                 Result
-                {error && <CircleAlertIcon color="text-red-500" className="ml-1" size={16} />}
+                {error && <CircleAlertIcon className="ml-1 text-red-500" size={16} />}
                 {!error && result && (
                   <Badge size="xs" color="success" className="ml-1">
                     OK
@@ -270,12 +273,17 @@ export function ExternalDataOptions({
                     }}
                   />
                 ) : (
-                  <p className="text-gray-500 text-center text-sm  bg-gray-50 border p-5 rounded">
-                    No result yet. Send a request to see the response.
+                  <p
+                    className={`${error ? 'text-red-600' : 'text-gray-500'} text-center text-sm  bg-gray-50 border p-5 rounded`}>
+                    {error ? error.message : 'No result yet. Send a request to see the response.'}
+                    {loading && (
+                      <>
+                        <Loader2Icon className="animate-spin ml-2 inline-block" size={16} />
+                        Loading..
+                      </>
+                    )}
                   </p>
                 )}
-                {error && <p className="text-red-600 mt-3">{error}</p>}
-                {loading && <p className="text-blue-600 mt-3">Loading...</p>}
               </div>
             </TabsContent>
             <TabsContent value="mapper">
@@ -547,4 +555,4 @@ export function ExternalDataOptions({
       </DialogContent>
     </Dialog>
   );
-}
+};

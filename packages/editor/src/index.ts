@@ -1,1 +1,1 @@
-export * from './FormEditor';
+export * from './components/FormEditor';

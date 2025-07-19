@@ -2,6 +2,7 @@ import { FieldGroupItem } from '@form-builder/types';
 import { Button, FormItem, Input } from '@parama-ui/react';
 import { Trash2 } from 'lucide-react';
 import { memo, useCallback } from 'react';
+import { useEditor } from '../../store/useEditor';
 
 /**
  * OptionItem component represents a single option in a select field.
@@ -16,6 +17,8 @@ interface OptionItemProps {
 }
 
 export const OptionItem = memo<OptionItemProps>(({ option, index, onUpdate, onDelete }) => {
+  const { editor } = useEditor();
+
   const handleLabelChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       onUpdate(index, 'label', e.target.value);
@@ -44,25 +47,24 @@ export const OptionItem = memo<OptionItemProps>(({ option, index, onUpdate, onDe
           type="text"
           placeholder="Option label"
           value={option.label}
+          disabled={editor.options?.propertiesSettings === 'readonly'}
           onChange={handleLabelChange}
         />
         <Input
           type="text"
           value={option.value}
           placeholder="Option value"
+          disabled={editor.options?.propertiesSettings === 'readonly'}
           onChange={handleValueChange}
         />
       </div>
-      <div className="col-span-1 shrink-0">
-        <Button
-          className="self-center"
-          variant="ghost"
-          size="xs"
-          color="secondary"
-          onClick={handleDelete}>
-          <Trash2 size={15} />
-        </Button>
-      </div>
+      {editor.options?.propertiesSettings !== 'readonly' && (
+        <div className="col-span-1 shrink-0">
+          <Button className="self-center" variant="ghost" size="xs" color="secondary" onClick={handleDelete}>
+            <Trash2 size={15} />
+          </Button>
+        </div>
+      )}
     </FormItem>
   );
 });

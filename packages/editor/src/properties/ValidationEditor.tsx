@@ -14,6 +14,7 @@ import type { FormField, ValidationRule } from '@form-builder/types';
 import { SectionPanel } from './SectionPanel';
 import React, { useMemo, useCallback } from 'react';
 import { builtInValidatorTemplate, useFormBuilder } from '@form-builder/core';
+import { useEditor } from '../store/useEditor';
 
 type ValidationEditorProps = {
   field: FormField;
@@ -21,6 +22,7 @@ type ValidationEditorProps = {
 };
 
 export default function ValidationEditor({ field, onChange }: ValidationEditorProps) {
+  const { editor } = useEditor();
   const { getFieldValue } = useFormBuilder().actions;
   const validations = useMemo(() => field.validations || [], [field.validations]);
   const builtInTextValidatorTemplate = useMemo(
@@ -72,6 +74,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         <Switch
           className="!col-span-1"
           checked={!!getValidationByType('required')}
+          disabled={editor.options?.validationSettings === 'readonly'}
           onCheckedChange={(checked) => {
             if (checked) {
               handleValidationChange({
@@ -97,6 +100,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
           <Switch
             className="!col-span-1"
             checked={!!getValidationByType('pattern')}
+            disabled={editor.options?.validationSettings === 'readonly'}
             onCheckedChange={(checked) => {
               if (checked) {
                 handleValidationChange({
@@ -117,7 +121,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
   const renderTextValidatorTemplate = useMemo(
     () => (
       <FormItem className="py-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between h-7">
           <Label>Validation template</Label>
           {getValidationByType('pattern') && (
             <Button
@@ -125,6 +129,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
               variant="ghost"
               size="xs"
               className="text-xs text-gray-500"
+              disabled={editor.options?.validationSettings === 'readonly'}
               onClick={() => removeValidation('pattern')}>
               Remove
             </Button>
@@ -132,16 +137,14 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         </div>
         <Select
           value={getValidationByType('pattern')?.name || ''}
+          disabled={editor.options?.validationSettings === 'readonly'}
           onValueChange={(value) => {
             const rule = builtInTextValidatorTemplate.find((rule) => rule.name === value);
             if (!rule) return;
             handleValidationChange({ ...rule, value: getFieldValue(field.id) });
           }}>
           <SelectTrigger className="whitespace-nowrap capitalize">
-            <SelectValue
-              className="!text-gray-500 dark:text-gray-600"
-              placeholder="Choose template"
-            />
+            <SelectValue className="!text-gray-500 dark:text-gray-600" placeholder="Choose template" />
           </SelectTrigger>
           <SelectContent>
             {builtInTextValidatorTemplate.map((option) => (
@@ -169,6 +172,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             min={0}
             title="Minimum character length"
             value={getValidationByType('minLength')?.value ?? ''}
+            disabled={editor.options?.validationSettings === 'readonly'}
             placeholder="Minimum character length"
             className="!col-span-2"
             onChange={(e) => {
@@ -196,6 +200,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             min={0}
             title="Maximum character length"
             value={getValidationByType('maxLength')?.value ?? ''}
+            disabled={editor.options?.validationSettings === 'readonly'}
             placeholder="Maximum character length"
             className="!col-span-2"
             onChange={(e) => {
@@ -232,6 +237,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             min={0}
             title="Minimum value"
             value={getValidationByType('min')?.value ?? ''}
+            disabled={editor.options?.validationSettings === 'readonly'}
             placeholder="Minimum value"
             className="!col-span-2"
             onChange={(e) => {
@@ -259,6 +265,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             min={0}
             title="Maximum value"
             value={getValidationByType('max')?.value ?? ''}
+            disabled={editor.options?.validationSettings === 'readonly'}
             placeholder="Maximum value"
             className="!col-span-2"
             onChange={(e) => {
@@ -292,6 +299,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
           <Label className="!col-span-4">Enable Email Validation</Label>
           <Switch
             checked={!!getValidationByType('pattern')}
+            disabled={editor.options?.validationSettings === 'readonly'}
             onCheckedChange={(checked) => {
               if (checked) {
                 handleValidationChange({

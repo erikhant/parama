@@ -32,7 +32,8 @@ import {
   SheetDescription,
   SheetFooter,
   SheetClose,
-  DateRange
+  DateRange,
+  MultiSelect
 } from './index';
 import { Eye, EyeClosed, Mail, User } from 'lucide-react';
 import {
@@ -194,6 +195,26 @@ function App() {
               </SelectGroup>
             </SelectContent>
           </Select>
+        </FormItem>
+        <FormItem>
+          <MultiSelect
+            placeholder="Select values"
+            modalPopover={true}
+            color="primary"
+            variant="shadow"
+            options={[
+              { id: 'option1', value: 'Option 1' },
+              { id: 'option2', value: 'Option 2' },
+              { id: 'option3', value: 'Option 3' },
+              { id: 'option4', value: 'Option 4' }
+            ].map((attr) => ({
+              value: attr.id,
+              label: attr.value
+            }))}
+            onValueChange={(selectedValues) => {
+              console.log('Selected values:', selectedValues);
+            }}
+          />
         </FormItem>
         <FormItem className="flex items-center space-x-2 space-y-0">
           <Checkbox id="terms" />

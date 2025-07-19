@@ -1,4 +1,5 @@
 import { FormItem, Input, Label } from '@parama-ui/react';
+import { useEditor } from '../../store/useEditor';
 
 interface DefaultValueProps {
   type?: React.HTMLInputTypeAttribute;
@@ -7,6 +8,8 @@ interface DefaultValueProps {
 }
 
 export const DefaultValue = ({ type, value, onChange }: DefaultValueProps) => {
+  const { editor } = useEditor();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
   };
@@ -14,7 +17,12 @@ export const DefaultValue = ({ type, value, onChange }: DefaultValueProps) => {
   return (
     <FormItem>
       <Label>Default value</Label>
-      <Input type={type} value={value} onChange={handleChange} />
+      <Input
+        type={type}
+        value={value}
+        disabled={editor.options?.propertiesSettings === 'readonly'}
+        onChange={handleChange}
+      />
       <p className="form-description">Used as the initial value when the form is loaded.</p>
     </FormItem>
   );

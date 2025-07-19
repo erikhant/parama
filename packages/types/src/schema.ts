@@ -16,6 +16,7 @@ export type FormField =
   | RadioField
   | CheckboxField
   | SelectField
+  | MultiSelectField
   | DateField
   | SubmitForm;
 
@@ -25,6 +26,25 @@ export interface FormBuilderProps {
   data?: Record<string, any>;
   // templates?: FormTemplate[];
   variables?: Record<string, any>;
+}
+
+export interface FormEditorOptions {
+  showJsonCode?: boolean;
+  generalSettings?: FieldSettings;
+  propertiesSettings?: FieldSettings;
+  appearanceSettings?: FieldSettings;
+  validationSettings?: FieldSettings;
+  conditionsSettings?: FieldSettings;
+  eventsSettings?: FieldSettings;
+}
+
+export type FieldSettings = 'on' | 'off' | 'readonly';
+
+export interface FormEditorProps {
+  onSaveSchema?: (data: FormSchema) => void;
+  loadPreset?: () => FieldTypeDef[];
+  schema?: FormSchema;
+  options?: FormEditorOptions;
 }
 
 export interface FormTemplate {
@@ -206,7 +226,30 @@ export interface SelectField extends BaseField {
   // dynamicOptions?: DynamicOptions;
 }
 
+export interface MultiSelectField extends BaseField {
+  type: 'multiselect';
+  multiple: boolean;
+  placeholder?: string;
+  options: FieldGroupItem[];
+  external?: ExternalDataSource<FieldGroupItem>;
+}
+
 export interface SubmitForm extends BaseField {
   type: 'submit';
 }
-// Add other validation types as needed (NumberValidation, DateValidation, etc.)
+
+export interface FieldTypeDef {
+  id: string;
+  label: string;
+  group: 'input' | 'selection' | 'presentation' | 'other';
+  description?: string;
+  image?: string;
+  icon?: object | string; // Can be a React component or a string (e.g., emoji)
+}
+
+export interface FieldTypes {
+  inputs: FieldTypeDef[];
+  selections: FieldTypeDef[];
+  presentations: FieldTypeDef[];
+  [x: string]: FieldTypeDef[];
+}

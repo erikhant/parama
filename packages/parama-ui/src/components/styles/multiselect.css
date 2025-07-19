@@ -1,0 +1,97 @@
+@layer components {
+  .multiselect-trigger {
+    @apply w-full h-auto min-h-10 bg-inherit p-1 hover:bg-inherit [&_svg]:pointer-events-auto shadow-sm;
+  }
+
+  .multiselect-placeholder {
+    @apply text-gray-700 dark:text-gray-500 mx-2 text-sm;
+  }
+
+  .multiselect-wrapper {
+    @apply mx-auto flex w-full items-center justify-between;
+  }
+
+  .multiselect-popover {
+    @apply w-[var(--radix-popover-trigger-width)] p-0;
+  }
+
+  .multiselect-badge-list {
+    @apply flex w-full items-center justify-between;
+  }
+
+  .multiselect-badge-items {
+    @apply flex flex-wrap items-center gap-1;
+  }
+
+  .multiselect-badge {
+    @apply [&>svg]:pointer-events-auto transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300;
+  }
+
+  .multiselect-badge-close {
+    @apply flex items-center justify-between;
+  }
+
+  .multiselect-badge-more {
+    @apply [&>svg]:pointer-events-auto text-foreground border-foreground/10 bg-transparent hover:bg-transparent;
+  }
+
+  .multiselect-icon {
+    @apply mr-2 h-4 w-4;
+  }
+
+  .multiselect-icon-svg {
+    @apply mx-2 h-4 cursor-pointer;
+  }
+
+  .multiselect-close {
+    @apply ml-2 h-4 w-4 cursor-pointer;
+  }
+
+  .multiselect-separator {
+    @apply flex h-full min-h-6;
+  }
+
+  .multiselect-input {
+    @apply border-none focus:border-none focus:ring-0;
+  }
+
+  .multiselect-option {
+    @apply border-primary mr-2 flex h-4 w-4 items-center justify-center rounded-sm border;
+  }
+
+  .multiselect-option-allselected {
+    @apply bg-primary text-white;
+  }
+
+  .multiselect-option-unselected {
+    @apply opacity-50 [&_svg]:invisible;
+  }
+
+  .multiselect-option-selected {
+    @apply bg-primary text-white;
+  }
+
+  .multiselect-option-icon {
+    @apply text-secondary mr-2 h-4 w-4;
+  }
+
+  .multiselect-option-footer {
+    @apply flex items-center justify-between;
+  }
+
+  .multiselect-option-footer-button {
+    @apply flex-1 cursor-pointer justify-center;
+  }
+
+  .multiselect-option-footer-button.close {
+    @apply max-w-full;
+  }
+
+  .multiselect-sparkles {
+    @apply text-foreground bg-background my-2 h-3 w-3 cursor-pointer;
+  }
+
+  .multiselect-sparkles.not-animated {
+    @apply text-secondary;
+  }
+}

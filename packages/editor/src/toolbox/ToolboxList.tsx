@@ -1,8 +1,8 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { SortableItem } from '../components';
-import { FieldTypeDef } from './fieldTypes';
 import { ToolboxItem } from './ToolboxItem';
+import { FieldTypeDef } from '@form-builder/types';
 
 type ToolboxListProps = {
   items: FieldTypeDef[];

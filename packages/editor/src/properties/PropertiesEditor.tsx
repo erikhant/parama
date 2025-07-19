@@ -1,11 +1,4 @@
-import {
-  CheckboxField,
-  DateField,
-  FieldGroupItem,
-  FormField,
-  RadioField,
-  SelectField
-} from '@form-builder/types';
+import { CheckboxField, DateField, FieldGroupItem, FormField, RadioField, SelectField } from '@form-builder/types';
 import {
   Accordion,
   AccordionContent,
@@ -31,14 +24,7 @@ import {
   SelectValue,
   Switch
 } from '@parama-ui/react';
-import {
-  Calendar1Icon,
-  CalendarDaysIcon,
-  CalendarRangeIcon,
-  PencilLineIcon,
-  Plus,
-  XIcon
-} from 'lucide-react';
+import { Calendar1Icon, CalendarDaysIcon, CalendarRangeIcon, PencilLineIcon, Plus, XIcon } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { NameField } from './common/NameField';
 import { ExternalDataOptions } from './select/ExternalDataOptions';
@@ -47,14 +33,17 @@ import { OptionItem } from './select/OptionItem';
 import { DefaultValue } from './common/DefaultValue';
 import { useFormBuilder } from '@form-builder/core';
 import { SectionPanel } from './SectionPanel';
+import { useEditor } from '../store/useEditor';
 
-type GeneralPropertiesEditorProps = {
+type PropertiesEditorProps = {
   field: FormField;
   onChange: (updates: Partial<FormField>) => void;
 };
 
-export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ field, onChange }) => {
+export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }) => {
   const { updateFieldValue } = useFormBuilder().actions;
+  const { editor } = useEditor();
+
   const handleNameChange = useCallback(
     (name: string) => {
       onChange({ name });
@@ -129,9 +118,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
       onChange({ optionGroups: newGroups, defaultValue });
       // If the deleted option was the default value, clear it
       if (Array.isArray(field.defaultValue)) {
-        const newDefaultValue = field.defaultValue.filter(
-          (value: string) => value !== defaultValue
-        );
+        const newDefaultValue = field.defaultValue.filter((value: string) => value !== defaultValue);
         onChange({ defaultValue: newDefaultValue.length > 0 ? newDefaultValue : undefined });
       } else if (field.defaultValue === defaultValue) {
         onChange({ defaultValue: undefined });
@@ -168,12 +155,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
     if ((field as SelectField).optionGroups) updates.optionGroups = undefined;
     if ((field as SelectField).external) updates.external = undefined;
     onChange(updates);
-  }, [
-    (field as SelectField).options,
-    (field as SelectField).optionGroups,
-    (field as SelectField).external,
-    onChange
-  ]);
+  }, [(field as SelectField).options, (field as SelectField).optionGroups, (field as SelectField).external, onChange]);
 
   const handleAddItem = useCallback(() => {
     const newItem: FieldGroupItem = {
@@ -197,8 +179,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
 
   const handleItemDelete = useCallback(
     (index: number) => {
-      const newItems =
-        (field as CheckboxField | RadioField).items?.filter((_, i) => i !== index) || [];
+      const newItems = (field as CheckboxField | RadioField).items?.filter((_, i) => i !== index) || [];
       const deletedItem = (field as CheckboxField | RadioField).items?.[index];
 
       if (field.defaultValue?.includes(deletedItem.value)) {
@@ -226,8 +207,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
   }, [(field as CheckboxField | RadioField).items, field.defaultValue, onChange]);
 
   const [restrictedDates, setRestrictedDates] = useState<DateRange | undefined>(() =>
-    (field as DateField).options?.restrictedMonths &&
-    (field as DateField).options!.restrictedMonths!.length >= 2
+    (field as DateField).options?.restrictedMonths && (field as DateField).options!.restrictedMonths!.length >= 2
       ? {
           from: new Date((field as DateField).options!.restrictedMonths![0]),
           to: new Date((field as DateField).options!.restrictedMonths![1])
@@ -270,11 +250,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
       (!(field as SelectField).options || (field as SelectField).options.length === 0) &&
       (!(field as SelectField).optionGroups || (field as SelectField).optionGroups!.length === 0) &&
       !(field as SelectField).external,
-    [
-      (field as SelectField).options,
-      (field as SelectField).optionGroups,
-      (field as SelectField).external
-    ]
+    [(field as SelectField).options, (field as SelectField).optionGroups, (field as SelectField).external]
   );
 
   const renderTypeSpecificProperties = useMemo(() => {
@@ -292,6 +268,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <Input
                 type="text"
                 value={field.placeholder || ''}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
                 onChange={handlePlaceholderChange}
               />
             </FormItem>
@@ -311,6 +288,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <Input
                 type="text"
                 value={field.placeholder || ''}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
                 onChange={handlePlaceholderChange}
               />
             </FormItem>
@@ -325,43 +303,44 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <Input
                 type="text"
                 value={field.placeholder || ''}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
                 onChange={handlePlaceholderChange}
               />
             </FormItem>
             <NameField value={field.name || ''} onChange={handleNameChange} hasValidation />
             <div className="flex justify-between items-center">
               <Label>Options</Label>
-              {hasNoOptionsConfigured ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="xs" color="secondary" variant="ghost">
-                      <Plus size={15} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-32" align="end">
-                    <DropdownMenuItem onSelect={handleAddOption}>List</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={handleAddGroup}>Group list</DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <ExternalDataOptions
-                        external={field.external}
-                        onChange={(value) => onChange({ external: value })}>
-                        <button className="dropdown-item w-full hover:bg-slate-100">
-                          API source
-                        </button>
-                      </ExternalDataOptions>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button
-                  className="text-xs text-gray-500"
-                  variant="ghost"
-                  size="xs"
-                  color="secondary"
-                  onClick={handleRemoveAllOptions}>
-                  Remove all
-                </Button>
-              )}
+              {editor.options?.propertiesSettings !== 'readonly' ? (
+                hasNoOptionsConfigured ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="xs" color="secondary" variant="ghost">
+                        <Plus size={15} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-32" align="end">
+                      <DropdownMenuItem onSelect={handleAddOption}>List</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={handleAddGroup}>Group list</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <ExternalDataOptions
+                          external={field.external}
+                          onChange={(value) => onChange({ external: value })}>
+                          <button className="dropdown-item w-full hover:bg-slate-100">API source</button>
+                        </ExternalDataOptions>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button
+                    className="text-xs text-gray-500"
+                    variant="ghost"
+                    size="xs"
+                    color="secondary"
+                    onClick={handleRemoveAllOptions}>
+                    Remove all
+                  </Button>
+                )
+              ) : null}
             </div>
 
             {/* OPTION LIST */}
@@ -384,30 +363,34 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                           onUpdate={handleOptionUpdate}
                           onDelete={handleOptionDelete}
                         />
-                        <div className="flex items-center ml-4 gap-2 mt-2">
-                          <Label htmlFor={option.id as string} className="text-xs text-gray-600">
-                            Set as default
-                          </Label>
-                          <Switch
-                            id={option.id as string}
-                            disabled={option.value === '' || option.label === ''}
-                            checked={field.defaultValue === option.value}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                onChange({ defaultValue: option.value });
-                              } else if (field.defaultValue === option.value) {
-                                onChange({ defaultValue: undefined });
-                              }
-                            }}
-                          />
-                        </div>
+                        {editor.options?.propertiesSettings !== 'readonly' && (
+                          <div className="flex items-center ml-4 gap-2 mt-2">
+                            <Label htmlFor={option.id as string} className="text-xs text-gray-600">
+                              Set as default
+                            </Label>
+                            <Switch
+                              id={option.id as string}
+                              disabled={option.value === '' || option.label === ''}
+                              checked={field.defaultValue === option.value}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  onChange({ defaultValue: option.value });
+                                } else if (field.defaultValue === option.value) {
+                                  onChange({ defaultValue: undefined });
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
                       </AccordionContent>
                     </AccordionItem>
                   ))}
                 </Accordion>
-                <Button onClick={handleAddOption} size="xs" color="secondary" variant="ghost">
-                  <Plus size={15} /> Add option
-                </Button>
+                {editor.options?.propertiesSettings !== 'readonly' && (
+                  <Button onClick={handleAddOption} size="xs" color="secondary" variant="ghost">
+                    <Plus size={15} /> Add option
+                  </Button>
+                )}
               </>
             )}
 
@@ -423,7 +406,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                 onAddItem={handleAddItemToGroup}
               />
             ))}
-            {(field.optionGroups?.length ?? 0) > 0 && (
+            {editor.options?.propertiesSettings !== 'readonly' && (field.optionGroups?.length ?? 0) > 0 && (
               <Button onClick={handleAddGroup} size="xs" color="secondary" variant="ghost">
                 <Plus size={15} /> Add group
               </Button>
@@ -436,14 +419,14 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                   <Badge size="sm">
                     <p className="max-w-52 truncate">{field.external.url}</p>
                   </Badge>
-                  <ExternalDataOptions
-                    external={field.external}
-                    onChange={(value) => onChange({ external: value })}>
-                    <Button variant="ghost" size="xs" color="secondary" className="text-gray-600">
-                      <span className="sr-only">Edit API source</span>
-                      <PencilLineIcon size={15} />
-                    </Button>
-                  </ExternalDataOptions>
+                  {editor.options?.propertiesSettings !== 'readonly' && (
+                    <ExternalDataOptions external={field.external} onChange={(value) => onChange({ external: value })}>
+                      <Button variant="ghost" size="xs" color="secondary" className="text-gray-600">
+                        <span className="sr-only">Edit API source</span>
+                        <PencilLineIcon size={15} />
+                      </Button>
+                    </ExternalDataOptions>
+                  )}
                 </div>
               </div>
             )}
@@ -456,20 +439,22 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
             <NameField value={field.name || ''} onChange={handleNameChange} />
             <div className="flex justify-between items-center">
               <Label>{field.type === 'checkbox' ? 'Checkbox' : 'Radio'} items</Label>
-              {(field.items?.length || 0) > 0 ? (
-                <Button
-                  className="text-xs text-gray-500"
-                  variant="ghost"
-                  size="xs"
-                  color="secondary"
-                  onClick={handleDeleteAllItems}>
-                  Remove all
-                </Button>
-              ) : (
-                <Button onClick={handleAddItem} size="xs" color="secondary" variant="ghost">
-                  <Plus size={15} />
-                </Button>
-              )}
+              {editor.options?.propertiesSettings !== 'readonly' ? (
+                (field.items?.length || 0) > 0 ? (
+                  <Button
+                    className="text-xs text-gray-500"
+                    variant="ghost"
+                    size="xs"
+                    color="secondary"
+                    onClick={handleDeleteAllItems}>
+                    Remove all
+                  </Button>
+                ) : (
+                  <Button onClick={handleAddItem} size="xs" color="secondary" variant="ghost">
+                    <Plus size={15} />
+                  </Button>
+                )
+              ) : null}
             </div>
             <Accordion
               type="multiple"
@@ -488,54 +473,46 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                       onUpdate={handleItemUpdate}
                       onDelete={handleItemDelete}
                     />
-                    <div className="flex items-center ml-4 gap-2 mt-2">
-                      <Label htmlFor={item.id as string} className="text-xs text-gray-600">
-                        Set as default
-                      </Label>
-                      <Switch
-                        id={item.id as string}
-                        disabled={item.value === '' || item.label === ''}
-                        checked={field.defaultValue?.includes(item.value)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            if (field.type === 'radio') {
-                              onChange({ defaultValue: item.value });
-                              updateFieldValue(field.id, item.value);
-                            } else if (field.type === 'checkbox') {
-                              const newValue = [...(field.defaultValue || []), item.value];
-                              onChange({ defaultValue: newValue });
-                              updateFieldValue(field.id, newValue);
+                    {editor.options?.propertiesSettings !== 'readonly' && (
+                      <div className="flex items-center ml-4 gap-2 mt-2">
+                        <Label htmlFor={item.id as string} className="text-xs text-gray-600">
+                          Set as default
+                        </Label>
+                        <Switch
+                          id={item.id as string}
+                          disabled={item.value === '' || item.label === ''}
+                          checked={field.defaultValue?.includes(item.value)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              if (field.type === 'radio') {
+                                onChange({ defaultValue: item.value });
+                                updateFieldValue(field.id, item.value);
+                              } else if (field.type === 'checkbox') {
+                                const newValue = [...(field.defaultValue || []), item.value];
+                                onChange({ defaultValue: newValue });
+                                updateFieldValue(field.id, newValue);
+                              }
+                            } else if (field.defaultValue?.includes(item.value)) {
+                              if (field.type === 'radio') {
+                                onChange({ defaultValue: undefined });
+                                updateFieldValue(field.id, undefined);
+                              } else if (field.type === 'checkbox') {
+                                const newValue = field.defaultValue?.filter((v: string) => v !== item.value);
+                                onChange({
+                                  defaultValue: newValue.length > 0 ? newValue : undefined
+                                });
+                                updateFieldValue(field.id, newValue.length > 0 ? newValue : undefined);
+                              }
                             }
-                          } else if (field.defaultValue?.includes(item.value)) {
-                            if (field.type === 'radio') {
-                              onChange({ defaultValue: undefined });
-                              updateFieldValue(field.id, undefined);
-                            } else if (field.type === 'checkbox') {
-                              const newValue = field.defaultValue?.filter(
-                                (v: string) => v !== item.value
-                              );
-                              onChange({
-                                defaultValue: newValue.length > 0 ? newValue : undefined
-                              });
-                              updateFieldValue(
-                                field.id,
-                                newValue.length > 0 ? newValue : undefined
-                              );
-                            }
-                          }
-                        }}
-                      />
-                    </div>
+                          }}
+                        />
+                      </div>
+                    )}
                   </AccordionContent>
                 </AccordionItem>
               ))}
-              {field.items?.length > 0 && (
-                <Button
-                  onClick={handleAddItem}
-                  size="xs"
-                  color="secondary"
-                  variant="ghost"
-                  className="mt-2.5">
+              {editor.options?.propertiesSettings !== 'readonly' && field.items?.length > 0 && (
+                <Button onClick={handleAddItem} size="xs" color="secondary" variant="ghost" className="mt-2.5">
                   <Plus size={15} /> Add item
                 </Button>
               )}
@@ -549,6 +526,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <Label>Mode</Label>
               <Select
                 value={field.mode}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
                 onValueChange={(value) => {
                   onChange({
                     mode: value as DatePickerProps['mode'],
@@ -557,8 +535,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                       ...field.options,
                       min: value === 'single' ? undefined : field.options?.min,
                       max: value === 'single' ? undefined : field.options?.max,
-                      restrictedMonths:
-                        value !== field.mode ? undefined : field.options?.restrictedMonths
+                      restrictedMonths: value !== field.mode ? undefined : field.options?.restrictedMonths
                     }
                   });
                 }}>
@@ -587,6 +564,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                 type="text"
                 placeholder="e.g. Select date"
                 value={field.placeholder || ''}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
                 onChange={handlePlaceholderChange}
               />
             </FormItem>
@@ -594,6 +572,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <Label>Date format</Label>
               <Select
                 value={field.options?.dateFormat}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
                 onValueChange={(value) => {
                   onChange({
                     options: {
@@ -622,6 +601,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                     type="number"
                     min={0}
                     max={field.options?.max}
+                    disabled={editor.options?.propertiesSettings === 'readonly'}
                     value={field.options?.min || ''}
                     onChange={({ target }) => {
                       const minValue = target.value ? parseInt(target.value, 10) : undefined;
@@ -649,6 +629,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                     type="number"
                     min={field.options?.min || 0}
                     value={field.options?.max || ''}
+                    disabled={editor.options?.propertiesSettings === 'readonly'}
                     onChange={({ target }) => {
                       const maxValue = target.value ? parseInt(target.value, 10) : undefined;
                       if (maxValue && field.options?.min && maxValue < field.options.min) {
@@ -672,8 +653,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               </div>
             )}
             <FormItem>
-              <div
-                className={`flex items-center justify-between ${!restrictedDates ? 'py-1.5' : ''}`}>
+              <div className={`flex items-center justify-between ${!restrictedDates ? 'py-1.5' : ''}`}>
                 <Label>Restricted months</Label>
                 {restrictedDates && (
                   <Button
@@ -696,6 +676,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               </div>
               <DatePicker
                 mode="range"
+                disabled={editor.options?.propertiesSettings === 'readonly'}
                 selected={restrictedDates}
                 placeholder="Select months"
                 onSelect={(dates) => {
@@ -704,10 +685,9 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                   onChange({
                     options: {
                       ...field.options,
-                      restrictedMonths: [
-                        dateRange?.from?.toString(),
-                        dateRange?.to?.toString()
-                      ].filter((date): date is string => Boolean(date))
+                      restrictedMonths: [dateRange?.from?.toString(), dateRange?.to?.toString()].filter(
+                        (date): date is string => Boolean(date)
+                      )
                     }
                   });
                 }}
@@ -724,6 +704,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <div className="col-span-1 flex items-center justify-end">
                 <Switch
                   id="past-dates"
+                  disabled={editor.options?.propertiesSettings === 'readonly'}
                   checked={field.options?.disabledPast || false}
                   onCheckedChange={(checked) => {
                     onChange({
@@ -744,6 +725,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <div className="col-span-1 flex items-center justify-end">
                 <Switch
                   id="future-dates"
+                  disabled={editor.options?.propertiesSettings === 'readonly'}
                   checked={field.options?.disabledFuture || false}
                   onCheckedChange={(checked) => {
                     onChange({
@@ -769,14 +751,13 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                           <button
                             className="ml-1"
                             onClick={() => {
-                              const newDisabledWeekdays = (
-                                field.options?.disabledWeekdays || []
-                              ).filter((d) => d !== day.value);
+                              const newDisabledWeekdays = (field.options?.disabledWeekdays || []).filter(
+                                (d) => d !== day.value
+                              );
                               onChange({
                                 options: {
                                   ...field.options,
-                                  disabledWeekdays:
-                                    newDisabledWeekdays.length > 0 ? newDisabledWeekdays : undefined
+                                  disabledWeekdays: newDisabledWeekdays.length > 0 ? newDisabledWeekdays : undefined
                                 }
                               });
                             }}>
@@ -791,7 +772,11 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <div className="col-span-1 flex items-center justify-end">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="xs" color="secondary" variant="ghost">
+                    <Button
+                      size="xs"
+                      color="secondary"
+                      disabled={editor.options?.propertiesSettings === 'readonly'}
+                      variant="ghost">
                       <Plus size={15} />
                     </Button>
                   </DropdownMenuTrigger>
@@ -803,9 +788,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
                         onCheckedChange={(checked) => {
                           const newDisabledWeekdays = checked
                             ? [...(field.options?.disabledWeekdays || []), day.value]
-                            : (field.options?.disabledWeekdays || []).filter(
-                                (d) => d !== day.value
-                              );
+                            : (field.options?.disabledWeekdays || []).filter((d) => d !== day.value);
                           onChange({
                             options: {
                               ...field.options,
@@ -833,6 +816,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <Label>Server URL</Label>
               <Input
                 type="text"
+                disabled={editor.options?.propertiesSettings === 'readonly'}
                 value={field.options?.server || ''}
                 placeholder="https://api.example.com/data"
                 onChange={(e) =>
@@ -853,6 +837,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <div className="flex items-center justify-end">
                 <Switch
                   id="multiple-files"
+                  disabled={editor.options?.propertiesSettings === 'readonly'}
                   checked={field.options.multiple || false}
                   onCheckedChange={(checked) => {
                     onChange({ options: { ...field.options, multiple: checked } });
@@ -868,6 +853,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <div className="col-span-1 flex items-center justify-end">
                 <Switch
                   id="instant-upload"
+                  disabled={editor.options?.propertiesSettings === 'readonly'}
                   checked={field.options.instantUpload || false}
                   onCheckedChange={(checked) => {
                     onChange({ options: { ...field.options, instantUpload: checked } });
@@ -883,6 +869,7 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
               <div className="col-span-1 flex items-center justify-end">
                 <Switch
                   id="bulk-upload"
+                  disabled={editor.options?.propertiesSettings === 'readonly'}
                   checked={field.options.bulkUpload || false}
                   onCheckedChange={(checked) => {
                     onChange({ options: { ...field.options, bulkUpload: checked } });
@@ -920,4 +907,4 @@ export const GeneralPropertiesEditor = memo<GeneralPropertiesEditorProps>(({ fie
   return renderTypeSpecificProperties;
 });
 
-GeneralPropertiesEditor.displayName = 'GeneralPropertiesEditor';
+PropertiesEditor.displayName = 'PropertiesEditor';

@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -10,24 +9,19 @@ import {
   useSensor,
   useSensors
 } from '@dnd-kit/core';
-import type {
-  CheckboxField,
-  FieldGroupItem,
-  FormField as FormFieldType
-} from '@form-builder/types';
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import type { CheckboxField, FieldGroupItem, FormField as FormFieldType } from '@form-builder/types';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
-import { setupWorkflowDebugger, useFormBuilder } from '@form-builder/core';
-import { useEditor } from './store/useEditor';
-import { FieldOverlay, FormCanvas } from './canvas';
-import { DragPreview } from './components/DragPreview';
-import { ToolboxItemOverlay, ToolboxPanel } from './toolbox';
-import { PropertiesPanel } from './properties/PropertiesPanel';
-import { ErrorBoundary } from 'react-error-boundary';
-import { FallbackException } from './components/FallbackException';
-import { Toolbar } from './components/Toolbar';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { useFormBuilder } from '@form-builder/core';
+import { useState } from 'react';
+import { FieldOverlay, FormCanvas } from '../canvas';
+import { EditorPanel } from '../properties/EditorPanel';
+import { useEditor } from '../store/useEditor';
+import { ToolboxItemOverlay, ToolboxPanel } from '../toolbox';
+import { DragPreview } from './DragPreview';
+import { Toolbar } from './Toolbar';
 
-const definedDefaultValue = (type: string): FormFieldType => {
+const defineDefaultValue = (type: string): FormFieldType => {
   const newField = {
     id: `field-${Date.now()}`,
     name: `name_${type}`,
@@ -90,9 +84,9 @@ const definedDefaultValue = (type: string): FormFieldType => {
   }
 };
 
-export const FormEditor = () => {
+export const Editor = () => {
   const { actions, schema } = useFormBuilder();
-  const { editor } = useEditor();
+  const { editor, canvas } = useEditor();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -130,8 +124,7 @@ export const FormEditor = () => {
       if (overElement) {
         const rect = overElement.getBoundingClientRect();
         const midpoint = rect.top + rect.height / 2;
-        const shouldInsertAfter =
-          event.delta.y > 0 || event.active.rect.current.translated?.top! > midpoint;
+        const shouldInsertAfter = event.delta.y > 0 || event.active.rect.current.translated?.top! > midpoint;
         editor.setInsertionIndex(shouldInsertAfter ? overIndex + 1 : overIndex);
       }
     }
@@ -143,6 +136,7 @@ export const FormEditor = () => {
     // console.log('over', over);
 
     setActiveId(null);
+    const insertionIndex = canvas.currentInsertionIndex;
     editor.setInsertionIndex(null);
 
     if (!over) return;
@@ -150,12 +144,13 @@ export const FormEditor = () => {
 
     // Handle toolbox -> canvas drop
     if (active.data.current?.fromToolbox) {
-      const newField = definedDefaultValue(active.id as string);
+      const newField = defineDefaultValue(active.id as string);
 
       // Insert at position if over existing field
       if (over.data.current?.fromCanvas) {
-        const overIndex = schema.fields.findIndex((f) => f.id === over.id);
-        actions.insertField(overIndex, newField as FormFieldType);
+        // Use the insertion index calculated during drag move
+        const targetIndex = insertionIndex !== null ? insertionIndex : schema.fields.findIndex((f) => f.id === over.id);
+        actions.insertField(targetIndex, newField as FormFieldType);
       } else {
         // Add to end if over empty canvas
         actions.addField(newField as FormFieldType);
@@ -174,7 +169,7 @@ export const FormEditor = () => {
   };
 
   return (
-    <ErrorBoundary FallbackComponent={FallbackException} onReset={() => actions.updateFields([])}>
+    <>
       <Toolbar />
       <DndContext
         sensors={sensors}
@@ -186,7 +181,7 @@ export const FormEditor = () => {
         <div className="editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden">
           <ToolboxPanel />
           <FormCanvas />
-          <PropertiesPanel />
+          <EditorPanel />
         </div>
         {activeId && (
           <DragPreview>
@@ -199,6 +194,6 @@ export const FormEditor = () => {
           </DragPreview>
         )}
       </DndContext>
-    </ErrorBoundary>
+    </>
   );
 };

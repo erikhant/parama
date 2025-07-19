@@ -7,10 +7,7 @@ type LayoutPropertiesEditorProps = {
   onChange: (updates: Partial<FormSchema['layout']>) => void;
 };
 
-export const LayoutPropertiesEditor: React.FC<LayoutPropertiesEditorProps> = ({
-  schema,
-  onChange
-}) => {
+export const LayoutPropertiesEditor: React.FC<LayoutPropertiesEditorProps> = ({ schema, onChange }) => {
   const [colValue, setColValue] = useState<number>(schema.layout.colSize);
   const [gapValue, setGapValue] = useState<number>(schema.layout.gap);
 
@@ -25,11 +22,9 @@ export const LayoutPropertiesEditor: React.FC<LayoutPropertiesEditorProps> = ({
 
   return (
     <div className="">
-      <h3 className="font-semibold uppercase text-xs text-gray-400 border-b border-gray-200 p-4">
-        Layout settings
-      </h3>
+      <h3 className="font-semibold uppercase text-xs text-gray-400 border-b border-gray-200 p-4">Layout settings</h3>
       <div className="space-y-3 p-4">
-        <FormItem>
+        {/* <FormItem>
           <Label>Grid size</Label>
           <div className="grid grid-cols-4 gap-x-3">
             <Slider
@@ -49,7 +44,7 @@ export const LayoutPropertiesEditor: React.FC<LayoutPropertiesEditorProps> = ({
               onChange={(e) => handleColChange(Number(e.target.value))}
             />
           </div>
-        </FormItem>
+        </FormItem> */}
         <FormItem>
           <Label>Gap size</Label>
           <div className="grid grid-cols-4 gap-x-3">
@@ -71,12 +66,12 @@ export const LayoutPropertiesEditor: React.FC<LayoutPropertiesEditorProps> = ({
             />
           </div>
         </FormItem>
-        <FormItem className="flex items-center space-y-0 space-x-2">
+        {/* <FormItem className="flex items-center space-y-0 space-x-2">
           <Checkbox id="show-grid-lines" />
           <Label htmlFor="show-grid-lines" className="text-gray-700">
             Show grid lines
           </Label>
-        </FormItem>
+        </FormItem> */}
       </div>
     </div>
   );

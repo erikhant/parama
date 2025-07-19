@@ -76,7 +76,7 @@ export interface FormBuilderState {
 /**
  * Default empty form schema
  */
-const defaultSchema: FormSchema = {
+export const defaultSchema: FormSchema = {
   title: '',
   description: '',
   layout: { colSize: 12, gap: 4 },
@@ -177,6 +177,8 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
             ...state.schema,
             fields: [...state.schema.fields, field]
           },
+          // Initialize field visibility
+          visibleFields: new Set([...state.visibleFields, field.id]),
           // Initialize validation state
           validation: {
             ...state.validation,
@@ -250,11 +252,19 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         set((state) => ({
           schema: {
             ...state.schema,
-            fields: [
-              ...state.schema.fields.slice(0, index),
-              field,
-              ...state.schema.fields.slice(index)
-            ]
+            fields: [...state.schema.fields.slice(0, index), field, ...state.schema.fields.slice(index)]
+          },
+          // Add field to visible fields
+          visibleFields: new Set([...state.visibleFields, field.id]),
+          // Initialize validation state
+          validation: {
+            ...state.validation,
+            [field.id]: {
+              isValid: true,
+              isPending: false,
+              messages: [],
+              lastValidated: 0
+            }
           },
           selectedFieldId: field.id
         }));
@@ -277,15 +287,9 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
             fields: state.schema.fields.filter((f) => f.id !== id)
           },
           // Clean up related state
-          validation: Object.fromEntries(
-            Object.entries(state.validation).filter(([key]) => key !== id)
-          ),
-          visibleFields: new Set(
-            Array.from(state.visibleFields).filter((fieldId) => fieldId !== id)
-          ),
-          disabledFields: new Set(
-            Array.from(state.disabledFields).filter((fieldId) => fieldId !== id)
-          )
+          validation: Object.fromEntries(Object.entries(state.validation).filter(([key]) => key !== id)),
+          visibleFields: new Set(Array.from(state.visibleFields).filter((fieldId) => fieldId !== id)),
+          disabledFields: new Set(Array.from(state.disabledFields).filter((fieldId) => fieldId !== id))
         }));
         workflowEngine.removeField(id);
         workflowEngine.evaluateConditions();
@@ -385,9 +389,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         set((state) => ({
           schema: {
             ...state.schema,
-            fields: state.schema.fields.map((f) =>
-              f.id === fieldId ? { ...f, error: undefined } : f
-            )
+            fields: state.schema.fields.map((f) => (f.id === fieldId ? { ...f, error: undefined } : f))
           }
         }));
       },

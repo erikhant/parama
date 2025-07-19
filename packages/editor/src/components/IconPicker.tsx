@@ -2,6 +2,7 @@ import { Button, Input, Popover, PopoverContent, PopoverTrigger, cn } from '@par
 import { memo, useCallback, useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import * as LucideIcons from 'lucide-react';
+import { useEditor } from '../store/useEditor';
 
 interface IconPickerProps {
   value: string;
@@ -12,9 +13,7 @@ interface IconPickerProps {
 
 // Memoize the expensive icon filtering operation
 const getAvailableIcons = (): string[] => {
-  return Object.keys(LucideIcons).filter(
-    (key) => key.startsWith('Lucide') && !key.endsWith('Icon')
-  );
+  return Object.keys(LucideIcons).filter((key) => key.startsWith('Lucide') && !key.endsWith('Icon'));
 };
 
 // Memoized icon button component
@@ -52,6 +51,8 @@ const IconButton = memo(
 IconButton.displayName = 'IconButton';
 
 export const IconPicker = memo(({ value, onChange, iconClassName, className }: IconPickerProps) => {
+  const { editor } = useEditor();
+
   const [search, setSearch] = useState('');
   const [debouncedSearch] = useDebounce(search, 200);
 
@@ -62,9 +63,7 @@ export const IconPicker = memo(({ value, onChange, iconClassName, className }: I
   const filteredIcons = useMemo(() => {
     if (!debouncedSearch) return availableIcons;
     const searchLower = debouncedSearch.toLowerCase();
-    return availableIcons.filter((iconName: string) =>
-      iconName.toLowerCase().includes(searchLower)
-    );
+    return availableIcons.filter((iconName: string) => iconName.toLowerCase().includes(searchLower));
   }, [availableIcons, debouncedSearch]);
 
   // Memoize selected icon component
@@ -91,12 +90,11 @@ export const IconPicker = memo(({ value, onChange, iconClassName, className }: I
         <Button
           variant="outline"
           color="secondary"
+          disabled={editor.options?.propertiesSettings === 'readonly'}
           size={value ? 'lg' : 'xs'}
           className={cn('w-full', className)}>
           {value ? (
-            <>
-              {SelectedIcon && <SelectedIcon size={15} className={cn('!size-5', iconClassName)} />}
-            </>
+            <>{SelectedIcon && <SelectedIcon size={15} className={cn('!size-5', iconClassName)} />}</>
           ) : (
             <span>Pick an icon</span>
           )}
@@ -104,12 +102,7 @@ export const IconPicker = memo(({ value, onChange, iconClassName, className }: I
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
         <div className="p-2">
-          <Input
-            placeholder="Search icons..."
-            value={search}
-            onChange={handleSearchChange}
-            className="mb-2"
-          />
+          <Input placeholder="Search icons..." value={search} onChange={handleSearchChange} className="mb-2" />
           <div className="grid grid-cols-6 gap-2 max-h-[300px] overflow-y-auto">
             {filteredIcons.map((iconName: string) => (
               <IconButton

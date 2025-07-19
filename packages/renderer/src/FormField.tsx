@@ -11,6 +11,7 @@ import {
   FormItem,
   Input,
   Label,
+  MultiSelect,
   RadioGroup,
   RadioGroupItem,
   Select,
@@ -210,18 +211,26 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
 
   const isRequired = useMemo(() => {
     const requiredRules = field.validations?.filter((rule) => rule.type === 'required')[0];
-    if (requiredRules && requiredRules.expression) {
-      const expr = interpolate(requiredRules.expression, formData);
-      const isValid = new Function(`return ${expr}`)();
-      return isValid as boolean;
-    } else {
-      return false;
-    }
+    return requiredRules ? true : false;
+    // if (requiredRules && requiredRules.expression) {
+    //   const expr = interpolate(requiredRules.expression, formData);
+    //   const isValid = new Function(`return ${expr}`)();
+    //   return isValid as boolean;
+    // } else {
+    //   return false;
+    // }
   }, [field.validations]);
 
   const handleSelectChange = useCallback(
     (selectedValue: string) => {
       handleChange(selectedValue);
+    },
+    [handleChange]
+  );
+
+  const handleMultiSelectChange = useCallback(
+    (selectedValues: string[]) => {
+      handleChange(selectedValues);
     },
     [handleChange]
   );
@@ -557,6 +566,28 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
           </Select>
         );
 
+      case 'multiselect':
+        return (
+          <MultiSelect
+            name={field.name}
+            defaultValue={value}
+            disabled={isDisabled}
+            placeholder={field.placeholder || 'Select options'}
+            modalPopover={true}
+            color="primary"
+            variant="shadow"
+            options={
+              Array.isArray(field.options) && field.options.length > 0
+                ? field.options.map((attr) => ({
+                    value: attr.id as string,
+                    label: attr.value
+                  }))
+                : []
+            }
+            onValueChange={handleMultiSelectChange}
+          />
+        );
+
       case 'file':
         return (
           <FileUpload
@@ -571,37 +602,12 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
             instantUpload={field.options.instantUpload}
             onFilesChange={handleFileChange}
             onError={(error) => {
-              console.error(validationState);
               actions.setFieldError(field.id, error.message || 'File upload failed');
             }}
             className={cn(
               !validationState.isValid || field.error ? 'border-red-500 bg-red-50' : ''
             )}
           />
-          // <Dropzone
-          //   accept={field.options?.accept}
-          //   disabled={isDisabled}
-          //   maxFiles={field.options?.maxFiles}
-          //   maxSize={field.options?.maxSize}
-          //   multiple={field.multiple}>
-          //   {({ getRootProps, getInputProps, acceptedFiles }) => (
-          //     <div
-          //       {...getRootProps()}
-          //       className={`border-2 border-dashed rounded-md p-4 ${
-          //         !validationState.isValid ? 'border-red-500' : 'border-gray-300'
-          //       }`}>
-          //       <input {...getInputProps()} name={field.name} />
-          //       <p className="text-center">
-          //         {field.label ?? 'Drag & drop files here, or click to browse'}
-          //       </p>
-          //       <ul>
-          //         {acceptedFiles.map((file, index) => (
-          //           <li key={`${file.name}_${index}`}>{file.name}</li>
-          //         ))}
-          //       </ul>
-          //     </div>
-          //   )}
-          // </Dropzone>
         );
 
       case 'submit':
@@ -631,6 +637,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     handleDateRangeChange,
     handleRadioChange,
     handleSelectChange,
+    handleMultiSelectChange,
     createCheckboxHandler
   ]);
 

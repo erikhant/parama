@@ -1,6 +1,5 @@
-import type { FieldTypeDef } from '../toolbox';
 import { create } from 'zustand';
-import { FormField } from '@form-builder/types';
+import { FieldTypeDef, FormEditorOptions, FormEditorProps, FormField } from '@form-builder/types';
 import {
   ArrowDown10,
   CalendarDays,
@@ -58,6 +57,13 @@ const fieldTypes: FieldTypeDef[] = [
     description: 'Choose one option from a list.'
   },
   {
+    id: 'multiselect',
+    label: 'Multi-select',
+    icon: ChevronDown as LucideIcon,
+    group: 'selection',
+    description: 'Choose multiple options from a list.'
+  },
+  {
     id: 'checkbox',
     label: 'Checkbox',
     icon: CheckCheck as LucideIcon,
@@ -81,23 +87,50 @@ const fieldTypes: FieldTypeDef[] = [
 ];
 
 interface FormEditorState {
+  initialize: (props: Omit<FormEditorProps, 'schema'>) => void;
   editor: {
     setInsertionIndex: (index: number | null) => void;
     setLocalField: (field: FormField | null) => void;
-  };
+  } & Omit<FormEditorProps, 'schema'>;
   canvas: {
     currentInsertionIndex: number | null;
   };
   toolbox: {
     fields: FieldTypeDef[];
+    presets: FieldTypeDef[];
   };
   properties: {
     localField: FormField | null;
   };
 }
 
+const defaultOptions: FormEditorOptions = {
+  showJsonCode: true,
+  generalSettings: 'on',
+  appearanceSettings: 'on',
+  validationSettings: 'on',
+  conditionsSettings: 'on',
+  eventsSettings: 'on'
+};
+
 export const useEditor = create<FormEditorState>((set, get) => ({
+  initialize: (props) => {
+    const { options: customOptions, ...editorProps } = props;
+    const mergedOptions = Object.assign({}, defaultOptions, customOptions);
+    set((state) => ({
+      editor: {
+        ...state.editor,
+        ...editorProps,
+        options: mergedOptions
+      },
+      toolbox: {
+        ...state.toolbox,
+        presets: typeof editorProps.loadPreset === 'function' ? editorProps.loadPreset() : []
+      }
+    }));
+  },
   editor: {
+    options: defaultOptions,
     setInsertionIndex: (index) => {
       set((state) => ({
         canvas: {
@@ -119,7 +152,8 @@ export const useEditor = create<FormEditorState>((set, get) => ({
     currentInsertionIndex: null
   },
   toolbox: {
-    fields: fieldTypes
+    fields: fieldTypes,
+    presets: []
   },
   properties: {
     localField: null

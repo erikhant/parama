@@ -8,7 +8,7 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "pnpm run clean:build && turbo run build",
+    "build": "pnpm run clean:build && pnpm build:parama-ui && pnpm build:types && pnpm build:core && pnpm build:renderer && pnpm build:editor",
     "build:types": "pnpm --filter @form-builder/types bundle",
     "build:core": "pnpm --filter @form-builder/core build",
     "build:renderer": "pnpm --filter @form-builder/renderer build",

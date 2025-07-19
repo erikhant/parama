@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { IconPicker } from '../components/IconPicker';
 import { ManageOptions } from './select/ManageOptions';
 import { SectionPanel } from './SectionPanel';
+import { useEditor } from '../store/useEditor';
 
 type AppearanceEditorProps = {
   field: FormField;
@@ -23,6 +24,8 @@ type AppearanceEditorProps = {
 };
 
 export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => {
+  const { editor } = useEditor();
+
   const renderAppearanceOptions = () => {
     switch (field.type) {
       case 'text':
@@ -43,6 +46,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                     variant="ghost"
                     color="secondary"
                     size="xs"
+                    disabled={editor.options?.appearanceSettings === 'readonly'}
                     className="text-xs text-gray-500"
                     onClick={() =>
                       onChange({
@@ -57,7 +61,11 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" color="secondary" size="xs">
+                      <Button
+                        disabled={editor.options?.appearanceSettings === 'readonly'}
+                        variant="ghost"
+                        color="secondary"
+                        size="xs">
                         <PlusIcon size={16} />
                       </Button>
                     </DropdownMenuTrigger>
@@ -106,6 +114,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                   <Input
                     type="text"
                     value={field.appearance?.prefix?.content || ''}
+                    disabled={editor.options?.appearanceSettings === 'readonly'}
                     className="!col-span-5"
                     onChange={(e) =>
                       onChange({
@@ -132,6 +141,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                     color="secondary"
                     size="xs"
                     className="text-xs text-gray-500"
+                    disabled={editor.options?.appearanceSettings === 'readonly'}
                     onClick={() =>
                       onChange({
                         appearance: {
@@ -145,7 +155,11 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" color="secondary" size="xs">
+                      <Button
+                        variant="ghost"
+                        color="secondary"
+                        disabled={editor.options?.appearanceSettings === 'readonly'}
+                        size="xs">
                         <PlusIcon size={16} />
                       </Button>
                     </DropdownMenuTrigger>
@@ -194,6 +208,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                   <Input
                     type="text"
                     value={field.appearance?.suffix?.content || ''}
+                    disabled={editor.options?.appearanceSettings === 'readonly'}
                     className="!col-span-5"
                     onChange={(e) =>
                       onChange({
@@ -207,8 +222,8 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 ))}
             </FormItem>
 
-            {/* ADD-ON START PROPERTIES */}
-            <FormItem orientation="horizontal">
+            {/* ADD-ON START PROPERTIES (EXPERIMENTAL) */}
+            {/* <FormItem orientation="horizontal">
               <div className="form-captions !col-span-4">
                 <Label>Add-on start</Label>
                 <p className="form-description">Prepend an element before input</p>
@@ -328,10 +343,10 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                   )}
                 </div>
               )}
-            </FormItem>
+            </FormItem> */}
 
-            {/* ADD-ON END PROPERTIES */}
-            <FormItem orientation="horizontal">
+            {/* ADD-ON END PROPERTIES (EXPERIMENTAL) */}
+            {/* <FormItem orientation="horizontal">
               <div className="form-captions !col-span-4">
                 <Label>Add-on end</Label>
                 <p className="form-description">Append an element after input</p>
@@ -450,7 +465,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                   )}
                 </div>
               )}
-            </FormItem>
+            </FormItem> */}
           </SectionPanel>
         );
       case 'textarea':
@@ -462,6 +477,8 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 type="number"
                 min={3}
                 value={field.rows || ''}
+                disabled={editor.options?.appearanceSettings === 'readonly'}
+                placeholder="Number of rows"
                 onChange={(e) => {
                   const rows = parseInt(e.target.value, 10);
                   if (!isNaN(rows) && rows > 0) {
@@ -477,12 +494,10 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
 
       case 'date':
         const [enableSelectionMonth, setEnableSelectionMonth] = useState(
-          field.options?.dropdownType !== undefined &&
-            field.options?.dropdownType !== 'dropdown-years'
+          field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years'
         );
         const [enableSelectionYear, setEnableSelectionYear] = useState(
-          field.options?.dropdownType !== undefined &&
-            field.options?.dropdownType !== 'dropdown-months'
+          field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-months'
         );
 
         return (
@@ -495,9 +510,9 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
               <div className="col-span-2 flex items-center justify-end">
                 <Switch
                   id="enable-selection-month"
+                  disabled={editor.options?.appearanceSettings === 'readonly'}
                   checked={
-                    field.options?.dropdownType !== undefined &&
-                    field.options?.dropdownType !== 'dropdown-years'
+                    field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years'
                   }
                   onCheckedChange={(checked) => {
                     setEnableSelectionMonth(checked);
@@ -526,9 +541,9 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
               <div className="col-span-2 flex items-center justify-end">
                 <Switch
                   id="enable-selection-year"
+                  disabled={editor.options?.appearanceSettings === 'readonly'}
                   checked={
-                    field.options?.dropdownType !== undefined &&
-                    field.options?.dropdownType !== 'dropdown-months'
+                    field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-months'
                   }
                   onCheckedChange={(checked) => {
                     setEnableSelectionYear(checked);
