@@ -1,3 +1,6 @@
+import { Condition } from '@form-builder/types';
+import { FormBuilderState } from './store';
+
 /**
  * Converts an object to a URL query string format.
  *
@@ -51,5 +54,35 @@ export function objectToQueryString(obj: Record<string, unknown>): string {
  * ```
  */
 export function interpolate(template: string, data: Record<string, unknown>): string {
-  return template.replace(/\{\{(.*?)\}\}/g, (_, key) => String(data[key.trim()] ?? ''));
+  return template.replace(/\{\{(.*?)\}\}/g, (_, key) => {
+    console.log('Interpolating with key:', key);
+    console.log('Interpolating with data:', data[key.trim()]);
+
+    const value = data[key.trim()];
+
+    // Handle undefined/null values
+    if (value === undefined || value === null) {
+      return 'null';
+    }
+
+    // For JavaScript expressions, we need to properly quote string values
+    if (typeof value === 'string') {
+      console.log('Interpolating string value:', value);
+      return JSON.stringify(value);
+    }
+
+    // For other types (numbers, booleans, etc.), convert to string
+    return String(value);
+  });
+}
+
+export function interceptExpressionTemplate(condition: Condition, state: FormBuilderState) {
+  return condition.expression?.replace(/\{\{(.*?)\}\}/g, (_, key) => {
+    // Replace field names with their IDs
+    const fieldId = state.actions.getField(key.trim())?.id;
+    if (!fieldId) {
+      return `{{${key.trim()}}}`;
+    }
+    return `{{${fieldId}}}`;
+  });
 }

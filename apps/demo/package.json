@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@form-builder/core": "workspace:*",
-    "@form-builder/renderer": "workspace:*"
+    "@form-builder/editor": "workspace:*",
+    "@form-builder/renderer": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",

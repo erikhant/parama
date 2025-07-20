@@ -8,6 +8,7 @@ import type {
   ValidatorRegistry
 } from '@form-builder/types';
 import { debounce, DebouncedFunc } from 'lodash-es';
+import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';
 import { WorkflowEngine } from './workflow/engine';
 import { evaluateValidations } from './validations/evaluate';
@@ -77,8 +78,10 @@ export interface FormBuilderState {
  * Default empty form schema
  */
 export const defaultSchema: FormSchema = {
-  title: '',
-  description: '',
+  id: uuid(),
+  version: '1.0.0',
+  title: 'Untitled Form',
+  description: 'Not provided',
   layout: { colSize: 12, gap: 4 },
   fields: []
 };
@@ -301,7 +304,12 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @returns The field or undefined if not found
        */
       getField: (id) => {
-        return get().schema.fields.find((field) => field.id === id);
+        const byId = get().schema.fields.find((field) => field.id === id);
+        if (!byId) {
+          const byName = get().schema.fields.find((field) => field.name === id);
+          return byName;
+        }
+        return byId;
       },
 
       /**
@@ -311,7 +319,10 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       getFields: () => get().schema.fields,
 
       getFieldValue: (id) => {
-        return get().formData[id] ?? get().actions.getField(id)?.defaultValue;
+        const field = get().actions.getField(id);
+        if (!field) return undefined;
+
+        return get().formData[field.id] ?? field.defaultValue;
       },
 
       /**

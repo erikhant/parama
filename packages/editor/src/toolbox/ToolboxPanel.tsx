@@ -1,16 +1,30 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@parama-ui/react';
 import { useEditor } from '../store/useEditor';
 import { ToolboxList } from './ToolboxList';
+import { PresetManager } from './PresetManager';
+import { useState } from 'react';
+import { PresetTypeDef } from '@form-builder/types';
 
 export const ToolboxPanel = () => {
   const { toolbox, editor } = useEditor();
-  // const { templates } = useFormBuilder();
-  // const templateList: FieldTypeDef[] = templates.map((template) => ({
-  //   id: template.id,
-  //   label: template.name,
-  //   description: template.description,
-  //   group: 'other'
-  // }));
+  const [filteredPresets, setFilteredPresets] = useState<PresetTypeDef[]>(toolbox.presets);
+
+  // Handle preset filtering from PresetManager
+  const handleFilteredPresets = (presets: PresetTypeDef[]) => {
+    setFilteredPresets(presets);
+  };
+
+  // Optional preset creation handler
+  const handleCreatePreset = () => {
+    console.log('Create new preset functionality would be implemented here');
+    // This could open a dialog or navigate to a preset creation interface
+  };
+
+  // Optional preset import handler
+  const handleImportPresets = () => {
+    console.log('Import presets functionality would be implemented here');
+    // This could open a file dialog to import preset files
+  };
 
   return (
     <div
@@ -30,10 +44,22 @@ export const ToolboxPanel = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="fields">
-          <ToolboxList items={toolbox.fields} />
+          <ToolboxList items={toolbox.fields} showSearch={true} searchPlaceholder="Search fields..." />
         </TabsContent>
         <TabsContent value="presets">
-          <ToolboxList items={toolbox.presets} />
+          {/* Enhanced preset management */}
+          <PresetManager
+            presets={toolbox.presets}
+            onFilteredPresets={handleFilteredPresets}
+            onCreatePreset={handleCreatePreset}
+            onImportPresets={handleImportPresets}
+            showActions={true}
+          />
+          <ToolboxList
+            items={filteredPresets}
+            showSearch={false} // Disable built-in search since PresetManager handles it
+            searchPlaceholder="Search presets..."
+          />
         </TabsContent>
       </Tabs>
     </div>

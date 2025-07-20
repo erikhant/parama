@@ -21,15 +21,13 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
+  FileUpload,
   Textarea
 } from '@parama-ui/react';
 import * as LucideIcons from 'lucide-react';
-import { interpolate } from '@form-builder/core';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import Dropzone from 'react-dropzone';
-import { FileUpload } from './FileUpload';
-import '../../parama-ui/dist/parama-ui.min.css';
 import { useDebounce } from 'use-debounce';
+import '../../parama-ui/dist/parama-ui.min.css';
 
 // Memoized components remain the same
 const MemoizedIcon = memo(({ iconName, size = 15 }: { iconName: string; size?: number }) => {
@@ -76,20 +74,18 @@ const MemoizedSelectGroupsOptions = memo(
   )
 );
 
-const MemoizedRadioItems = memo(
-  ({ items, defaultValue }: { items: FieldGroupItem[]; defaultValue?: string }) => (
-    <>
-      {items
-        .filter((item) => item.id && item.value && item.label)
-        .map((item) => (
-          <div key={item.id} className="flex items-center space-x-2">
-            <RadioGroupItem value={item.value} id={item.id as string} />
-            <Label htmlFor={item.id as string}>{item.label}</Label>
-          </div>
-        ))}
-    </>
-  )
-);
+const MemoizedRadioItems = memo(({ items, defaultValue }: { items: FieldGroupItem[]; defaultValue?: string }) => (
+  <>
+    {items
+      .filter((item) => item.id && item.value && item.label)
+      .map((item) => (
+        <div key={item.id} className="flex items-center space-x-2">
+          <RadioGroupItem value={item.value} id={item.id as string} />
+          <Label htmlFor={item.id as string}>{item.label}</Label>
+        </div>
+      ))}
+  </>
+));
 
 const MemoizedCheckboxItems = memo(
   ({
@@ -130,8 +126,7 @@ const MemoizedCheckboxItems = memo(
 );
 
 export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) => {
-  const { formData, actions, visibleFields, disabledFields, readOnlyFields, mode } =
-    useFormBuilder();
+  const { formData, actions, visibleFields, disabledFields, readOnlyFields, mode } = useFormBuilder();
   const value = formData[field.id] ?? field.defaultValue;
   const validationState = actions.getFieldValidation(field.id);
 
@@ -196,17 +191,17 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
   // Determine field state from workflow engine
   const isVisible = useMemo(
     () => (mode === 'editor' ? true : visibleFields.has(field.id)),
-    [visibleFields, field.id]
+    [visibleFields, field.id, mode]
   );
 
   const isDisabled = useMemo(
-    () => (mode === 'editor' ? true : disabledFields.has(field.id)),
-    [disabledFields, field.id]
+    () => (mode === 'editor' ? false : disabledFields.has(field.id)),
+    [disabledFields, field.id, mode]
   );
 
   const isReadOnly = useMemo(
-    () => (mode === 'editor' ? true : readOnlyFields.has(field.id)),
-    [readOnlyFields, field.id]
+    () => (mode === 'editor' ? false : readOnlyFields.has(field.id)),
+    [readOnlyFields, field.id, mode]
   );
 
   const isRequired = useMemo(() => {
@@ -244,9 +239,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
 
   const createCheckboxHandler = useCallback(
     (item: any) => (checked: boolean) => {
-      const newValue = checked
-        ? [...(value || []), item.value]
-        : (value || []).filter((v: any) => v !== item.value);
+      const newValue = checked ? [...(value || []), item.value] : (value || []).filter((v: any) => v !== item.value);
       handleChange(newValue);
     },
     [value, handleChange]
@@ -254,11 +247,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
 
   const [singleDate, setSingleDate] = useState<Date | undefined>(() => {
     if ((field as DateField).mode === 'single' && value) {
-      return value instanceof Date
-        ? value
-        : typeof value === 'string'
-          ? new Date(value)
-          : undefined;
+      return value instanceof Date ? value : typeof value === 'string' ? new Date(value) : undefined;
     }
     return undefined;
   });
@@ -293,11 +282,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
             ? value.from
             : new Date(value.from)
           : undefined,
-        to: isValidDateValue(value.to)
-          ? value.to instanceof Date
-            ? value.to
-            : new Date(value.to)
-          : undefined
+        to: isValidDateValue(value.to) ? (value.to instanceof Date ? value.to : new Date(value.to)) : undefined
       };
     }
     return undefined;
@@ -375,15 +360,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
       required: isRequired,
       className: !validationState.isValid || field.error ? 'border-red-500' : ''
     }),
-    [
-      field.id,
-      field.name,
-      field.placeholder,
-      field.error,
-      isDisabled,
-      isRequired,
-      validationState.isValid
-    ]
+    [field.id, field.name, field.placeholder, field.error, isDisabled, isRequired, validationState.isValid]
   );
 
   // Memoized appearance props (same as before)
@@ -433,10 +410,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
         const inputElement = (
           <Input
             {...commonInputProps}
-            className={cn(
-              commonInputProps.className,
-              field.type === 'hidden' && mode === 'editor' ? 'bg-void' : ''
-            )}
+            className={cn(commonInputProps.className, field.type === 'hidden' && mode === 'editor' ? 'bg-void' : '')}
             type={field.type === 'hidden' && mode === 'editor' ? 'text' : field.type}
             value={textValue}
             readOnly={isReadOnly}
@@ -444,11 +418,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
           />
         );
 
-        return field.appearance ? (
-          <FormGroup {...appearanceProps}>{inputElement}</FormGroup>
-        ) : (
-          inputElement
-        );
+        return field.appearance ? <FormGroup {...appearanceProps}>{inputElement}</FormGroup> : inputElement;
       case 'textarea':
         return (
           <Textarea
@@ -467,12 +437,8 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
           placeholder: field.placeholder,
           dateFormat: field.options?.dateFormat,
           disabled: disabledDates,
-          startMonth: field.options?.restrictedMonths?.[0]
-            ? new Date(field.options.restrictedMonths[0])
-            : undefined,
-          endMonth: field.options?.restrictedMonths?.[1]
-            ? new Date(field.options.restrictedMonths[1])
-            : undefined,
+          startMonth: field.options?.restrictedMonths?.[0] ? new Date(field.options.restrictedMonths[0]) : undefined,
+          endMonth: field.options?.restrictedMonths?.[1] ? new Date(field.options.restrictedMonths[1]) : undefined,
           captionLayout: field.options?.dropdownType as DatePickerProps['captionLayout'],
           container: document.getElementById(`item__${field.id}`),
           className: !validationState.isValid ? 'border-red-500' : 'border-gray-300',
@@ -550,10 +516,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
             required={isRequired}
             onValueChange={handleSelectChange}>
             <SelectTrigger className="w-full">
-              <SelectValue
-                className="text-slate-400"
-                placeholder={field.placeholder || 'Select an option'}
-              />
+              <SelectValue className="text-slate-400" placeholder={field.placeholder || 'Select an option'} />
             </SelectTrigger>
             <SelectContent>
               {Array.isArray(field.options) && field.options.length > 0 && (
@@ -579,8 +542,8 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
             options={
               Array.isArray(field.options) && field.options.length > 0
                 ? field.options.map((attr) => ({
-                    value: attr.id as string,
-                    label: attr.value
+                    value: attr.value,
+                    label: attr.label
                   }))
                 : []
             }
@@ -602,11 +565,9 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
             instantUpload={field.options.instantUpload}
             onFilesChange={handleFileChange}
             onError={(error) => {
-              actions.setFieldError(field.id, error.message || 'File upload failed');
+              actions.setFieldError(field.id, (error as Error).message || 'File upload failed');
             }}
-            className={cn(
-              !validationState.isValid || field.error ? 'border-red-500 bg-red-50' : ''
-            )}
+            className={cn(!validationState.isValid || field.error ? 'border-red-500 bg-red-50' : '')}
           />
         );
 
@@ -647,26 +608,16 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     <FormItem
       id={`item__${field.id}`}
       className={`column-span-${field.width}`}
-      orientation={
-        field.type === 'checkbox' || field.type === 'radio'
-          ? field.appearance?.position
-          : 'vertical'
-      }>
+      orientation={field.type === 'checkbox' || field.type === 'radio' ? field.appearance?.position : 'vertical'}>
       {field.type !== 'submit' && <Label>{field.label}</Label>}
-      {field.type === 'file' && field.helpText && (
-        <p className="form-description">{field.helpText}</p>
-      )}
+      {field.type === 'file' && field.helpText && <p className="form-description">{field.helpText}</p>}
       {field.type === 'file' && (!validationState.isValid || field.error) && (
         <p className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</p>
       )}
       {renderInput}
-      {field.type !== 'submit' &&
-        field.type !== 'file' &&
-        (!validationState.isValid || field.error) && (
-          <span className="text-red-500 text-sm mt-1">
-            {validationState.messages[0] || field.error}
-          </span>
-        )}
+      {field.type !== 'submit' && field.type !== 'file' && (!validationState.isValid || field.error) && (
+        <span className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</span>
+      )}
       {field.type !== 'submit' && field.type !== 'file' && field.helpText && (
         <span className="form-description">{field.helpText}</span>
       )}

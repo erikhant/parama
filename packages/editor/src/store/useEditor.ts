@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { FieldTypeDef, FormEditorOptions, FormEditorProps, FormField } from '@form-builder/types';
+import { FieldTypeDef, FormEditorOptions, FormEditorProps, FormField, PresetTypeDef } from '@form-builder/types';
 import {
   ArrowDown10,
   CalendarDays,
@@ -12,76 +12,87 @@ import {
   WholeWord
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { v4 as uuid } from 'uuid';
 
 const fieldTypes: FieldTypeDef[] = [
   {
-    id: 'text',
+    id: uuid(),
+    type: 'text',
     label: 'Text input',
     icon: TextCursorInput as LucideIcon,
-    group: 'input',
+    group: 'fields',
     description: 'A single-line text input field for short text entries.'
   },
   {
-    id: 'number',
+    id: uuid(),
+    type: 'number',
     label: 'Number',
     icon: ArrowDown10 as LucideIcon,
-    group: 'input',
+    group: 'fields',
     description: 'A numeric input field for entering numbers.'
   },
   {
-    id: 'textarea',
+    id: uuid(),
+    type: 'textarea',
     label: 'Text area',
     icon: WholeWord as LucideIcon,
-    group: 'input',
+    group: 'fields',
     description: 'A multi-line text input field for longer text entries.'
   },
   {
-    id: 'password',
+    id: uuid(),
+    type: 'password',
     label: 'Password input',
     icon: RectangleEllipsis as LucideIcon,
-    group: 'input',
+    group: 'fields',
     description: 'Input field for entering sensitive information.'
   },
   {
-    id: 'date',
+    id: uuid(),
+    type: 'date',
     label: 'Date',
     icon: CalendarDays as LucideIcon,
-    group: 'input',
+    group: 'fields',
     description: 'Date picker input field for selecting dates.'
   },
   {
-    id: 'select',
+    id: uuid(),
+    type: 'select',
     label: 'Select',
     icon: ChevronDown as LucideIcon,
-    group: 'selection',
+    group: 'fields',
     description: 'Choose one option from a list.'
   },
   {
-    id: 'multiselect',
+    id: uuid(),
+    type: 'multiselect',
     label: 'Multi-select',
     icon: ChevronDown as LucideIcon,
-    group: 'selection',
+    group: 'fields',
     description: 'Choose multiple options from a list.'
   },
   {
-    id: 'checkbox',
+    id: uuid(),
+    type: 'checkbox',
     label: 'Checkbox',
     icon: CheckCheck as LucideIcon,
-    group: 'selection',
+    group: 'fields',
     description: 'Select items from multiple options.'
   },
   {
-    id: 'radio',
+    id: uuid(),
+    type: 'radio',
     label: 'Radio',
     icon: CircleDot as LucideIcon,
-    group: 'selection',
+    group: 'fields',
     description: 'Select one option from a set.'
   },
   {
-    id: 'file',
+    id: uuid(),
+    type: 'file',
     label: 'File upload',
     icon: Upload as LucideIcon,
-    group: 'input',
+    group: 'fields',
     description: 'Upload file for selecting files.'
   }
 ];
@@ -97,7 +108,7 @@ interface FormEditorState {
   };
   toolbox: {
     fields: FieldTypeDef[];
-    presets: FieldTypeDef[];
+    presets: PresetTypeDef[];
   };
   properties: {
     localField: FormField | null;

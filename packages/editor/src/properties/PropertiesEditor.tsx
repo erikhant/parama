@@ -1,4 +1,13 @@
-import { CheckboxField, DateField, FieldGroupItem, FormField, RadioField, SelectField } from '@form-builder/types';
+import { useFormBuilder } from '@form-builder/core';
+import {
+  CheckboxField,
+  DateField,
+  FieldGroupItem,
+  FormField,
+  MultiSelectField,
+  RadioField,
+  SelectField
+} from '@form-builder/types';
 import {
   Accordion,
   AccordionContent,
@@ -26,14 +35,13 @@ import {
 } from '@parama-ui/react';
 import { Calendar1Icon, CalendarDaysIcon, CalendarRangeIcon, PencilLineIcon, Plus, XIcon } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
+import { useEditor } from '../store/useEditor';
+import { DefaultValue } from './common/DefaultValue';
 import { NameField } from './common/NameField';
+import { SectionPanel } from './SectionPanel';
 import { ExternalDataOptions } from './select/ExternalDataOptions';
 import { OptionGroup } from './select/OptionGroup';
 import { OptionItem } from './select/OptionItem';
-import { DefaultValue } from './common/DefaultValue';
-import { useFormBuilder } from '@form-builder/core';
-import { SectionPanel } from './SectionPanel';
-import { useEditor } from '../store/useEditor';
 
 type PropertiesEditorProps = {
   field: FormField;
@@ -105,8 +113,19 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
 
   const handleOptionDelete = useCallback(
     (index: number) => {
-      const newOptions = (field as SelectField).options?.filter((_, i) => i !== index) || [];
-      onChange({ options: newOptions });
+      const newOptions = (field as SelectField | MultiSelectField).options?.filter((_, i) => i !== index) || [];
+
+      if ((field as SelectField).defaultValue === (field as SelectField).options?.[index].value) {
+        onChange({ defaultValue: undefined, options: newOptions });
+        updateFieldValue(field.id, undefined);
+      } else if (
+        (field as MultiSelectField).defaultValue?.includes((field as MultiSelectField).options?.[index].value)
+      ) {
+        const newDefaultValue = (field as MultiSelectField).defaultValue?.filter(
+          (value: string) => value !== (field as MultiSelectField).options?.[index].value
+        );
+        onChange({ defaultValue: newDefaultValue.length > 0 ? newDefaultValue : undefined, options: newOptions });
+      }
     },
     [(field as SelectField).options, onChange]
   );
@@ -182,19 +201,22 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
       const newItems = (field as CheckboxField | RadioField).items?.filter((_, i) => i !== index) || [];
       const deletedItem = (field as CheckboxField | RadioField).items?.[index];
 
-      if (field.defaultValue?.includes(deletedItem.value)) {
+      // Always update the items array
+      let updates: Partial<CheckboxField | RadioField> = { items: newItems };
+
+      // If the deleted item was in the default value, also update the default value
+      if (deletedItem && field.defaultValue?.includes(deletedItem.value)) {
         if (field.type === 'radio') {
-          onChange({ defaultValue: undefined, items: newItems });
+          updates.defaultValue = undefined;
           updateFieldValue(field.id, undefined);
         } else if (field.type === 'checkbox') {
           const newValue = field.defaultValue?.filter((v: string) => v !== deletedItem.value);
-          onChange({
-            defaultValue: newValue.length > 0 ? newValue : undefined,
-            items: newItems
-          });
+          updates.defaultValue = newValue.length > 0 ? newValue : undefined;
           updateFieldValue(field.id, newValue.length > 0 ? newValue : undefined);
         }
       }
+
+      onChange(updates);
     },
     [(field as CheckboxField | RadioField).items, field.defaultValue, onChange]
   );
@@ -432,6 +454,128 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
             )}
           </SectionPanel>
         );
+      case 'multiselect':
+        return (
+          <SectionPanel title="Properties">
+            <FormItem>
+              <Label>Placeholder</Label>
+              <Input
+                type="text"
+                value={field.placeholder || ''}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
+                onChange={handlePlaceholderChange}
+              />
+            </FormItem>
+            <NameField value={field.name || ''} onChange={handleNameChange} hasValidation />
+            <div className="flex justify-between items-center">
+              <Label>Options</Label>
+              {editor.options?.propertiesSettings !== 'readonly' ? (
+                hasNoOptionsConfigured ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="xs" color="secondary" variant="ghost">
+                        <Plus size={15} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-32" align="end">
+                      <DropdownMenuItem onSelect={handleAddOption}>List</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <ExternalDataOptions
+                          external={field.external}
+                          onChange={(value) => onChange({ external: value })}>
+                          <button className="dropdown-item w-full hover:bg-slate-100">API source</button>
+                        </ExternalDataOptions>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button
+                    className="text-xs text-gray-500"
+                    variant="ghost"
+                    size="xs"
+                    color="secondary"
+                    onClick={handleRemoveAllOptions}>
+                    Remove all
+                  </Button>
+                )
+              ) : null}
+            </div>
+
+            {/* OPTION LIST */}
+            {(field.options?.length || 0) > 0 && (
+              <>
+                <Accordion
+                  type="multiple"
+                  defaultValue={field.options?.map((option) => String(option.id))}
+                  className="w-auto !-mt-0">
+                  {field.options?.map((option, index) => (
+                    <AccordionItem key={String(option.id)} value={String(option.id)}>
+                      <AccordionTrigger className="text-gray-700 text-sm">
+                        {option.label || 'Option name'}
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-1">
+                        <OptionItem
+                          key={option.id}
+                          option={option}
+                          index={index}
+                          onUpdate={handleOptionUpdate}
+                          onDelete={handleOptionDelete}
+                        />
+                        {editor.options?.propertiesSettings !== 'readonly' && (
+                          <div className="flex items-center ml-4 gap-2 mt-2">
+                            <Label htmlFor={option.id as string} className="text-xs text-gray-600">
+                              Set as default
+                            </Label>
+                            <Switch
+                              id={option.id as string}
+                              disabled={option.value === '' || option.label === ''}
+                              checked={field.defaultValue?.includes(option.value) || false}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  const newValue = [...(field.defaultValue || []), option.value];
+                                  onChange({ defaultValue: newValue });
+                                } else {
+                                  const newValue = field.defaultValue?.filter((v: string) => v !== option.value);
+                                  onChange({
+                                    defaultValue: newValue.length > 0 ? newValue : undefined
+                                  });
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+                {editor.options?.propertiesSettings !== 'readonly' && (
+                  <Button onClick={handleAddOption} size="xs" color="secondary" variant="ghost">
+                    <Plus size={15} /> Add option
+                  </Button>
+                )}
+              </>
+            )}
+            {/* EXTERNAL DATA OPTIONS */}
+            {field.external?.url && (
+              <div>
+                <Label className="text-xs text-gray-600">API Source</Label>
+                <div className="flex items-center space-x-2">
+                  <Badge size="sm">
+                    <p className="max-w-52 truncate">{field.external.url}</p>
+                  </Badge>
+                  {editor.options?.propertiesSettings !== 'readonly' && (
+                    <ExternalDataOptions external={field.external} onChange={(value) => onChange({ external: value })}>
+                      <Button variant="ghost" size="xs" color="secondary" className="text-gray-600">
+                        <span className="sr-only">Edit API source</span>
+                        <PencilLineIcon size={15} />
+                      </Button>
+                    </ExternalDataOptions>
+                  )}
+                </div>
+              </div>
+            )}
+          </SectionPanel>
+        );
       case 'checkbox':
       case 'radio':
         return (
@@ -511,12 +655,12 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                   </AccordionContent>
                 </AccordionItem>
               ))}
-              {editor.options?.propertiesSettings !== 'readonly' && field.items?.length > 0 && (
-                <Button onClick={handleAddItem} size="xs" color="secondary" variant="ghost" className="mt-2.5">
-                  <Plus size={15} /> Add item
-                </Button>
-              )}
             </Accordion>
+            {editor.options?.propertiesSettings !== 'readonly' && (field.items?.length || 0) > 0 && (
+              <Button onClick={handleAddItem} size="xs" color="secondary" variant="ghost" className="mt-2">
+                <Plus size={15} /> Add item
+              </Button>
+            )}
           </SectionPanel>
         );
       case 'date':
@@ -807,7 +951,6 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
             </FormItem>
           </SectionPanel>
         );
-
       case 'file':
         return (
           <SectionPanel title="Properties">
@@ -818,7 +961,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                 type="text"
                 disabled={editor.options?.propertiesSettings === 'readonly'}
                 value={field.options?.server || ''}
-                placeholder="https://api.example.com/data"
+                placeholder="https://api.example.com/upload"
                 onChange={(e) =>
                   onChange({
                     options: {
@@ -828,23 +971,9 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                   })
                 }
               />
+              <p className="form-description">Where files will be uploaded</p>
             </FormItem>
-            <FormItem orientation="horizontal">
-              <div className="col-span-4 space-y-1">
-                <Label htmlFor="multiple-files">Multiple files</Label>
-                <p className="form-description">Upload multiple files at once</p>
-              </div>
-              <div className="flex items-center justify-end">
-                <Switch
-                  id="multiple-files"
-                  disabled={editor.options?.propertiesSettings === 'readonly'}
-                  checked={field.options.multiple || false}
-                  onCheckedChange={(checked) => {
-                    onChange({ options: { ...field.options, multiple: checked } });
-                  }}
-                />
-              </div>
-            </FormItem>
+
             <FormItem orientation="horizontal">
               <div className="col-span-4 space-y-1">
                 <Label htmlFor="instant-upload">Instant upload</Label>

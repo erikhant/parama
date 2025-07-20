@@ -16,6 +16,7 @@
 @import '../components/styles/radio.css';
 @import '../components/styles/select.css';
 @import '../components/styles/multiselect.css';
+@import '../components/styles/file-upload.css';
 @import '../components/styles/sheet.css';
 @import '../components/styles/slider.css';
 @import '../components/styles/switch.css';

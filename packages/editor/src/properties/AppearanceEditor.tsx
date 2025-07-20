@@ -491,7 +491,6 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
             </FormItem>
           </SectionPanel>
         );
-
       case 'date':
         const [enableSelectionMonth, setEnableSelectionMonth] = useState(
           field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years'

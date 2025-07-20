@@ -36,12 +36,8 @@ import {
   MultiSelect
 } from './index';
 import { Eye, EyeClosed, Mail, User } from 'lucide-react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
-} from './components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './components/ui/accordion';
+import { FileUpload } from './components/ui/file-upload';
 
 function App() {
   const [type, setType] = useState<'text' | 'password'>('password');
@@ -276,21 +272,31 @@ function App() {
             <Input type={type} id="password" placeholder="Enter your password" />
           </FormGroup>
         </FormItem>
+        <FormItem>
+          <Label htmlFor="description">Description</Label>
+          <FileUpload
+            name="files"
+            multiple={true}
+            accept={{
+              'image/*': ['.jpeg', '.png', '.jpg'],
+              'application/pdf': ['.pdf']
+            }}
+            className="mt-2"
+            onFilesChange={(files) => console.log(files)}
+          />
+        </FormItem>
       </div>
       <div className="border p-4 rounded-md space-y-5">
         <h5 className="font-semibold text-lg text-gray-700">Calendar</h5>
         <p className="text-sm text-gray-600 leading-relaxed">
-          The calendar component allows you to select a date. It supports different date selection
-          modes such as single, multiple, and range and customizable and can be styled using the
-          `className` prop. <br />
-          The selected date is controlled by the `selected` prop and can be updated using the
-          `onSelect` prop. <br />
+          The calendar component allows you to select a date. It supports different date selection modes such as single,
+          multiple, and range and customizable and can be styled using the `className` prop. <br />
+          The selected date is controlled by the `selected` prop and can be updated using the `onSelect` prop. <br />
           The `autoFocus` prop will focus the calendar when it is mounted. <br />
-          The `mode` prop can be set to "single" for single date selection or "range" for selecting
-          a range of dates. <br />
-          The `selected` prop should be a Date object or null if no date is selected. <br />
-          The `onSelect` prop should be a function that receives the selected date as an argument.{' '}
+          The `mode` prop can be set to "single" for single date selection or "range" for selecting a range of dates.{' '}
           <br />
+          The `selected` prop should be a Date object or null if no date is selected. <br />
+          The `onSelect` prop should be a function that receives the selected date as an argument. <br />
           The `autoFocus` prop will focus the calendar when it is mounted.
         </p>
         <Calendar mode="single" selected={date} onSelect={setDate} />
@@ -353,24 +359,21 @@ function App() {
       <div className="border p-4 rounded-md space-y-5">
         <h5 className="font-semibold text-lg text-gray-700">Sheet</h5>
         <p className="text-sm text-gray-600 leading-relaxed">
-          The sheet component is a modal that can be used to display content or forms. It can be
-          triggered by a button and can contain a header, description, and footer. The content of
-          the sheet can be customized using the `children` prop. The `side` prop can be used to
-          specify which side of the screen the sheet should appear on (e.g., 'left', 'right', 'top',
-          'bottom').
+          The sheet component is a modal that can be used to display content or forms. It can be triggered by a button
+          and can contain a header, description, and footer. The content of the sheet can be customized using the
+          `children` prop. The `side` prop can be used to specify which side of the screen the sheet should appear on
+          (e.g., 'left', 'right', 'top', 'bottom').
           <br />
-          The `SheetTrigger` component is used to open the sheet, and the `SheetClose` component is
-          used to close it.
+          The `SheetTrigger` component is used to open the sheet, and the `SheetClose` component is used to close it.
           <br />
-          The `SheetContent` component contains the main content of the sheet, while the
-          `SheetHeader`, `SheetTitle`, and `SheetDescription` components are used to display the
-          header and description of the sheet.
+          The `SheetContent` component contains the main content of the sheet, while the `SheetHeader`, `SheetTitle`,
+          and `SheetDescription` components are used to display the header and description of the sheet.
           <br />
-          The `SheetFooter` component is used to display the footer of the sheet, which can contain
-          buttons or other actions.
+          The `SheetFooter` component is used to display the footer of the sheet, which can contain buttons or other
+          actions.
           <br />
-          The `SheetPortal` component is used to render the sheet in a portal, allowing it to be
-          displayed above other content on the page.
+          The `SheetPortal` component is used to render the sheet in a portal, allowing it to be displayed above other
+          content on the page.
         </p>
         <Sheet>
           <SheetTrigger asChild>
@@ -379,9 +382,7 @@ function App() {
           <SheetContent>
             <SheetHeader>
               <SheetTitle>Edit profile</SheetTitle>
-              <SheetDescription>
-                Make changes to your profile here. Click save when you're done.
-              </SheetDescription>
+              <SheetDescription>Make changes to your profile here. Click save when you're done.</SheetDescription>
             </SheetHeader>
             <div className="grid gap-4 py-4">
               <FormItem>
@@ -400,13 +401,7 @@ function App() {
                 <Label htmlFor="birthdate" className="text-right">
                   Birthdate
                 </Label>
-                <DatePicker
-                  selected={dateRange}
-                  mode="range"
-                  min={3}
-                  max={5}
-                  onSelect={setDateRange}
-                />
+                <DatePicker selected={dateRange} mode="range" min={3} max={5} onSelect={setDateRange} />
               </FormItem>
             </div>
             <SheetFooter>

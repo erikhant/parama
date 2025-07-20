@@ -1,6 +1,8 @@
 import { ValidationRule, ValidatorRegistry } from './validation';
 
 export interface FormSchema {
+  id: string;
+  version: string;
   title: string;
   description?: string;
   layout: {
@@ -8,6 +10,9 @@ export interface FormSchema {
     gap: number;
   };
   fields: FormField[];
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
 }
 
 export type FormField =
@@ -42,7 +47,7 @@ export type FieldSettings = 'on' | 'off' | 'readonly';
 
 export interface FormEditorProps {
   onSaveSchema?: (data: FormSchema) => void;
-  loadPreset?: () => FieldTypeDef[];
+  loadPreset?: () => PresetTypeDef[];
   schema?: FormSchema;
   options?: FormEditorOptions;
 }
@@ -75,8 +80,7 @@ export interface Condition {
 }
 
 export interface FieldConditions {
-  render?: Condition;
-  visibility?: Condition;
+  hidden?: Condition;
   disabled?: Condition;
   readOnly?: Condition;
 }
@@ -121,7 +125,7 @@ export interface BaseField {
   defaultValue?: any;
   value: any;
   helpText?: string;
-  readOnly: boolean;
+  readOnly?: boolean;
   placeholder?: string;
   width: number;
   appearance?: Record<string, any>;
@@ -240,8 +244,9 @@ export interface SubmitForm extends BaseField {
 
 export interface FieldTypeDef {
   id: string;
+  type: string;
   label: string;
-  group: 'input' | 'selection' | 'presentation' | 'other';
+  group: 'fields' | 'presets';
   description?: string;
   image?: string;
   icon?: object | string; // Can be a React component or a string (e.g., emoji)
@@ -252,4 +257,8 @@ export interface FieldTypes {
   selections: FieldTypeDef[];
   presentations: FieldTypeDef[];
   [x: string]: FieldTypeDef[];
+}
+
+export interface PresetTypeDef extends FieldTypeDef {
+  fields: FormField[];
 }

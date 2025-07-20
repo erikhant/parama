@@ -2,12 +2,12 @@ import { Checkbox, FormItem, Input, Label, Slider } from '@parama-ui/react';
 import { FormSchema } from '@form-builder/types';
 import { useState } from 'react';
 
-type LayoutPropertiesEditorProps = {
+type LayoutEditorProps = {
   schema: FormSchema;
   onChange: (updates: Partial<FormSchema['layout']>) => void;
 };
 
-export const LayoutPropertiesEditor: React.FC<LayoutPropertiesEditorProps> = ({ schema, onChange }) => {
+export const LayoutEditor: React.FC<LayoutEditorProps> = ({ schema, onChange }) => {
   const [colValue, setColValue] = useState<number>(schema.layout.colSize);
   const [gapValue, setGapValue] = useState<number>(schema.layout.gap);
 

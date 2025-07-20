@@ -9,12 +9,9 @@ type ToolboxItemOverlayProps = {
 
 export const ToolboxItemOverlay: React.FC<ToolboxItemOverlayProps> = ({ id }) => {
   const { toolbox } = useEditor();
-  const inputs = toolbox.fields.find((f) => f.id === id);
 
-  let field: any = null;
-  if (inputs) {
-    field = inputs;
-  }
+  // Check both fields and presets
+  const field = toolbox.fields.find((f) => f.id === id) || toolbox.presets.find((p) => p.id === id);
 
   return (
     field && (

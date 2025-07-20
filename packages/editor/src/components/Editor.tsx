@@ -9,11 +9,11 @@ import {
   useSensor,
   useSensors
 } from '@dnd-kit/core';
-import type { CheckboxField, FieldGroupItem, FormField as FormFieldType } from '@form-builder/types';
+import type { CheckboxField, FieldGroupItem, FormField as FormFieldType, PresetTypeDef } from '@form-builder/types';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { useFormBuilder } from '@form-builder/core';
-import { useState } from 'react';
+import { setupWorkflowDebugger, useFormBuilder } from '@form-builder/core';
+import { useEffect, useState } from 'react';
 import { FieldOverlay, FormCanvas } from '../canvas';
 import { EditorPanel } from '../properties/EditorPanel';
 import { useEditor } from '../store/useEditor';
@@ -70,7 +70,7 @@ const defineDefaultValue = (type: string): FormFieldType => {
           maxFiles: 5,
           maxSize: 5 * 1024 * 1024, // 5MB
           accept: {
-            'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
+            'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp', '.svg', '.bmp', '.tiff', '.tif'],
             'application/pdf': ['.pdf'],
             'text/plain': ['.txt']
           },
@@ -79,6 +79,8 @@ const defineDefaultValue = (type: string): FormFieldType => {
           server: ''
         }
       } as unknown as FormFieldType;
+    case 'preset':
+    // TODO: Handle preset type
     default:
       return newField as FormFieldType;
   }
@@ -86,7 +88,7 @@ const defineDefaultValue = (type: string): FormFieldType => {
 
 export const Editor = () => {
   const { actions, schema } = useFormBuilder();
-  const { editor, canvas } = useEditor();
+  const { editor, canvas, toolbox } = useEditor();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -144,19 +146,51 @@ export const Editor = () => {
 
     // Handle toolbox -> canvas drop
     if (active.data.current?.fromToolbox) {
-      const newField = defineDefaultValue(active.id as string);
+      // Handle preset drop - expand all fields from preset
+      if (active.data.current.type === 'preset') {
+        const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
+        if (preset && preset.fields) {
+          const fieldsToAdd = preset.fields.map((field: FormFieldType) => ({
+            ...field,
+            id: `field-${Date.now()}-${Math.random()}`
+          })) as FormFieldType[];
 
-      // Insert at position if over existing field
-      if (over.data.current?.fromCanvas) {
-        // Use the insertion index calculated during drag move
-        const targetIndex = insertionIndex !== null ? insertionIndex : schema.fields.findIndex((f) => f.id === over.id);
-        actions.insertField(targetIndex, newField as FormFieldType);
+          // Insert all preset fields
+          if (over.data.current?.fromCanvas) {
+            const targetIndex =
+              insertionIndex !== null ? insertionIndex : schema.fields.findIndex((f) => f.id === over.id);
+            fieldsToAdd.forEach((field, index) => {
+              actions.insertField(targetIndex + index, field);
+            });
+          } else {
+            // Add all fields to end if over empty canvas
+            fieldsToAdd.forEach((field) => {
+              actions.addField(field);
+            });
+          }
+
+          // Select the first field from the preset
+          if (fieldsToAdd.length > 0) {
+            actions.selectField(fieldsToAdd[0].id);
+          }
+        }
       } else {
-        // Add to end if over empty canvas
-        actions.addField(newField as FormFieldType);
-      }
+        // Handle regular field drop
+        const newField = defineDefaultValue(active.data.current.type as string);
 
-      actions.selectField(newField.id as string);
+        // Insert at position if over existing field
+        if (over.data.current?.fromCanvas) {
+          // Use the insertion index calculated during drag move
+          const targetIndex =
+            insertionIndex !== null ? insertionIndex : schema.fields.findIndex((f) => f.id === over.id);
+          actions.insertField(targetIndex, newField as FormFieldType);
+        } else {
+          // Add to end if over empty canvas
+          actions.addField(newField as FormFieldType);
+        }
+
+        actions.selectField(newField.id as string);
+      }
     }
     // Handle reordering existing fields
     else if (active.data.current?.fromCanvas && over.data.current?.fromCanvas) {

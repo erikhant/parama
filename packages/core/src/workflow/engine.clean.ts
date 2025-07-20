@@ -1,3 +1,4 @@
+// Clean version without debug logs for production
 import type {
   Condition,
   Events,
@@ -8,7 +9,7 @@ import type {
 } from '@form-builder/types';
 import _, { debounce } from 'lodash';
 import { FormBuilderState } from '../store';
-import { interceptExpressionTemplate, interpolate, objectToQueryString } from '../utils';
+import { interpolate, objectToQueryString } from '../utils';
 import { DependencyGraph } from './graph';
 
 interface WorkflowEngineOptions {
@@ -41,28 +42,21 @@ export class WorkflowEngine {
     // Clear existing dependencies first
     this.graph.removeField(field.id);
 
-    console.log(`Registering dependencies for field ${field.id} (${field.name})`);
-
     // Register condition dependencies
     if (field.conditions) {
       const conditionDeps = this.extractConditionDependencies(field.conditions);
-      console.log(`Found condition dependencies for ${field.id}:`, conditionDeps);
 
       conditionDeps.forEach((fieldName) => {
         // Find field by name and get its ID
         const state = this.getState();
         const dependencyField = state.actions.getField(fieldName);
         if (dependencyField) {
-          console.log(`Adding dependency: ${dependencyField.id} -> ${field.id} (by name: ${fieldName})`);
           this.graph.addDependency(dependencyField.id, field.id);
         } else {
           // Also try to find by ID in case the expression uses ID instead of name
           const fieldById = state.schema.fields.find((f) => f.id === fieldName);
           if (fieldById) {
-            console.log(`Adding dependency: ${fieldById.id} -> ${field.id} (by ID: ${fieldName})`);
             this.graph.addDependency(fieldById.id, field.id);
-          } else {
-            console.warn(`Could not find dependency field "${fieldName}" for field ${field.id}`);
           }
         }
       });
@@ -71,23 +65,18 @@ export class WorkflowEngine {
     // Register validation dependencies
     if (field.validations) {
       const validationDeps = this.extractValidationDependencies(field.validations);
-      console.log(`Found validation dependencies for ${field.id}:`, validationDeps);
 
       validationDeps.forEach((fieldName) => {
         // Find field by name and get its ID
         const state = this.getState();
         const dependencyField = state.actions.getField(fieldName);
         if (dependencyField) {
-          console.log(`Adding validation dependency: ${dependencyField.id} -> ${field.id} (by name: ${fieldName})`);
           this.graph.addDependency(dependencyField.id, field.id);
         } else {
           // Also try to find by ID in case the expression uses ID instead of name
           const fieldById = state.schema.fields.find((f) => f.id === fieldName);
           if (fieldById) {
-            console.log(`Adding validation dependency: ${fieldById.id} -> ${field.id} (by ID: ${fieldName})`);
             this.graph.addDependency(fieldById.id, field.id);
-          } else {
-            console.warn(`Could not find validation dependency field "${fieldName}" for field ${field.id}`);
           }
         }
       });
@@ -106,12 +95,10 @@ export class WorkflowEngine {
 
     // 2. Evaluate conditions FIRST
     const dependents = this.graph.getDependents(fieldId);
-    console.log(`Processing field change for ${fieldId}, found dependents:`, dependents);
 
     dependents.forEach((depId) => {
       const depField = state.actions.getField(depId);
       if (depField?.conditions) {
-        console.log(`Evaluating conditions for dependent field ${depId}:`, depField.conditions);
         this.evaluateDependentConditions(depField);
       }
 
@@ -196,7 +183,6 @@ export class WorkflowEngine {
     const mappedOptions: FieldGroupItem[] = options.map((item: any) => {
       return {
         id: _.get(item, mapper.dataMapper.id),
-
         label: _.get(item, mapper.dataMapper.label),
         value: _.get(item, mapper.dataMapper.value)
       };
@@ -342,16 +328,12 @@ export class WorkflowEngine {
 
   private evaluateCondition(condition: Condition | undefined, formData: Record<string, any>): boolean {
     if (!condition?.expression) return true;
-    const interceptExpression = interceptExpressionTemplate(condition, this.getState());
-    console.log(`Intercepting expression: "${interceptExpression}"`);
+
     try {
       // Replace formData references with actual values
-      const expr = interpolate(interceptExpression, formData);
-      console.log(`Evaluating condition: "${condition.expression}" => "${expr}"`);
+      const expr = interpolate(condition.expression, formData);
       // Create safe evaluation
-      const result = new Function(`return ${expr}`)();
-      console.log(`Condition result: ${result}`);
-      return result;
+      return new Function(`return ${expr}`)();
     } catch (error) {
       console.error('Condition evaluation failed:', error);
       console.error('Original expression:', condition.expression);
@@ -370,12 +352,7 @@ export class WorkflowEngine {
       deps.add(match[1].trim());
     }
 
-    // Debug logging (remove in production)
-    if (deps.size > 0) {
-      console.log('Condition dependencies found:', Array.from(deps), 'from conditions:', conditions);
-    }
-
-    return Array.from(deps).filter((dep) => dep.length > 0);
+    return Array.from(deps);
   }
 
   private extractValidationDependencies(rules: ValidationRule[]): string[] {
@@ -385,7 +362,7 @@ export class WorkflowEngine {
       if (rule.type === 'cross-field' && rule.expression) {
         const matches = rule.expression.matchAll(/\{\{(.*?)\}\}/g);
         for (const match of matches) {
-          deps.add(match[1]);
+          deps.add(match[1].trim());
         }
       }
     });
