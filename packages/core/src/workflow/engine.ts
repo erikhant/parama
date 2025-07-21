@@ -126,37 +126,36 @@ export class WorkflowEngine {
 
       // 4. Execute onValueChange actions LAST
       if (isValid && field.events && field.events.length > 0) {
-        this.executeActions(fieldId, field.events);
+        this.executeEvents(field.events);
       }
     }
   }
 
-  private async executeActions(fieldId: string, actions: Events[]) {
+  private async executeEvents(events: Events[]) {
     const formData = this.getState().formData;
-    const field = this.getState().actions.getField(fieldId);
 
-    if (!field) {
-      console.error(`Execute Actions Failed: Field with ID ${fieldId} not found`);
-      return;
-    }
-
-    for (const action of actions) {
-      switch (action.type) {
+    for (const event of events) {
+      const targetField = this.getState().actions.getField(event.target);
+      if (!targetField) {
+        console.error(`Target field ${event.target} not found for event`, event);
+        continue;
+      }
+      switch (event.type) {
         case 'fetch':
-          this.refreshDynamicOptions(field);
+          this.refreshDynamicOptions(targetField);
           break;
 
         case 'reset':
-          this.getState().actions.updateFieldValue(fieldId, field.defaultValue || '');
+          this.getState().actions.updateFieldValue(targetField.id, targetField.defaultValue || '');
           break;
 
         case 'setValue':
-          const value = interpolate(action.params?.value, formData);
-          this.getState().actions.updateFieldValue(fieldId, value);
+          const value = interpolate(event.params?.value, formData);
+          this.getState().actions.updateFieldValue(targetField.id, value);
           break;
 
         default:
-          console.warn(`Unknown action type: ${action.type} for field ${fieldId}`);
+          console.warn(`Unknown event type: ${event.type} for field ${targetField.id}`);
           break;
       }
     }
