@@ -1,6 +1,6 @@
 @layer components {
   .multiselect-trigger {
-    @apply w-full h-auto min-h-10 bg-inherit p-1 hover:bg-inherit [&_svg]:pointer-events-auto shadow-sm;
+    @apply w-full h-auto min-h-10 bg-inherit p-1 hover:bg-inherit [&_svg]:pointer-events-auto shadow-sm bg-white dark:bg-zinc-900 dark:placeholder:text-foreground-dark/50 dark:border-background-dark dark:text-foreground-dark;
   }
 
   .multiselect-placeholder {
@@ -40,7 +40,7 @@
   }
 
   .multiselect-icon-svg {
-    @apply mx-2 h-4 cursor-pointer;
+    @apply mx-2 h-4 cursor-pointer dark:text-foreground-dark/50;
   }
 
   .multiselect-close {

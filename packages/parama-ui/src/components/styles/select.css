@@ -1,6 +1,6 @@
 @layer components {
   .select-trigger {
-    @apply form-control flex items-center justify-between;
+    @apply form-control flex items-center justify-between dark:bg-zinc-900 dark:placeholder:text-foreground-dark/50 dark:border-background-dark dark:text-foreground-dark;
   }
 
   .select-trigger-icon {

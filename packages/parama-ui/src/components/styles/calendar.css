@@ -1,6 +1,6 @@
 @layer components {
   .calendar-base {
-    @apply bg-secondary p-3 rounded-lg [--cell-size:theme(spacing.8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent;
+    @apply bg-secondary dark:bg-zinc-900 p-3 rounded-lg [--cell-size:theme(spacing.8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent;
   }
 
   .calendar-root {
@@ -73,7 +73,7 @@
   }
 
   .calendar-weekday {
-    @apply text-gray-700 rounded-md flex-1 font-normal text-[0.8rem] select-none;
+    @apply text-gray-700 dark:text-gray-500 rounded-md flex-1 font-normal text-[0.8rem] select-none;
   }
 
   .calendar-week {
@@ -133,7 +133,7 @@
   }
 
   .calendar-today {
-    @apply bg-[#f1f5f9] text-[#0f172b] rounded-md data-[selected=true]:rounded-none;
+    @apply bg-[#f1f5f9] text-[#0f172b] dark:bg-primary-dark/40 rounded-md data-[selected=true]:rounded-none;
   }
 
   .calendar-day-outside {

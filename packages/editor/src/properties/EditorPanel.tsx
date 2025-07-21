@@ -18,7 +18,6 @@ export const EditorPanel: React.FC = () => {
   const { selectedFieldId, schema, actions } = useFormBuilder();
   const { editor, properties } = useEditor();
   const [collapsed, setCollapsed] = useState(false);
-  const [widthValue, setWidthValue] = useState<number>(1);
 
   const handleFieldChange = (updates: Partial<FormField>) => {
     if (!selectedFieldId) return;
@@ -28,11 +27,6 @@ export const EditorPanel: React.FC = () => {
 
   const handleLayoutChange = (updates: Partial<FormSchema['layout']>) => {
     updateLayout(updates);
-  };
-
-  const handleWidthChange = (width: number) => {
-    setWidthValue(width);
-    handleFieldChange({ width });
   };
 
   const updateField = useDebouncedCallback(

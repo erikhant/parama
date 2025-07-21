@@ -22,9 +22,7 @@ import { cn } from '@/lib/utils';
 /**
  * Props for MultiSelect component
  */
-interface MultiSelectProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof badgeVariants> {
+interface MultiSelectProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof badgeVariants> {
   /**
    * Color & variant for badge in the multi-select component.
    */
@@ -229,15 +227,11 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="multiselect-popover"
+          className="popover-content multiselect-popover"
           align="start"
           onEscapeKeyDown={() => setIsPopoverOpen(false)}>
           <Command>
-            <CommandInput
-              placeholder="Search..."
-              className="multiselect-input"
-              onKeyDown={handleInputKeyDown}
-            />
+            <CommandInput placeholder="Search..." className="multiselect-input" onKeyDown={handleInputKeyDown} />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
@@ -263,9 +257,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                       <div
                         className={cn(
                           'multiselect-option',
-                          isSelected
-                            ? 'multiselect-option-selected'
-                            : 'multiselect-option-unselected'
+                          isSelected ? 'multiselect-option-selected' : 'multiselect-option-unselected'
                         )}>
                         <CheckIcon size={16} />
                       </div>
@@ -280,9 +272,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                 <div className="multiselect-option-footer">
                   {selectedValues.length > 0 && (
                     <>
-                      <CommandItem
-                        onSelect={handleClear}
-                        className="multiselect-option-footer-button">
+                      <CommandItem onSelect={handleClear} className="multiselect-option-footer-button">
                         Clear
                       </CommandItem>
                       <Separator orientation="vertical" className="multiselect-separator" />

@@ -10,6 +10,7 @@ import _, { debounce } from 'lodash';
 import { FormBuilderState } from '../store';
 import { interceptExpressionTemplate, interpolate, objectToQueryString } from '../utils';
 import { DependencyGraph } from './graph';
+import { url } from 'node:inspector/promises';
 
 interface WorkflowEngineOptions {
   getState: () => FormBuilderState;
@@ -92,6 +93,18 @@ export class WorkflowEngine {
         }
       });
     }
+
+    // Register event dependencies
+    if (field.events) {
+      const eventDeps = this.extractEventDependencies(field.events);
+      console.log(`Found event dependencies for ${field.id}:`, eventDeps);
+
+      eventDeps.forEach((fieldDependentId) => {
+        // Find field by name and get its ID
+        console.log(`Adding event dependency: ${fieldDependentId} -> ${field.id} (by name: ${fieldDependentId})`);
+        this.graph.addDependency(fieldDependentId, field.id);
+      });
+    }
   }
 
   /**
@@ -123,11 +136,17 @@ export class WorkflowEngine {
     // 3. Run validations SECOND
     if (field.validations && field.validations.length > 0) {
       const isValid = await state.actions.validateField(fieldId, 'change');
+      console.log(`Field ${fieldId} validation result:`, isValid);
 
-      // 4. Execute onValueChange actions LAST
+      // 4a. Execute onValueChange actions LAST
       if (isValid && field.events && field.events.length > 0) {
         this.executeEvents(field.events);
       }
+    }
+
+    // 4b. Execute onValueChange actions LAST
+    else if (field.events && field.events.length > 0) {
+      this.executeEvents(field.events);
     }
   }
 
@@ -150,8 +169,9 @@ export class WorkflowEngine {
           break;
 
         case 'setValue':
-          const value = interpolate(event.params?.value, formData);
-          this.getState().actions.updateFieldValue(targetField.id, value);
+          const interceptedExpression = interceptExpressionTemplate(event.params?.value, this.getState());
+          const value = interpolate(interceptedExpression, formData);
+          this.getState().actions.updateFieldValue(targetField.id, JSON.parse(value));
           break;
 
         default:
@@ -375,6 +395,22 @@ export class WorkflowEngine {
     }
 
     return Array.from(deps).filter((dep) => dep.length > 0);
+  }
+
+  private extractEventDependencies(event: Events[]): string[] {
+    const deps = new Set<string>();
+    event.forEach((e) => {
+      if (e.target) {
+        deps.add(e.target);
+      }
+    });
+
+    // Debug logging (remove in production)
+    if (deps.size > 0) {
+      console.log('Event dependencies found:', Array.from(deps), 'from event:', event);
+    }
+
+    return Array.from(deps);
   }
 
   private extractValidationDependencies(rules: ValidationRule[]): string[] {
