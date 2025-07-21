@@ -76,8 +76,8 @@ export function interpolate(template: string, data: Record<string, unknown>): st
   });
 }
 
-export function interceptExpressionTemplate(condition: Condition, state: FormBuilderState) {
-  return condition.expression?.replace(/\{\{(.*?)\}\}/g, (_, key) => {
+export function interceptExpressionTemplate(expression: string, state: FormBuilderState) {
+  return expression.replace(/\{\{(.*?)\}\}/g, (_, key) => {
     // Replace field names with their IDs
     const fieldId = state.actions.getField(key.trim())?.id;
     if (!fieldId) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { GripVertical, MoveIcon, Trash2 } from 'lucide-react';
 import { useEditor } from '../store/useEditor';
 import { DroppableIndicator } from './DroppableIndicator';
 import { cn } from '@parama-ui/react';
@@ -61,23 +61,22 @@ export const SortableItem: React.FC<SortableItemProps> = ({
         ref={setNodeRef}
         style={style}
         {...attrs}
-        className={`relative group flex items-center ${!useHandle ? ' cursor-grab ' : ' '}${className}`}>
+        className={`relative group ${!useHandle ? ' cursor-grab ' : ' '}${className}`}>
         <div
           className={cn(
+            'absolute top-1 right-1 z-10 flex items-center justify-end w-auto gap-1 transition-opacity duration-200',
             !useHandle
               ? 'w-0 opacity-0'
-              : 'w-7 border-none ring-1 ring-gray-200 opacity-0 group-hover:opacity-100 shrink-0 self-stretch flex flex-col items-center justify-evenly gap-1 bg-gray-50 rounded-tl-md rounded-bl-md',
+              : 'border-none ring-1 ring-gray-200 opacity-0 group-hover:opacity-100 shrink-0',
             handleClassName
           )}>
           {useHandle && (
             <button {...listeners} {...attributes} className="p-1 text-gray-500 cursor-grab">
-              <GripVertical size={16} />
+              <MoveIcon size={16} />
             </button>
           )}
           {removable && (
-            <button
-              className="p-1 text-gray-500 cursor-pointer"
-              onClick={onRemove ? () => onRemove(id) : undefined}>
+            <button className="p-1 text-gray-500 cursor-pointer" onClick={onRemove ? () => onRemove(id) : undefined}>
               <Trash2 size={16} />
             </button>
           )}

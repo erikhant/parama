@@ -56,11 +56,7 @@ const arrayHeaders = (headersObj: Record<string, string>) => {
   }));
 };
 
-export const ExternalDataOptions = ({
-  children,
-  external = { url: '' },
-  onChange
-}: ExternalDataOptionsProps) => {
+export const ExternalDataOptions = ({ children, external = { url: '' }, onChange }: ExternalDataOptionsProps) => {
   const [headers, setHeaders] = useState<Header[]>(arrayHeaders(external.headers || {}));
   const [externalData, setExternal] = useState<ExternalDataSource<FieldGroupItem>>(external);
   const [tab, setTab] = useState<'headers' | 'result' | 'mapper'>('headers');
@@ -90,9 +86,7 @@ export const ExternalDataOptions = ({
   };
 
   const updateHeader = (id: string, field: 'key' | 'value', newValue: string) => {
-    const updatedHeaders = headers.map((header) =>
-      header.id === id ? { ...header, [field]: newValue } : header
-    );
+    const updatedHeaders = headers.map((header) => (header.id === id ? { ...header, [field]: newValue } : header));
     setHeaders(updatedHeaders);
     const mappedHeaders = mapHeaders(updatedHeaders);
     setExternal({ ...externalData, headers: mappedHeaders });
@@ -135,17 +129,14 @@ export const ExternalDataOptions = ({
   };
 
   const isValidUrl = (url: string) => {
-    const urlPattern =
-      /^(https?:\/\/)(localhost|127\.0\.0\.1|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(\/.*)?$/;
+    const urlPattern = /^(https?:\/\/)(localhost|127\.0\.0\.1|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(\/.*)?$/;
     return urlPattern.test(url);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {children ? (
-        <DialogTrigger asChild>
-          {React.isValidElement(children) ? children : <span>{children}</span>}
-        </DialogTrigger>
+        <DialogTrigger asChild>{React.isValidElement(children) ? children : <span>{children}</span>}</DialogTrigger>
       ) : (
         <DialogTrigger asChild>
           <Button variant="ghost" size="sm" color="secondary">
@@ -240,12 +231,7 @@ export const ExternalDataOptions = ({
                   </tbody>
                 </table>
                 <div className="flex justify-end mt-2">
-                  <Button
-                    variant="ghost"
-                    color="secondary"
-                    className="text-gray-700"
-                    size="xs"
-                    onClick={addHeader}>
+                  <Button variant="ghost" color="secondary" className="text-gray-700" size="xs" onClick={addHeader}>
                     <PlusIcon size={16} />
                     Add row
                   </Button>
@@ -291,8 +277,8 @@ export const ExternalDataOptions = ({
                 {result || externalData.mapper ? (
                   <>
                     <p className="text-blue-700 leading-relaxed text-sm my-2 p-3 bg-blue-100 rounded border border-blue-200">
-                      <strong>Note:</strong> The mapper is used to transform the response data into
-                      a format suitable for use in the select options. <br />
+                      <strong>Note:</strong> The mapper is used to transform the response data into a format suitable
+                      for use in the select options. <br />
                     </p>
                     <table className="min-w-full">
                       <thead>
@@ -320,8 +306,7 @@ export const ExternalDataOptions = ({
                                   </TooltipTrigger>
                                   <TooltipContent className="max-w-64 mr-2" side="top">
                                     <p className="form-description text-gray-700 leading-relaxed">
-                                      The key in the response object that contains the array of
-                                      items you want to map.
+                                      The key in the response object that contains the array of items you want to map.
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
@@ -337,8 +322,7 @@ export const ExternalDataOptions = ({
                                   ...externalData,
                                   mapper: {
                                     dataSource: e.target.value,
-                                    dataMapper:
-                                      externalData.mapper?.dataMapper || ({} as FieldGroupItem)
+                                    dataMapper: externalData.mapper?.dataMapper || ({} as FieldGroupItem)
                                   }
                                 })
                               }
@@ -486,7 +470,7 @@ export const ExternalDataOptions = ({
                             <div className="flex items-center gap-2 pr-2">
                               <Input
                                 className="rounded-none shadow-none border-none focus-visible:ring-0"
-                                value="Description"
+                                value="Description (optional)"
                                 placeholder="Description (optional)"
                                 readOnly
                               />
@@ -499,8 +483,8 @@ export const ExternalDataOptions = ({
                                   </TooltipTrigger>
                                   <TooltipContent className="max-w-64 mr-2" side="top">
                                     <p className="form-description text-gray-700 leading-relaxed">
-                                      An optional field that can be used to provide additional
-                                      information about the option.
+                                      An optional field that can be used to provide additional information about the
+                                      option.
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
@@ -531,9 +515,7 @@ export const ExternalDataOptions = ({
                     </table>
                   </>
                 ) : (
-                  <p className="bg-gray-50 border p-5 rounded text-gray-500 text-center text-sm">
-                    No mapping yet.
-                  </p>
+                  <p className="bg-gray-50 border p-5 rounded text-gray-500 text-center text-sm">No mapping yet.</p>
                 )}
               </div>
             </TabsContent>

@@ -34,11 +34,7 @@ export function setupWorkflowDebugger(options: DebugOptions = {}) {
   if (logDependencies) {
     const originalAddDependency = graph.addDependency.bind(graph);
     graph.addDependency = (source: string, target: string) => {
-      console.log(
-        `%c[DEPENDENCY]%c ${source} → ${target}`,
-        'color: #4CAF50; font-weight: bold',
-        'color: inherit'
-      );
+      console.log(`%c[DEPENDENCY]%c ${source} → ${target}`, 'color: #4CAF50; font-weight: bold', 'color: inherit');
       return originalAddDependency(source, target);
     };
   }
@@ -105,15 +101,11 @@ export function setupWorkflowDebugger(options: DebugOptions = {}) {
     const originalRefreshOptions = workflowEngine.refreshDynamicOptions.bind(workflowEngine);
     const store = useFormBuilder.getState();
     workflowEngine.refreshDynamicOptions = async (field: FormField) => {
-      if (!field || field.type !== 'select' || !field.external) {
-        console.warn(`Field ${field.id} is not a select with dynamic options`);
+      if (!field || (field.type !== 'select' && field.type !== 'multiselect') || !field.external) {
+        console.warn(`Field ${field.id} is not a select or multiselect with dynamic options`);
         return;
       }
-      console.groupCollapsed(
-        `%c[OPTIONS LOAD]%c ${field.id}`,
-        'color: #00BCD4; font-weight: bold',
-        'color: inherit'
-      );
+      console.groupCollapsed(`%c[OPTIONS LOAD]%c ${field.id}`, 'color: #00BCD4; font-weight: bold', 'color: inherit');
       console.log('Dynamic options config:', field?.external);
       await originalRefreshOptions(field);
       console.log('Loaded options:', field.options);
@@ -157,10 +149,6 @@ export function setupWorkflowDebugger(options: DebugOptions = {}) {
 
   // Return cleanup function (no subscription to unsubscribe)
   return () => {
-    console.log(
-      '%c[DEBUGGER]%c Workflow debugger disabled',
-      'color: #F44336; font-weight: bold',
-      'color: inherit'
-    );
+    console.log('%c[DEBUGGER]%c Workflow debugger disabled', 'color: #F44336; font-weight: bold', 'color: inherit');
   };
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input } from '@parama-ui/react';
 import { Search, X, Loader2 } from 'lucide-react';
-import { useToolboxSearch } from './useToolboxSearch';
+import { useToolboxSearch } from '../hooks/useToolboxSearch';
 import { FieldTypeDef, PresetTypeDef } from '@form-builder/types';
 
 interface ToolboxSearchHookProps {
@@ -43,7 +43,7 @@ export const ToolboxSearchWithHook: React.FC<ToolboxSearchHookProps> = ({
   };
 
   return (
-    <div className="relative p-4 pb-2">
+    <div className="relative px-4 py-2">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
         <Input
@@ -52,7 +52,7 @@ export const ToolboxSearchWithHook: React.FC<ToolboxSearchHookProps> = ({
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="pl-9 pr-9 h-9 text-sm bg-white border border-gray-200 rounded-md focus:border-blue-300 focus:ring-1 focus:ring-blue-300 transition-colors"
+          className="pl-9 pr-9 h-9 text-sm transition-colors"
           autoComplete="off"
         />
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">

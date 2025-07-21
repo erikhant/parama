@@ -278,7 +278,12 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
   const renderTypeSpecificProperties = useMemo(() => {
     switch (field.type) {
       case 'hidden':
-        return <NameField value={field.name || ''} onChange={handleNameChange} />;
+        return (
+          <SectionPanel title="Properties">
+            <DefaultValue type="text" value={field.defaultValue || ''} onChange={handleDefaultValueChange} />
+            <NameField value={field.name || ''} onChange={handleNameChange} />
+          </SectionPanel>
+        );
       case 'text':
       case 'number':
       case 'email':
@@ -408,7 +413,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                     </AccordionItem>
                   ))}
                 </Accordion>
-                {editor.options?.propertiesSettings !== 'readonly' && (
+                {editor.options?.propertiesSettings !== 'readonly' && !field.external && (
                   <Button onClick={handleAddOption} size="xs" color="secondary" variant="ghost">
                     <Plus size={15} /> Add option
                   </Button>
@@ -439,7 +444,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                 <Label className="text-xs text-gray-600">API Source</Label>
                 <div className="flex items-center space-x-2">
                   <Badge size="sm">
-                    <p className="max-w-52 truncate">{field.external.url}</p>
+                    <p className="max-w-48 truncate">{field.external.url}</p>
                   </Badge>
                   {editor.options?.propertiesSettings !== 'readonly' && (
                     <ExternalDataOptions external={field.external} onChange={(value) => onChange({ external: value })}>
@@ -548,7 +553,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                     </AccordionItem>
                   ))}
                 </Accordion>
-                {editor.options?.propertiesSettings !== 'readonly' && (
+                {editor.options?.propertiesSettings !== 'readonly' && !field.external && (
                   <Button onClick={handleAddOption} size="xs" color="secondary" variant="ghost">
                     <Plus size={15} /> Add option
                   </Button>
@@ -561,7 +566,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                 <Label className="text-xs text-gray-600">API Source</Label>
                 <div className="flex items-center space-x-2">
                   <Badge size="sm">
-                    <p className="max-w-52 truncate">{field.external.url}</p>
+                    <p className="max-w-48 truncate">{field.external.url}</p>
                   </Badge>
                   {editor.options?.propertiesSettings !== 'readonly' && (
                     <ExternalDataOptions external={field.external} onChange={(value) => onChange({ external: value })}>

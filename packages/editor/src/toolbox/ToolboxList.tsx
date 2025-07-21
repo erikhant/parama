@@ -4,6 +4,7 @@ import { SortableItem } from '../components';
 import { ToolboxItem } from './ToolboxItem';
 import { ToolboxSearch } from './ToolboxSearch';
 import { FieldTypeDef, PresetTypeDef } from '@form-builder/types';
+import { ToolboxSearchWithHook } from './ToolboxSearchWithHook';
 
 type ToolboxListProps = {
   items: FieldTypeDef[] | PresetTypeDef[];
@@ -19,7 +20,7 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
   searchPlaceholder = 'Search items...'
 }) => {
   const id = `toolbox-${Date.now()}`;
-  const [filteredItems, setFilteredItems] = useState<FieldTypeDef[] | PresetTypeDef[]>(items);
+  const [filteredItems, setFilteredItems] = useState<FieldTypeDef[] | PresetTypeDef[]>([]);
 
   // Update filtered items when items prop changes
   useEffect(() => {
@@ -35,7 +36,13 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
       {section && <label className="block font-semibold font-sm p-4 pb-0">{section}</label>}
 
       {showSearch && (
-        <ToolboxSearch items={items} onFilteredItems={handleFilteredItems} placeholder={searchPlaceholder} />
+        <ToolboxSearchWithHook
+          items={items}
+          onFilteredItems={handleFilteredItems}
+          placeholder={searchPlaceholder}
+          debounceMs={350}
+        />
+        // <ToolboxSearch items={items} onFilteredItems={handleFilteredItems} placeholder={searchPlaceholder} />
       )}
 
       <div className="space-y-2 p-4 pt-2">

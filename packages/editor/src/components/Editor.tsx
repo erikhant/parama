@@ -26,7 +26,7 @@ const defineDefaultValue = (type: string): FormFieldType => {
     id: `field-${Date.now()}`,
     name: `name_${type}`,
     type: type,
-    label: `Text label`,
+    label: type === 'hidden' ? 'Hidden input' : 'Text label',
     width: 12
   };
 

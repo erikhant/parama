@@ -6,6 +6,7 @@ import {
   CheckCheck,
   ChevronDown,
   CircleDot,
+  EyeOff,
   RectangleEllipsis,
   TextCursorInput,
   Upload,
@@ -15,6 +16,14 @@ import type { LucideIcon } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
 
 const fieldTypes: FieldTypeDef[] = [
+  {
+    id: uuid(),
+    type: 'hidden',
+    label: 'Hidden input',
+    icon: EyeOff as LucideIcon,
+    group: 'fields',
+    description: 'A hidden input field that is not visible to the user.'
+  },
   {
     id: uuid(),
     type: 'text',

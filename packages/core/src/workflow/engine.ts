@@ -169,20 +169,20 @@ export class WorkflowEngine {
   public async refreshDynamicOptions(field: FormField): Promise<void> {
     const formData = this.getState().formData;
 
-    if (field.type !== 'select' || !field.external) {
+    if ((field.type !== 'select' && field.type !== 'multiselect') || !field.external) {
       return;
     }
-    const { url, headers, params, mapper } = field.external;
+    const { url, headers, mapper } = field.external;
 
     if (!mapper || !mapper.dataSource || !mapper.dataMapper) {
       console.error(`Field ${field.id} is missing external mapper configuration`);
       return;
     }
 
-    const queryExpr = interpolate(JSON.stringify(params || {}), formData);
-    const queryParams = objectToQueryString(JSON.parse(queryExpr) || {});
+    const interceptedExpression = interceptExpressionTemplate(url, this.getState());
+    const serializedUrl = interpolate(interceptedExpression, formData);
 
-    const response = await fetch(`${url}?${queryParams}`, {
+    const response = await fetch(serializedUrl, {
       headers: { ...headers }
     });
     if (!response.ok) {
@@ -342,7 +342,7 @@ export class WorkflowEngine {
 
   private evaluateCondition(condition: Condition | undefined, formData: Record<string, any>): boolean {
     if (!condition?.expression) return true;
-    const interceptExpression = interceptExpressionTemplate(condition, this.getState());
+    const interceptExpression = interceptExpressionTemplate(condition.expression, this.getState());
     console.log(`Intercepting expression: "${interceptExpression}"`);
     try {
       // Replace formData references with actual values

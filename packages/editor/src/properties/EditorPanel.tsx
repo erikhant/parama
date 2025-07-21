@@ -12,6 +12,7 @@ import { PropertiesEditor } from './PropertiesEditor';
 import ValidationEditor from './ValidationEditor';
 import { LayoutEditor } from './LayoutEditor';
 import { FormMetadata } from './FormMetadata';
+import { EventsEditor } from './EventsEditor';
 
 export const EditorPanel: React.FC = () => {
   const { selectedFieldId, schema, actions } = useFormBuilder();
@@ -103,8 +104,11 @@ export const EditorPanel: React.FC = () => {
           {editor.options?.validationSettings !== 'off' && (
             <ValidationEditor field={properties.localField} onChange={handleFieldChange} />
           )}
-          {editor.options?.conditionsSettings !== 'off' && (
+          {editor.options?.conditionsSettings !== 'off' && properties.localField.type !== 'hidden' && (
             <ConditionEditor field={properties.localField} onChange={handleFieldChange} />
+          )}
+          {editor.options?.eventsSettings !== 'off' && (
+            <EventsEditor field={properties.localField} onChange={handleFieldChange} />
           )}
         </>
       )}

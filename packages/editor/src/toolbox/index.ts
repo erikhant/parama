@@ -5,4 +5,4 @@ export * from './ToolboxPanel';
 export * from './ToolboxSearch';
 export * from './ToolboxSearchWithHook';
 export * from './PresetManager';
-export * from './useToolboxSearch';
+export * from '../hooks/useToolboxSearch';

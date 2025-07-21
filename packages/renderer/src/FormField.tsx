@@ -1,5 +1,11 @@
 import { useFormBuilder } from '@form-builder/core';
-import type { DateField, FieldGroupItem, FormField as FormFieldType } from '@form-builder/types';
+import type {
+  DateField,
+  FieldGroupItem,
+  FormField as FormFieldType,
+  MultiSelectField,
+  SelectField
+} from '@form-builder/types';
 import {
   Button,
   Checkbox,
@@ -136,7 +142,6 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
 
   const handleChange = useCallback(
     (value: any) => {
-      console.log(value);
       actions.updateFieldValue(field.id, value);
     },
     [actions, field.id]
@@ -393,25 +398,44 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     return null;
   }, [field.appearance, renderAppearance]);
 
-  // // Effect to handle dynamic options loading
-  // useEffect(() => {
-  //   if (field.type === 'select' && field.dynamicOptions) {
-  //     actions.refreshFieldOptions(field.id);
-  //   }
-  // }, [field.id, (field as SelectField).dynamicOptions, actions]);
+  const multiselectOptions = useMemo(() => {
+    if (field.type === 'multiselect' && Array.isArray(field.options)) {
+      return field.options.map((option) => ({
+        value: option.value,
+        label: option.label
+      }));
+    }
+    return [];
+  }, [field.type, field.type === 'multiselect' ? (field as MultiSelectField).options : null]);
+
+  // Effect to handle dynamic options loading
+  useEffect(() => {
+    if ((field.type === 'select' || field.type === 'multiselect') && field.external) {
+      if (firstRender) return;
+
+      actions.refreshFieldOptions(field.id);
+    }
+  }, [field.id, field.type === 'select' || field.type === 'multiselect' ? field.external : null, firstRender]);
 
   const renderInput = useMemo(() => {
     switch (field.type) {
-      case 'text':
       case 'hidden':
+        if (mode === 'editor') {
+          return (
+            <Input {...commonInputProps} className={cn(commonInputProps.className, 'bg-void')} type="text" readOnly />
+          );
+        } else {
+          return <input type="hidden" value={field.value} />;
+        }
+      case 'text':
       case 'email':
       case 'password':
       case 'number':
         const inputElement = (
           <Input
             {...commonInputProps}
-            className={cn(commonInputProps.className, field.type === 'hidden' && mode === 'editor' ? 'bg-void' : '')}
-            type={field.type === 'hidden' && mode === 'editor' ? 'text' : field.type}
+            className={cn(commonInputProps.className)}
+            type={field.type}
             value={textValue}
             readOnly={isReadOnly}
             onChange={(e) => setTextValue(e.target.value || '')}
@@ -539,14 +563,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
             modalPopover={true}
             color="primary"
             variant="shadow"
-            options={
-              Array.isArray(field.options) && field.options.length > 0
-                ? field.options.map((attr) => ({
-                    value: attr.value,
-                    label: attr.label
-                  }))
-                : []
-            }
+            options={multiselectOptions}
             onValueChange={handleMultiSelectChange}
           />
         );
@@ -609,7 +626,13 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
       id={`item__${field.id}`}
       className={`column-span-${field.width}`}
       orientation={field.type === 'checkbox' || field.type === 'radio' ? field.appearance?.position : 'vertical'}>
-      {field.type !== 'submit' && <Label>{field.label}</Label>}
+      {field.type !== 'submit' ? (
+        mode === 'editor' ? (
+          <Label>{field.label}</Label>
+        ) : field.type !== 'hidden' ? (
+          <Label>{field.label}</Label>
+        ) : null
+      ) : null}
       {field.type === 'file' && field.helpText && <p className="form-description">{field.helpText}</p>}
       {field.type === 'file' && (!validationState.isValid || field.error) && (
         <p className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</p>

@@ -127,7 +127,6 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        */
       initialize: ({ schema, validators = {}, data = {} }) => {
         set({
-          mode: 'preview',
           schema: schema || defaultSchema,
           formData: data,
           validators,

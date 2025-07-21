@@ -87,7 +87,7 @@ export interface FieldConditions {
 
 export interface Events {
   type: 'fetch' | 'setValue' | 'reset';
-  target?: string;
+  target: string;
   params?: Record<string, any>;
   config?: Record<string, any>;
 }

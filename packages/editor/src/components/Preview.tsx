@@ -39,12 +39,7 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
   return (
     <Sheet onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button
-          color="secondary"
-          size="sm"
-          variant="ghost"
-          disabled={disabled}
-          className="rounded-md">
+        <Button color="secondary" size="sm" variant="ghost" disabled={disabled} className="rounded-md">
           <PlayIcon size={16} />
           Preview
         </Button>
@@ -54,8 +49,10 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
           <SheetTitle>{schema.title || 'Preview'}</SheetTitle>
           <SheetDescription>{schema.description || ''}</SheetDescription>
         </SheetHeader>
-        <div className="grid gap-4 px-1 py-4 min-h-[calc(100vh-120px)] overflow-y-auto">
-          <FormBuilder schema={schema} />
+        <div className="grid gap-4 px-1 py-4 min-h-[calc(100vh-150px)] overflow-y-auto">
+          <div>
+            <FormBuilder schema={schema} />
+          </div>
         </div>
         <SheetFooter>
           <SheetClose asChild onClick={actions.resetForm}>
