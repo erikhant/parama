@@ -26,8 +26,8 @@ export default defineConfig({
       external: [
         'react',
         'react-dom',
-        '@form-builder/core',
-        '@form-builder/types',
+        '@parama-dev/form-builder-core',
+        '@parama-dev/form-builder-types',
         '@parama-ui/react',
         'lodash-es',
         'lucide-react',
@@ -39,8 +39,8 @@ export default defineConfig({
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          '@form-builder/core': 'FormBuilderCore',
-          '@form-builder/types': 'FormBuilderTypes',
+          '@parama-dev/form-builder-core': 'FormBuilderCore',
+          '@parama-dev/form-builder-types': 'FormBuilderTypes',
           '@parama-ui/react': 'ParamaUI',
           'lodash-es': 'lodash',
           'lucide-react': 'LucideReact',

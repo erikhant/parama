@@ -1,10 +1,10 @@
-import { useFormBuilder } from '@form-builder/core';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
 import { Button } from '@parama-ui/react';
 import { MonitorIcon, SaveIcon, SmartphoneIcon, TabletIcon } from 'lucide-react';
 import { SchemaViewer } from './SchemaViewer';
 import { Preview } from './Preview';
 import { useEditor } from '../store/useEditor';
-import { FormEditorProps } from '@form-builder/types';
+import { FormEditorProps } from '@parama-dev/form-builder-types';
 
 export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSaveSchema'] }) => {
   const { editor } = useEditor();

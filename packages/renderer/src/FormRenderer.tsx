@@ -1,4 +1,4 @@
-import { FormBuilderProps } from '@form-builder/types';
+import { FormBuilderProps } from '@parama-dev/form-builder-types';
 import { FormProvider } from './FormProvider';
 import { FormSubmitter } from './FormSubmitter';
 

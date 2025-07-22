@@ -1,8 +1,8 @@
 import './index.css';
 import '../../parama-ui/dist/parama-ui.min.css';
-import { FormEditor } from '@form-builder/editor';
+import { FormEditor } from '@parama-dev/form-builder-editor';
 import { createRoot } from 'react-dom/client';
-import type { FormSchema } from '@form-builder/types';
+import type { FormSchema } from '@parama-dev/form-builder-types';
 
 // Example usage of the FormEditor component
 export function App() {

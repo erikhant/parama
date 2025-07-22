@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { defaultSchema, useFormBuilder } from '@form-builder/core';
-import { FormEditorProps } from '@form-builder/types';
+import { defaultSchema, useFormBuilder } from '@parama-dev/form-builder-core';
+import { FormEditorProps } from '@parama-dev/form-builder-types';
 import { isEqual } from 'lodash-es';
 import { useEditor } from '../store/useEditor';
 import { ErrorBoundary } from 'react-error-boundary';

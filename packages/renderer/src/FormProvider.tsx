@@ -1,6 +1,6 @@
 import { useEffect, Fragment, useRef } from 'react';
-import { useFormBuilder } from '@form-builder/core';
-import { FormBuilderProps } from '@form-builder/types';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import { FormBuilderProps } from '@parama-dev/form-builder-types';
 import { isEqual } from 'lodash-es';
 
 export const FormProvider: React.FC<FormBuilderProps & { children: React.ReactNode }> = ({

@@ -1,6 +1,6 @@
 {
-  "name": "@form-builder/renderer",
-  "version": "0.1.0",
+  "name": "@parama-dev/form-builder-renderer",
+  "version": "0.1.1",
   "description": "React components for rendering forms from the form builder",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
@@ -26,8 +26,8 @@
     "clean": "rimraf dist node_modules"
   },
   "dependencies": {
-    "@form-builder/core": "workspace:*",
-    "@form-builder/types": "workspace:*",
+    "@parama-dev/form-builder-core": "^0.1.1",
+    "@parama-dev/form-builder-types": "^0.1.1",
     "@parama-ui/react": "workspace:*",
     "@types/react-select": "^5.0.1",
     "lodash-es": "^4.17.21",
@@ -58,8 +58,8 @@
   "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@form-builder/core": "^0.1.0",
-    "@form-builder/types": "^0.1.0",
+    "@parama-dev/form-builder-core": "^0.1.0",
+    "@parama-dev/form-builder-types": "^0.1.0",
     "@parama-ui/react": "^1.0.0"
   }
 }

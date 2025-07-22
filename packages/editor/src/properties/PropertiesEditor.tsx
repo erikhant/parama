@@ -1,4 +1,4 @@
-import { useFormBuilder } from '@form-builder/core';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
 import {
   CheckboxField,
   DateField,
@@ -7,7 +7,7 @@ import {
   MultiSelectField,
   RadioField,
   SelectField
-} from '@form-builder/types';
+} from '@parama-dev/form-builder-types';
 import {
   Accordion,
   AccordionContent,

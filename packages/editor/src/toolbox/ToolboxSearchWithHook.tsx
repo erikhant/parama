@@ -2,7 +2,7 @@ import React from 'react';
 import { Input } from '@parama-ui/react';
 import { Search, X, Loader2 } from 'lucide-react';
 import { useToolboxSearch } from '../hooks/useToolboxSearch';
-import { FieldTypeDef, PresetTypeDef } from '@form-builder/types';
+import { FieldTypeDef, PresetTypeDef } from '@parama-dev/form-builder-types';
 
 interface ToolboxSearchHookProps {
   items: FieldTypeDef[] | PresetTypeDef[];

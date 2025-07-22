@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Input } from '@parama-ui/react';
 import { Search, X } from 'lucide-react';
 import { useDebouncedCallback } from 'use-debounce';
-import { FieldTypeDef, PresetTypeDef } from '@form-builder/types';
+import { FieldTypeDef, PresetTypeDef } from '@parama-dev/form-builder-types';
 
 interface ToolboxSearchProps {
   items: FieldTypeDef[] | PresetTypeDef[];

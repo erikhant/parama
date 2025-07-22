@@ -19,7 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@parama-ui/react';
-import type { ExternalDataSource, FieldGroupItem } from '@form-builder/types';
+import type { ExternalDataSource, FieldGroupItem } from '@parama-dev/form-builder-types';
 import React, { useState } from 'react';
 import { CircleAlertIcon, HelpCircleIcon, Loader2Icon, PlusIcon, Trash2Icon } from 'lucide-react';
 import { Editor } from '@monaco-editor/react';

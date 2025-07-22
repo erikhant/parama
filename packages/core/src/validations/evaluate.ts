@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { ValidationRule } from '@form-builder/types';
+import type { ValidationRule } from '@parama-dev/form-builder-types';
 import { interpolate, objectToQueryString } from '../utils';
 import { JsonValidator } from './json';
 import validator from 'validator';

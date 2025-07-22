@@ -1,5 +1,5 @@
 import { cn } from '@parama-ui/react';
-import { FieldTypeDef, PresetTypeDef } from '@form-builder/types';
+import { FieldTypeDef, PresetTypeDef } from '@parama-dev/form-builder-types';
 import type { LucideIcon } from 'lucide-react';
 import React from 'react';
 

@@ -28,7 +28,7 @@ export default defineConfig({
         'react',
         'react-dom',
         'zustand',
-        '@form-builder/types',
+        '@parama-dev/form-builder-types',
         'ajv',
         'lodash',
         'lodash-es',
@@ -40,7 +40,7 @@ export default defineConfig({
           react: 'React',
           'react-dom': 'ReactDOM',
           zustand: 'Zustand',
-          '@form-builder/types': 'FormBuilderTypes'
+          '@parama-dev/form-builder-types': 'FormBuilderTypes'
         }
       }
     }

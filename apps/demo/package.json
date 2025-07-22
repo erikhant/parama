@@ -1,5 +1,5 @@
 {
-  "name": "@form-builder/demo",
+  "name": "@parama-dev/demo",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,10 +9,10 @@
     "clean": "rimraf dist node_modules"
   },
   "dependencies": {
-    "@form-builder/core": "workspace:*",
-    "@form-builder/editor": "workspace:*",
-    "@form-builder/renderer": "workspace:*",
-    "@form-builder/types": "workspace:*",
+    "@parama-dev/form-builder-core": "workspace:*",
+    "@parama-dev/form-builder-editor": "workspace:*",
+    "@parama-dev/form-builder-renderer": "workspace:*",
+    "@parama-dev/form-builder-types": "workspace:*",
     "@parama-ui/react": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

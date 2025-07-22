@@ -1,4 +1,4 @@
-import { FieldGroupItem } from '@form-builder/types';
+import { FieldGroupItem } from '@parama-dev/form-builder-types';
 import { Button, FormItem, Input } from '@parama-ui/react';
 import { Trash2 } from 'lucide-react';
 import { memo, useCallback } from 'react';

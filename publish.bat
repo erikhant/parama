@@ -33,11 +33,11 @@ if %errorlevel% neq 0 (
 
 REM 6. Show packages to be published
 echo 📋 About to publish the following packages:
-for /f "tokens=*" %%i in ('node -p "require('./packages/types/package.json').version"') do echo   - @form-builder/types@%%i
+for /f "tokens=*" %%i in ('node -p "require('./packages/types/package.json').version"') do echo   - @parama-dev/form-builder-types@%%i
 for /f "tokens=*" %%i in ('node -p "require('./packages/parama-ui/package.json').version"') do echo   - @parama-ui/react@%%i
-for /f "tokens=*" %%i in ('node -p "require('./packages/core/package.json').version"') do echo   - @form-builder/core@%%i
-for /f "tokens=*" %%i in ('node -p "require('./packages/renderer/package.json').version"') do echo   - @form-builder/renderer@%%i
-for /f "tokens=*" %%i in ('node -p "require('./packages/editor/package.json').version"') do echo   - @form-builder/editor@%%i
+for /f "tokens=*" %%i in ('node -p "require('./packages/core/package.json').version"') do echo   - @parama-dev/form-builder-core@%%i
+for /f "tokens=*" %%i in ('node -p "require('./packages/renderer/package.json').version"') do echo   - @parama-dev/form-builder-renderer@%%i
+for /f "tokens=*" %%i in ('node -p "require('./packages/editor/package.json').version"') do echo   - @parama-dev/form-builder-editor@%%i
 echo.
 
 set /p confirm=Do you want to continue? (y/N): 

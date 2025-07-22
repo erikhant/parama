@@ -1,4 +1,4 @@
-import type { FormField } from '@form-builder/types';
+import type { FormField } from '@parama-dev/form-builder-types';
 import {
   Badge,
   Button,

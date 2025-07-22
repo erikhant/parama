@@ -1,4 +1,10 @@
-import { FieldTypeDef, FormEditorOptions, FormEditorProps, FormField, PresetTypeDef } from '@form-builder/types';
+import {
+  FieldTypeDef,
+  FormEditorOptions,
+  FormEditorProps,
+  FormField,
+  PresetTypeDef
+} from '@parama-dev/form-builder-types';
 import type { LucideIcon } from 'lucide-react';
 import {
   ArrowDown10,

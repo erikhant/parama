@@ -5,7 +5,7 @@ import type {
   FieldGroupItem,
   FormField,
   ValidationRule
-} from '@form-builder/types';
+} from '@parama-dev/form-builder-types';
 import _, { debounce } from 'lodash';
 import { FormBuilderState } from '../store';
 import { interceptExpressionTemplate, interpolate } from '../utils';

@@ -1,5 +1,5 @@
-import { useFormBuilder } from '@form-builder/core';
-import { BlockField } from '@form-builder/types';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import { BlockField } from '@parama-dev/form-builder-types';
 import { FormItem, Input, Label, Slider } from '@parama-ui/react';
 import { useEffect, useState } from 'react';
 import { useEditor } from '../../store/useEditor';

@@ -1,4 +1,4 @@
-import { Condition } from '@form-builder/types';
+import { Condition } from '@parama-dev/form-builder-types';
 import { FormBuilderState } from './store';
 
 /**

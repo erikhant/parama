@@ -1,5 +1,5 @@
 import { Checkbox, FormItem, Input, Label, Slider } from '@parama-ui/react';
-import { FormSchema } from '@form-builder/types';
+import { FormSchema } from '@parama-dev/form-builder-types';
 import { useState } from 'react';
 
 type LayoutEditorProps = {

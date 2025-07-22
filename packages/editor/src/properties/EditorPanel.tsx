@@ -1,5 +1,5 @@
-import { useFormBuilder } from '@form-builder/core';
-import { FormField, FormSchema } from '@form-builder/types';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import { FormField, FormSchema } from '@parama-dev/form-builder-types';
 import { Button } from '@parama-ui/react';
 import { ArrowLeftToLine, ArrowRightToLine } from 'lucide-react';
 import { useEffect, useState } from 'react';

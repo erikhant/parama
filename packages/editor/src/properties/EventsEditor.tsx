@@ -1,5 +1,5 @@
-import { useFormBuilder } from '@form-builder/core';
-import { Events, FormField } from '@form-builder/types';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import { Events, FormField } from '@parama-dev/form-builder-types';
 import {
   Button,
   FormItem,

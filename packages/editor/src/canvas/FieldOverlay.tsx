@@ -1,5 +1,5 @@
-import { useFormBuilder } from '@form-builder/core';
-import { FormField } from '@form-builder/renderer';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import { FormField } from '@parama-dev/form-builder-renderer';
 
 type FieldOverlayProps = {
   id: string;

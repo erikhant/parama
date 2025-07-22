@@ -13,11 +13,11 @@
     "declarationMap": true, // Helps with debugging
     "skipLibCheck": true,
     "paths": {
-      "@form-builder/*": ["./packages/*/src"],
-      "@form-builder/core": ["./packages/core/src"],
-      "@form-builder/editor": ["./packages/editor/src"],
-      "@form-builder/renderer": ["./packages/renderer/src"],
-      "@form-builder/types": ["./packages/types/src"],
+      "@parama-dev/form-builder-*": ["./packages/*/src"],
+      "@parama-dev/form-builder-core": ["./packages/core/src"],
+      "@parama-dev/form-builder-editor": ["./packages/editor/src"],
+      "@parama-dev/form-builder-renderer": ["./packages/renderer/src"],
+      "@parama-dev/form-builder-types": ["./packages/types/src"],
       "@parama-ui/react": ["./packages/parama-ui/src"]
     }
   },

@@ -1,4 +1,4 @@
-import { useFormBuilder } from '@form-builder/core';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
 import type {
   BlockField,
   DateField,
@@ -12,7 +12,7 @@ import type {
   SelectField,
   ButtonField as ButtonFieldType,
   FormBuilderProps
-} from '@form-builder/types';
+} from '@parama-dev/form-builder-types';
 import {
   Button,
   Checkbox,

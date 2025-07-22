@@ -6,7 +6,7 @@ import type {
   ValidationState,
   ValidationTrigger,
   ValidatorRegistry
-} from '@form-builder/types';
+} from '@parama-dev/form-builder-types';
 import { debounce, DebouncedFunc } from 'lodash-es';
 import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';

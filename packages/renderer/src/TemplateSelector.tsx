@@ -1,6 +1,6 @@
 import React from 'react';
-import { useFormBuilder } from '@form-builder/core';
-import { FormTemplate } from '@form-builder/types';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import { FormTemplate } from '@parama-dev/form-builder-types';
 
 export const TemplateSelector = () => {
   // const { templates, actions } = useFormBuilder();

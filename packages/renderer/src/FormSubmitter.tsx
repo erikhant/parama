@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFormBuilder } from '@form-builder/core';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
 import { FormField } from './FormField';
 
 export const FormSubmitter: React.FC<{

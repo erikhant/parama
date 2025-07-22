@@ -1,4 +1,4 @@
-import { ButtonField, FormField } from '@form-builder/types';
+import { ButtonField, FormField } from '@parama-dev/form-builder-types';
 import { Button, FormItem, Label } from '@parama-ui/react';
 import { SectionPanel } from '../SectionPanel';
 import { CheckCircleIcon } from 'lucide-react';

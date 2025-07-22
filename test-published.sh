@@ -19,11 +19,11 @@ RENDERER_VERSION=$(node -p "require('../../packages/renderer/package.json').vers
 EDITOR_VERSION=$(node -p "require('../../packages/editor/package.json').version")
 
 # Update package.json to use published versions
-sed -i "s/\"@form-builder\/types\": \"workspace:\*\"/\"@form-builder\/types\": \"^${TYPES_VERSION}\"/g" package.json
+sed -i "s/\"@parama-dev\/form-builder-types\": \"workspace:\*\"/\"@parama-dev\/form-builder-types\": \"^${TYPES_VERSION}\"/g" package.json
 sed -i "s/\"@parama-ui\/react\": \"workspace:\*\"/\"@parama-ui\/react\": \"^${PARAMA_UI_VERSION}\"/g" package.json
-sed -i "s/\"@form-builder\/core\": \"workspace:\*\"/\"@form-builder\/core\": \"^${CORE_VERSION}\"/g" package.json
-sed -i "s/\"@form-builder\/renderer\": \"workspace:\*\"/\"@form-builder\/renderer\": \"^${RENDERER_VERSION}\"/g" package.json
-sed -i "s/\"@form-builder\/editor\": \"workspace:\*\"/\"@form-builder\/editor\": \"^${EDITOR_VERSION}\"/g" package.json
+sed -i "s/\"@parama-dev\/form-builder-core\": \"workspace:\*\"/\"@parama-dev\/form-builder-core\": \"^${CORE_VERSION}\"/g" package.json
+sed -i "s/\"@parama-dev\/form-builder-renderer\": \"workspace:\*\"/\"@parama-dev\/form-builder-renderer\": \"^${RENDERER_VERSION}\"/g" package.json
+sed -i "s/\"@parama-dev\/form-builder-editor\": \"workspace:\*\"/\"@parama-dev\/form-builder-editor\": \"^${EDITOR_VERSION}\"/g" package.json
 
 echo "📦 Installing published packages..."
 pnpm install

@@ -1,5 +1,5 @@
 // workflowDebugger.ts
-import type { FormField, ValidationTrigger } from '@form-builder/types';
+import type { FormField, ValidationTrigger } from '@parama-dev/form-builder-types';
 import { useFormBuilder } from '../store';
 import { DependencyGraph } from '../workflow/graph';
 import { WorkflowEngine } from '../workflow/engine';

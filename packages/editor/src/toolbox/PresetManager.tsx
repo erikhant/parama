@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Input, Button } from '@parama-ui/react';
 import { Search, X, Plus, FolderPlus, Tag } from 'lucide-react';
 import { useDebouncedCallback } from 'use-debounce';
-import { PresetTypeDef } from '@form-builder/types';
+import { PresetTypeDef } from '@parama-dev/form-builder-types';
 
 interface PresetManagerProps {
   presets: PresetTypeDef[];

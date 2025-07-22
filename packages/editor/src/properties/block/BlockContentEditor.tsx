@@ -1,4 +1,4 @@
-import { BlockField } from '@form-builder/types';
+import { BlockField } from '@parama-dev/form-builder-types';
 import { FormItem, Label, Textarea } from '@parama-ui/react';
 import { useEditor } from '../../store/useEditor';
 import { SectionPanel } from '../SectionPanel';

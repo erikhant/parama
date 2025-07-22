@@ -17,10 +17,10 @@ import type {
   FormEditorProps,
   FormField as FormFieldType,
   PresetTypeDef
-} from '@form-builder/types';
+} from '@parama-dev/form-builder-types';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { setupWorkflowDebugger, useFormBuilder } from '@form-builder/core';
+import { setupWorkflowDebugger, useFormBuilder } from '@parama-dev/form-builder-core';
 import { useEffect, useState } from 'react';
 import { FieldOverlay, FormCanvas } from '../canvas';
 import { EditorPanel } from '../properties/EditorPanel';

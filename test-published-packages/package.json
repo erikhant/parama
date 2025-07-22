@@ -1,0 +1,20 @@
+{
+  "name": "test-published-packages",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "test.js",
+  "scripts": {
+    "test": "node test.js",
+    "start": "node test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@parama-dev/form-builder-core": "^0.1.0",
+    "@parama-dev/form-builder-editor": "^0.1.0",
+    "@parama-dev/form-builder-renderer": "^0.1.0",
+    "@parama-dev/form-builder-types": "^0.1.0"
+  }
+}

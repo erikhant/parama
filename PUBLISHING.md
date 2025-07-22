@@ -50,11 +50,11 @@ pnpm build:packages
 
 This will build packages in the correct order:
 
-1. `@form-builder/types` - Type definitions
+1. `@parama-dev/form-builder-types` - Type definitions
 2. `@parama-ui/react` - UI component library
-3. `@form-builder/core` - Core logic
-4. `@form-builder/renderer` - React form components
-5. `@form-builder/editor` - Visual form builder editor
+3. `@parama-dev/form-builder-core` - Core logic
+4. `@parama-dev/form-builder-renderer` - React form components
+5. `@parama-dev/form-builder-editor` - Visual form builder editor
 
 #### 4. Test the Build
 
@@ -118,11 +118,11 @@ This script will:
 The packages have the following dependency relationships:
 
 ```
-@form-builder/types (no dependencies)
+@parama-dev/form-builder-types (no dependencies)
 ├── @parama-ui/react (no dependencies)
-├── @form-builder/core (depends on types)
-├── @form-builder/renderer (depends on types, core, parama-ui)
-└── @form-builder/editor (depends on types, core, renderer, parama-ui)
+├── @parama-dev/form-builder-core (depends on types)
+├── @parama-dev/form-builder-renderer (depends on types, core, parama-ui)
+└── @parama-dev/form-builder-editor (depends on types, core, renderer, parama-ui)
 ```
 
 ## Versioning

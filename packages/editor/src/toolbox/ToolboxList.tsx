@@ -3,7 +3,7 @@ import { LucideIcon } from 'lucide-react';
 import { SortableItem } from '../components';
 import { ToolboxItem } from './ToolboxItem';
 import { ToolboxSearch } from './ToolboxSearch';
-import { FieldTypeDef, PresetTypeDef } from '@form-builder/types';
+import { FieldTypeDef, PresetTypeDef } from '@parama-dev/form-builder-types';
 import { ToolboxSearchWithHook } from './ToolboxSearchWithHook';
 import { ToolboxItemThumbnail } from './ToolboxItemThumbnail';
 

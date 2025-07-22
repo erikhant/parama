@@ -1,4 +1,4 @@
-import type { FormEditorProps } from '@form-builder/types';
+import type { FormEditorProps } from '@parama-dev/form-builder-types';
 import { Editor } from './Editor';
 import { EditorProvider } from './EditorProvider';
 

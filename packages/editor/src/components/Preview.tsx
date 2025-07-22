@@ -1,6 +1,6 @@
-import { useFormBuilder } from '@form-builder/core';
-import { FormRenderer } from '@form-builder/renderer';
-import { FormSchema } from '@form-builder/types';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import { FormRenderer } from '@parama-dev/form-builder-renderer';
+import { FormSchema } from '@parama-dev/form-builder-types';
 import { PlayIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@parama-ui/react';
