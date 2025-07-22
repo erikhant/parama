@@ -74,7 +74,7 @@
 }
 
 .form-group-prefix {
-  @apply inline-flex items-center rounded-l-lg border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm;
+  @apply inline-flex items-center rounded-l-lg border border-r-0 border-gray-300 dark:border-background-dark px-3 text-gray-500 sm:text-sm;
 }
 
 .form-group-prefix + .form-control {
@@ -82,5 +82,5 @@
 }
 
 .form-group-suffix {
-  @apply inline-flex items-center rounded-r-lg border border-l-0 border-gray-300 px-3 text-gray-500 sm:text-sm;
+  @apply inline-flex items-center rounded-r-lg border border-l-0 border-gray-300 dark:border-background-dark px-3 text-gray-500 sm:text-sm;
 }

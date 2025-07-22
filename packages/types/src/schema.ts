@@ -1,12 +1,8 @@
-import {
-  BaseValidation,
-  CheckboxValidation,
-  FileValidation,
-  TextValidation,
-  ValidatorRegistry
-} from './validation';
+import { ValidationRule, ValidatorRegistry } from './validation';
 
 export interface FormSchema {
+  id: string;
+  version: string;
   title: string;
   description?: string;
   layout: {
@@ -14,6 +10,9 @@ export interface FormSchema {
     gap: number;
   };
   fields: FormField[];
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
 }
 
 export type FormField =
@@ -22,15 +21,37 @@ export type FormField =
   | RadioField
   | CheckboxField
   | SelectField
+  | MultiSelectField
   | DateField
-  | SubmitForm;
+  | ButtonField
+  | BlockField;
 
 export interface FormBuilderProps {
   schema: FormSchema;
   validators?: ValidatorRegistry;
   data?: Record<string, any>;
-  templates?: FormTemplate[];
-  variables?: Record<string, any>;
+  onSubmit?: (data: Record<string, any>) => void;
+  onChange?: (data: Record<string, any>) => void;
+  onCancel?: () => void;
+}
+
+export interface FormEditorOptions {
+  showJsonCode?: boolean;
+  generalSettings?: FieldSettings;
+  propertiesSettings?: FieldSettings;
+  appearanceSettings?: FieldSettings;
+  validationSettings?: FieldSettings;
+  conditionsSettings?: FieldSettings;
+  eventsSettings?: FieldSettings;
+}
+
+export type FieldSettings = 'on' | 'off' | 'readonly';
+
+export interface FormEditorProps {
+  onSaveSchema?: (data: FormSchema) => void;
+  loadPreset?: (() => PresetTypeDef[]) | PresetTypeDef[];
+  schema?: FormSchema;
+  options?: FormEditorOptions;
 }
 
 export interface FormTemplate {
@@ -42,13 +63,58 @@ export interface FormTemplate {
 }
 
 export interface ExternalDataSource<TData = any> {
-  source: string;
+  url: string;
   params?: Record<string, any>;
   headers?: Record<string, string>;
   mapper?: {
     dataSource: string;
     dataMapper: TData;
   };
+}
+
+export interface LogicalCondition {
+  operator: 'Equals' | 'NotEqual' | 'GreaterThan' | 'LessThan' | 'LessOrEqual' | 'GreaterOrEqual';
+}
+
+export interface Condition {
+  expression: string;
+  fallback?: any;
+}
+
+export interface FieldConditions {
+  hidden?: Condition;
+  disabled?: Condition;
+  readOnly?: Condition;
+}
+
+export interface Events {
+  type: 'fetch' | 'setValue' | 'reset';
+  target: string;
+  params?: Record<string, any>;
+  config?: Record<string, any>;
+}
+
+export interface DynamicOptions {
+  url: string;
+  dependsOn?: string[];
+  queryParams?: Record<string, string>;
+  headers?: Record<string, string>;
+  dataPath?: string;
+  cache?: boolean;
+  cacheKey?: string;
+  cacheDuration?: number;
+}
+
+export interface FileOptions {
+  accept: {
+    [key: string]: readonly string[];
+  };
+  maxSize?: number; // in bytes
+  maxFiles?: number;
+  multiple?: boolean;
+  server: string;
+  instantUpload?: boolean;
+  bulkUpload?: boolean;
 }
 
 export interface BaseField {
@@ -61,12 +127,13 @@ export interface BaseField {
   defaultValue?: any;
   value: any;
   helpText?: string;
-  readOnly: boolean;
+  readOnly?: boolean;
   placeholder?: string;
   width: number;
   appearance?: Record<string, any>;
   conditions?: FieldConditions;
-  // ... common properties
+  events?: Events[];
+  validations?: ValidationRule[];
 }
 
 export interface FieldGroupItem {
@@ -80,22 +147,9 @@ export interface FieldGroupItem {
   };
 }
 
-interface Condition {
-  dependsOn: string;
-  operator: 'Equals' | 'NotEqual' | 'GreaterThan' | 'LessThan' | 'LessOrEqual' | 'GreaterOrEqual';
-  value: any;
-}
-
-export interface FieldConditions {
-  visibility?: Condition;
-  disabled?: Condition;
-  readOnly?: Condition;
-}
-
 export interface TextField extends BaseField {
-  type: 'text' | 'email' | 'textarea' | 'password' | 'number';
+  type: 'text' | 'email' | 'textarea' | 'password' | 'number' | 'tel' | 'url' | 'hidden';
   placeholder?: string;
-  validation?: TextValidation;
   rows?: number;
   appearance?: {
     prefix?: {
@@ -126,7 +180,6 @@ export interface RadioField extends BaseField {
     position?: 'horizontal' | 'vertical';
     bordered?: boolean;
   };
-  validation?: BaseValidation;
 }
 
 export interface CheckboxField extends BaseField {
@@ -136,17 +189,12 @@ export interface CheckboxField extends BaseField {
     position?: 'horizontal' | 'vertical';
     bordered?: boolean;
   };
-  validation?: CheckboxValidation;
 }
 
 export interface FileField extends BaseField {
   type: 'file';
-  multiple: boolean;
-  validation?: FileValidation;
-  options?: {
-    server: string;
-    instantUpload: boolean;
-  };
+  options: FileOptions;
+  formExtension?: Record<string, any>;
   appearance?: {
     droppable: boolean;
   };
@@ -167,7 +215,6 @@ export interface DateField extends BaseField {
     disabledWeekdays?: number[];
     restrictedMonths?: string[];
   };
-  validation?: BaseValidation;
 }
 
 export interface SelectField extends BaseField {
@@ -180,11 +227,50 @@ export interface SelectField extends BaseField {
     label: string;
     items: FieldGroupItem[];
   }[];
-  validation?: BaseValidation;
   external?: ExternalDataSource<FieldGroupItem>;
 }
 
-export interface SubmitForm extends BaseField {
-  type: 'submit';
+export interface MultiSelectField extends BaseField {
+  type: 'multiselect';
+  multiple: boolean;
+  placeholder?: string;
+  options: FieldGroupItem[];
+  external?: ExternalDataSource<FieldGroupItem>;
 }
-// Add other validation types as needed (NumberValidation, DateValidation, etc.)
+
+export interface ButtonField extends Pick<BaseField, 'id' | 'label' | 'disabled' | 'width' | 'conditions'> {
+  type: 'submit' | 'reset' | 'button';
+  action: 'submit' | 'reset' | 'cancel';
+  appearance?: {
+    color?: 'primary' | 'secondary';
+    variant?: 'fill' | 'outline' | 'ghost' | 'shadow';
+    size?: 'xs' | 'sm' | 'lg' | 'default';
+  };
+}
+
+export interface BlockField extends Pick<BaseField, 'id' | 'width' | 'conditions'> {
+  type: 'block' | 'spacer';
+  height?: number;
+  content: any; // Can be a React component or HTML content
+}
+
+export interface FieldTypeDef {
+  id: string;
+  type: string;
+  label: string;
+  group: 'fields' | 'presets';
+  description?: string;
+  image?: string;
+  icon?: object | string; // Can be a React component or a string (e.g., emoji)
+}
+
+export interface FieldTypes {
+  inputs: FieldTypeDef[];
+  selections: FieldTypeDef[];
+  presentations: FieldTypeDef[];
+  [x: string]: FieldTypeDef[];
+}
+
+export interface PresetTypeDef extends FieldTypeDef {
+  fields: FormField[];
+}

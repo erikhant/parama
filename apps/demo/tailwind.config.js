@@ -1,7 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './src/**/*.{js,ts,jsx,tsx}' // Scans all packages
+    './src/**/*.{js,ts,jsx,tsx}', // Demo app source files
+    '../../packages/editor/src/**/*.{js,ts,jsx,tsx}', // Editor package source
+    '../../packages/parama-ui/src/**/*.{js,ts,jsx,tsx}', // UI package source
+    '../../packages/renderer/src/**/*.{js,ts,jsx,tsx}' // Renderer package source
   ],
   theme: {
     extend: {

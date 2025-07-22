@@ -2,4 +2,6 @@ export * from './ToolboxItem';
 export * from './ToolboxItemOverlay';
 export * from './ToolboxList';
 export * from './ToolboxPanel';
-export * from './fieldTypes';
+export * from './ToolboxSearch';
+export * from './ToolboxSearchWithHook';
+export * from './PresetManager';

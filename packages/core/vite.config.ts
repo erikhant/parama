@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import path from 'path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [
@@ -21,13 +24,30 @@ export default defineConfig({
       fileName: (format) => `index.${format}.js`
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'zustand', '@form-builder/types']
+      external: [
+        'react',
+        'react-dom',
+        'zustand',
+        '@form-builder/types',
+        'ajv',
+        'lodash',
+        'lodash-es',
+        'uuid',
+        'validator'
+      ],
+      output: {
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+          zustand: 'Zustand',
+          '@form-builder/types': 'FormBuilderTypes'
+        }
+      }
     }
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '@form-builder/types': path.resolve(__dirname, '../types/dist')
+      '@': path.resolve(__dirname, 'src')
     }
   }
 });

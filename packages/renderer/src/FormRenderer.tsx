@@ -1,24 +1,11 @@
-import React from 'react';
-import { useFormBuilder } from '@form-builder/core';
-import { FormField } from './FormField';
+import { FormBuilderProps } from '@form-builder/types';
+import { FormProvider } from './FormProvider';
+import { FormSubmitter } from './FormSubmitter';
 
-export const FormRenderer = () => {
-  const { schema, actions } = useFormBuilder();
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const { data, isValid } = await actions.submitForm();
-    if (isValid) {
-      console.log('Form submitted', JSON.stringify(data));
-    }
-  };
-
+export const FormRenderer: React.FC<FormBuilderProps> = (props) => {
   return (
-    <form
-      className={`grid grid-cols-${schema.layout.colSize} gap-${schema.layout.gap}`}
-      onSubmit={onSubmit}>
-      {schema.fields.map((field) => (
-        <FormField key={field.id} field={field} />
-      ))}
-    </form>
+    <FormProvider {...props}>
+      <FormSubmitter onSubmit={props.onSubmit} onChange={props.onChange} onCancel={props.onCancel} />
+    </FormProvider>
   );
 };

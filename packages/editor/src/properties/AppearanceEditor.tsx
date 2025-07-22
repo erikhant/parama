@@ -13,8 +13,10 @@ import {
 } from '@parama-ui/react';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
-import { IconPicker } from './IconPicker';
+import { IconPicker } from '../components/IconPicker';
 import { ManageOptions } from './select/ManageOptions';
+import { SectionPanel } from './SectionPanel';
+import { useEditor } from '../store/useEditor';
 
 type AppearanceEditorProps = {
   field: FormField;
@@ -22,6 +24,8 @@ type AppearanceEditorProps = {
 };
 
 export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => {
+  const { editor } = useEditor();
+
   const renderAppearanceOptions = () => {
     switch (field.type) {
       case 'text':
@@ -29,7 +33,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
       case 'number':
       case 'password':
         return (
-          <>
+          <SectionPanel title="Appearance">
             <FormItem orientation="horizontal">
               {/* PREFIX PROPERTIES */}
               <div className="form-captions !col-span-4">
@@ -42,6 +46,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                     variant="ghost"
                     color="secondary"
                     size="xs"
+                    disabled={editor.options?.appearanceSettings === 'readonly'}
                     className="text-xs text-gray-500"
                     onClick={() =>
                       onChange({
@@ -56,7 +61,11 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" color="secondary" size="xs">
+                      <Button
+                        disabled={editor.options?.appearanceSettings === 'readonly'}
+                        variant="ghost"
+                        color="secondary"
+                        size="xs">
                         <PlusIcon size={16} />
                       </Button>
                     </DropdownMenuTrigger>
@@ -105,6 +114,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                   <Input
                     type="text"
                     value={field.appearance?.prefix?.content || ''}
+                    disabled={editor.options?.appearanceSettings === 'readonly'}
                     className="!col-span-5"
                     onChange={(e) =>
                       onChange({
@@ -131,6 +141,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                     color="secondary"
                     size="xs"
                     className="text-xs text-gray-500"
+                    disabled={editor.options?.appearanceSettings === 'readonly'}
                     onClick={() =>
                       onChange({
                         appearance: {
@@ -144,7 +155,11 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" color="secondary" size="xs">
+                      <Button
+                        variant="ghost"
+                        color="secondary"
+                        disabled={editor.options?.appearanceSettings === 'readonly'}
+                        size="xs">
                         <PlusIcon size={16} />
                       </Button>
                     </DropdownMenuTrigger>
@@ -193,6 +208,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                   <Input
                     type="text"
                     value={field.appearance?.suffix?.content || ''}
+                    disabled={editor.options?.appearanceSettings === 'readonly'}
                     className="!col-span-5"
                     onChange={(e) =>
                       onChange({
@@ -206,8 +222,8 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 ))}
             </FormItem>
 
-            {/* ADD-ON START PROPERTIES */}
-            <FormItem orientation="horizontal">
+            {/* ADD-ON START PROPERTIES (EXPERIMENTAL) */}
+            {/* <FormItem orientation="horizontal">
               <div className="form-captions !col-span-4">
                 <Label>Add-on start</Label>
                 <p className="form-description">Prepend an element before input</p>
@@ -327,10 +343,10 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                   )}
                 </div>
               )}
-            </FormItem>
+            </FormItem> */}
 
-            {/* ADD-ON END PROPERTIES */}
-            <FormItem orientation="horizontal">
+            {/* ADD-ON END PROPERTIES (EXPERIMENTAL) */}
+            {/* <FormItem orientation="horizontal">
               <div className="form-captions !col-span-4">
                 <Label>Add-on end</Label>
                 <p className="form-description">Append an element after input</p>
@@ -449,32 +465,53 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                   )}
                 </div>
               )}
+            </FormItem> */}
+          </SectionPanel>
+        );
+      case 'textarea':
+        return (
+          <SectionPanel title="Appearance">
+            <FormItem>
+              <Label>Row size</Label>
+              <Input
+                type="number"
+                min={3}
+                value={field.rows || ''}
+                disabled={editor.options?.appearanceSettings === 'readonly'}
+                placeholder="Number of rows"
+                onChange={(e) => {
+                  const rows = parseInt(e.target.value, 10);
+                  if (!isNaN(rows) && rows > 0) {
+                    onChange({ rows: rows });
+                  } else {
+                    onChange({ rows: undefined });
+                  }
+                }}
+              />
             </FormItem>
-          </>
+          </SectionPanel>
         );
       case 'date':
         const [enableSelectionMonth, setEnableSelectionMonth] = useState(
-          field.options?.dropdownType !== undefined &&
-            field.options?.dropdownType !== 'dropdown-years'
+          field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years'
         );
         const [enableSelectionYear, setEnableSelectionYear] = useState(
-          field.options?.dropdownType !== undefined &&
-            field.options?.dropdownType !== 'dropdown-months'
+          field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-months'
         );
 
         return (
-          <>
+          <SectionPanel title="Appearance">
             <FormItem orientation="horizontal">
-              <div className="form-captions !col-span-4">
+              <div className="form-captions !col-span-3">
                 <Label htmlFor="enable-selection-month">Selection month</Label>
                 <p className="form-description">Enable month selection</p>
               </div>
-              <div className="col-span-2 flex justify-end">
+              <div className="col-span-2 flex items-center justify-end">
                 <Switch
                   id="enable-selection-month"
+                  disabled={editor.options?.appearanceSettings === 'readonly'}
                   checked={
-                    field.options?.dropdownType !== undefined &&
-                    field.options?.dropdownType !== 'dropdown-years'
+                    field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years'
                   }
                   onCheckedChange={(checked) => {
                     setEnableSelectionMonth(checked);
@@ -496,16 +533,16 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
               </div>
             </FormItem>
             <FormItem orientation="horizontal">
-              <div className="form-captions !col-span-4">
+              <div className="form-captions !col-span-3">
                 <Label htmlFor="enable-selection-year">Selection year</Label>
                 <p className="form-description">Enable year selection</p>
               </div>
-              <div className="col-span-2 flex justify-end">
+              <div className="col-span-2 flex items-center justify-end">
                 <Switch
                   id="enable-selection-year"
+                  disabled={editor.options?.appearanceSettings === 'readonly'}
                   checked={
-                    field.options?.dropdownType !== undefined &&
-                    field.options?.dropdownType !== 'dropdown-months'
+                    field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-months'
                   }
                   onCheckedChange={(checked) => {
                     setEnableSelectionYear(checked);
@@ -526,17 +563,12 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 />
               </div>
             </FormItem>
-          </>
+          </SectionPanel>
         );
       default:
         return null;
     }
   };
 
-  return (
-    <div className="w-full space-y-4">
-      <h6 className="font-semibold uppercase text-xs text-gray-400">Appearance</h6>
-      {renderAppearanceOptions()}
-    </div>
-  );
+  return renderAppearanceOptions();
 };

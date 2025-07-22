@@ -3,7 +3,11 @@ const defaultTheme = require('tailwindcss/defaultTheme');
 
 export default {
   darkMode: ['class'],
-  content: ['./src/**/*.{ts,tsx,css}'],
+  content: [
+    process.env.NODE_ENV !== 'production'
+      ? './src/**/*.{ts,tsx,css}'
+      : './src/components/**/*.{ts,tsx,css}'
+  ],
   theme: {
     fontFamily: {
       sans: ['Inter', ...defaultTheme.fontFamily.sans]
@@ -64,6 +68,28 @@ export default {
           DEFAULT: 'rgba(var(--warning-default), <alpha-value>)',
           dark: 'rgba(var(--warning-dark), <alpha-value>)'
         }
+      },
+      keyframes: {
+        'accordion-down': {
+          from: {
+            height: '0'
+          },
+          to: {
+            height: 'var(--radix-accordion-content-height)'
+          }
+        },
+        'accordion-up': {
+          from: {
+            height: 'var(--radix-accordion-content-height)'
+          },
+          to: {
+            height: '0'
+          }
+        }
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out'
       }
     }
   },

@@ -1,34 +1,52 @@
 import { FormField } from './schema';
+import type { Options as AjvOptions } from 'ajv';
 
 export type ValidatorFunction = (field: FormField) => Promise<boolean> | boolean;
 export type ValidatorRegistry = Record<string, ValidatorFunction>;
 
-export interface BaseValidation {
-  required?: boolean | { value: boolean; message: string };
-  custom?: Array<{
-    validator: string;
-    value?: any;
-    message?: string;
-  }>;
+export interface ValidationRule {
+  type:
+    | 'required'
+    | 'pattern'
+    | 'minLength'
+    | 'maxLength'
+    | 'min'
+    | 'max'
+    | 'minSelected'
+    | 'maxSelected'
+    | 'custom'
+    | 'server'
+    | 'cross-field'
+    | 'json-schema';
+  message: string;
+  name?: string;
+  trigger?: ValidationTrigger;
+  pattern?: RegExp;
+  expression?: string;
+  value?: any;
+  json?: JSONSchemaValidation;
+  serverConfig?: ServerConfig;
 }
 
-export interface CheckboxValidation extends BaseValidation {
-  minSelected: number;
-  maxSelected: number;
+export interface ValidationState {
+  isValid: boolean;
+  isPending: boolean;
+  messages: string[];
+  lastValidated?: number;
 }
 
-export interface TextValidation extends BaseValidation {
-  minLength?: number | { value: number; message: string };
-  maxLength?: number | { value: number; message: string };
-  min?: number | { value: number; message: string };
-  max?: number | { value: number; message: string };
-  pattern?: RegExp | { value: RegExp; message: string };
+export type ValidationTrigger = 'change' | 'blur' | 'submit';
+
+export interface JSONSchemaValidation {
+  schema?: object;
+  ajvOptions?: AjvOptions;
+  severity?: 'error' | 'warning';
 }
 
-export interface FileValidation extends BaseValidation {
-  accept: {
-    [x: string]: string[];
-  };
-  maxSize?: number; // in bytes
-  maxFiles?: number;
+export interface ServerConfig {
+  url: string;
+  headers?: Record<string, string>;
+  params?: Record<string, any>;
+  debounce?: number;
+  dataSource?: string;
 }

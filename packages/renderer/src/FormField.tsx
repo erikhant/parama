@@ -1,9 +1,22 @@
-import React, { useState, useCallback, useMemo, memo } from 'react';
-import Dropzone from 'react-dropzone';
 import { useFormBuilder } from '@form-builder/core';
+import type {
+  BlockField,
+  DateField,
+  FieldGroupItem,
+  FormField as FormFieldType,
+  MultiSelectField,
+  TextField,
+  FileField,
+  RadioField,
+  CheckboxField,
+  SelectField,
+  ButtonField as ButtonFieldType,
+  FormBuilderProps
+} from '@form-builder/types';
 import {
   Button,
   Checkbox,
+  cn,
   DatePicker,
   DatePickerProps,
   DateRange,
@@ -11,6 +24,7 @@ import {
   FormItem,
   Input,
   Label,
+  MultiSelect,
   RadioGroup,
   RadioGroupItem,
   Select,
@@ -20,18 +34,14 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
+  FileUpload,
   Textarea
 } from '@parama-ui/react';
 import * as LucideIcons from 'lucide-react';
-import type {
-  DateField,
-  FieldConditions,
-  FieldGroupItem,
-  FormField as FormFieldType
-} from '@form-builder/types';
-import '../../parama-ui/dist/parama-ui.min.css';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 
-// Memoized components for better performance
+// Memoized components remain the same
 const MemoizedIcon = memo(({ iconName, size = 15 }: { iconName: string; size?: number }) => {
   const Icon = (LucideIcons as any)[iconName];
   return Icon ? <Icon size={size} /> : null;
@@ -62,11 +72,9 @@ const MemoizedSelectGroupsOptions = memo(
     <>
       {optionGroups.map((group) => (
         <SelectGroup key={group.id}>
-          {group.label && ( // Check if group has a label
-            <SelectLabel>{group.label}</SelectLabel>
-          )}
+          {group.label && <SelectLabel>{group.label}</SelectLabel>}
           {group.items
-            .filter((opt) => opt.id && opt.value && opt.label) // Ensure valid options
+            .filter((opt) => opt.id && opt.value && opt.label)
             .map((opt) => (
               <SelectItem key={opt.id} value={opt.value}>
                 {opt.label}
@@ -78,14 +86,16 @@ const MemoizedSelectGroupsOptions = memo(
   )
 );
 
-const MemoizedRadioItems = memo(({ items, fieldName }: { items: any[]; fieldName: string }) => (
+const MemoizedRadioItems = memo(({ items, defaultValue }: { items: FieldGroupItem[]; defaultValue?: string }) => (
   <>
-    {items.map((item) => (
-      <div key={item.id} className="flex items-center space-x-2">
-        <RadioGroupItem value={item.value} id={item.id as string} />
-        <Label htmlFor={item.id as string}>{item.label}</Label>
-      </div>
-    ))}
+    {items
+      .filter((item) => item.id && item.value && item.label)
+      .map((item) => (
+        <div key={item.id} className="flex items-center space-x-2">
+          <RadioGroupItem value={item.value} id={item.id as string} />
+          <Label htmlFor={item.id as string}>{item.label}</Label>
+        </div>
+      ))}
   </>
 ));
 
@@ -93,101 +103,132 @@ const MemoizedCheckboxItems = memo(
   ({
     items,
     fieldName,
-    value,
+    defaultValue,
     required,
+    disabled,
     onCheckedChange
   }: {
-    items: any[];
+    items: FieldGroupItem[];
     fieldName: string;
-    value: any;
+    defaultValue: string[] | undefined;
     required: boolean;
+    disabled?: boolean;
     onCheckedChange: (item: any) => (checked: boolean) => void;
   }) => (
     <>
-      {items.map((item) => (
-        <div className="flex items-center space-x-2" key={item.id}>
-          <Checkbox
-            id={item.id as string}
-            name={fieldName}
-            required={required}
-            disabled={item.disabled}
-            value={item.value}
-            defaultChecked={value?.includes(item.value)}
-            onCheckedChange={onCheckedChange(item)}
-            className="mr-2"
-          />
-          <Label htmlFor={item.id as string}>{item.label}</Label>
-        </div>
-      ))}
+      {items
+        .filter((item) => item.id && item.value && item.label)
+        .map((item) => (
+          <div className="flex items-center space-x-2" key={item.id}>
+            <Checkbox
+              id={item.id as string}
+              name={fieldName}
+              required={required}
+              disabled={disabled || item.disabled}
+              value={item.value}
+              defaultChecked={defaultValue?.includes(item.value)}
+              onCheckedChange={onCheckedChange(item)}
+              className="mr-2"
+            />
+            <Label htmlFor={item.id as string}>{item.label}</Label>
+          </div>
+        ))}
     </>
   )
 );
 
-export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) => {
-  const { formData, actions } = useFormBuilder();
-  const value = formData[field.id] ?? field.defaultValue;
+// Type for input fields that have all the common properties
+type InputFieldType = TextField | FileField | RadioField | CheckboxField | SelectField | MultiSelectField | DateField;
 
-  // Memoized handlers
+// Separate component for block fields
+const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
+  const { mode } = useFormBuilder();
+  const isEditor = mode === 'editor';
+
+  if (field.type === 'spacer') {
+    const height = field.height || 2;
+    const spacerHeight = height * 24; // 24px per height unit
+
+    return (
+      <div className={`column-span-${field.width}`} style={{ height: `${spacerHeight}px` }}>
+        {isEditor && (
+          <div className="h-full bg-void border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+            <span className="text-gray-500 text-sm">Spacer ({height} units)</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`column-span-${field.width}`}
+      style={{ minHeight: field.height ? `${field.height * 24}px` : 'auto' }}>
+      {typeof field.content === 'string' ? (
+        <div className="min-h-full" dangerouslySetInnerHTML={{ __html: field.content }} />
+      ) : (
+        field.content
+      )}
+    </div>
+  );
+});
+
+BlockField.displayName = 'BlockField';
+
+// Separate component for button fields
+const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps['onCancel'] }> = memo(
+  ({ field, onCancel }) => {
+    const { actions } = useFormBuilder();
+
+    const handleReset = () => {
+      actions.resetForm();
+    };
+
+    return (
+      <div className={`column-span-${field.width}`}>
+        <Button
+          type={field.type}
+          color={field.appearance?.color}
+          size={field.appearance?.size}
+          variant={field.appearance?.variant}
+          className="w-full"
+          onClick={field.action === 'cancel' ? onCancel : field.action === 'reset' ? handleReset : undefined}>
+          {field.label}
+        </Button>
+      </div>
+    );
+  }
+);
+
+ButtonField.displayName = 'ButtonField';
+
+// Main component for form input fields (excluding block and button types)
+const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
+  const { formData, actions, visibleFields, disabledFields, readOnlyFields, mode } = useFormBuilder();
+
+  const value = formData[field.id] ?? field.defaultValue;
+  const validationState = actions.getFieldValidation(field.id);
+
+  const [textValue, setTextValue] = useState<string>(value || '');
+  const [debouncedTextValue] = useDebounce(textValue, 300);
+  const [firstRender, setFirstRender] = useState(true);
+
   const handleChange = useCallback(
     (value: any) => {
       actions.updateFieldValue(field.id, value);
-      actions.validateField(field.id);
     },
     [actions, field.id]
   );
 
-  const handleFocus = useCallback(() => {
-    actions.selectField(field.id);
-  }, [actions, field.id]);
+  // Handle text input changes
+  useEffect(() => {
+    if (firstRender) {
+      setFirstRender(false);
+      return;
+    }
+    handleChange(debouncedTextValue);
+  }, [debouncedTextValue]);
 
-  // Memoized validation value getter
-  const getValidationValue = useCallback(
-    (validationName: string) => {
-      if (field.type === 'submit') return false;
-      if (!field.validation) return false;
-      if (typeof (field.validation as Record<string, unknown>)?.[validationName] === 'boolean') {
-        return (field.validation as Record<string, unknown>)[validationName] === true;
-      } else {
-        return (field.validation as Record<string, { value: unknown; message: string }>)[
-          validationName
-        ]?.value;
-      }
-    },
-    [field]
-  );
-
-  // Memoized conditions evaluator
-  const evaluateConditions = useCallback(
-    (field: FormFieldType, type: keyof FieldConditions) => {
-      if (!field.conditions?.[type]) return type === 'visibility' ? true : false;
-
-      const { dependsOn, operator, value } = field.conditions[type];
-      if (!dependsOn || !operator || value === undefined) return false;
-
-      const dependentValue = formData[dependsOn];
-      if (!dependentValue) return false;
-
-      switch (operator) {
-        case 'Equals':
-          return dependentValue === value;
-        case 'NotEqual':
-          return dependentValue !== value;
-        case 'GreaterThan':
-          return dependentValue > value;
-        case 'LessThan':
-          return dependentValue < value;
-        case 'LessOrEqual':
-          return dependentValue <= value;
-        case 'GreaterOrEqual':
-          return dependentValue >= value;
-        default:
-          return true;
-      }
-    },
-    [formData]
-  );
-
-  // Memoized appearance renderer
   const renderAppearance = useCallback(
     ({
       type,
@@ -225,32 +266,37 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     []
   );
 
-  // Memoized computed values
-  const isDisabled = useMemo(
-    () => evaluateConditions(field, 'disabled'),
-    [evaluateConditions, field]
-  );
-  const isReadOnly = useMemo(
-    () => evaluateConditions(field, 'readOnly'),
-    [evaluateConditions, field]
-  );
-  const isRequired = useMemo(() => getValidationValue('required') as boolean, [getValidationValue]);
+  // Determine field state from workflow engine
   const isVisible = useMemo(
-    () => evaluateConditions(field, 'visibility'),
-    [evaluateConditions, field]
+    () => (mode === 'editor' ? true : visibleFields.has(field.id)),
+    [visibleFields, field.id, mode]
   );
 
-  // Memoized input change handlers
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      handleChange(e.target.value);
-    },
-    [handleChange]
+  const isDisabled = useMemo(
+    () => (mode === 'editor' ? false : disabledFields.has(field.id)),
+    [disabledFields, field.id, mode]
   );
+
+  const isReadOnly = useMemo(
+    () => (mode === 'editor' ? false : readOnlyFields.has(field.id)),
+    [readOnlyFields, field.id, mode]
+  );
+
+  const isRequired = useMemo(() => {
+    const requiredRules = field.validations?.filter((rule: any) => rule.type === 'required')[0];
+    return requiredRules ? true : false;
+  }, [field.validations]);
 
   const handleSelectChange = useCallback(
     (selectedValue: string) => {
       handleChange(selectedValue);
+    },
+    [handleChange]
+  );
+
+  const handleMultiSelectChange = useCallback(
+    (selectedValues: string[]) => {
+      handleChange(selectedValues);
     },
     [handleChange]
   );
@@ -262,76 +308,110 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     [handleChange]
   );
 
-  // Memoized checkbox change handler factory
   const createCheckboxHandler = useCallback(
     (item: any) => (checked: boolean) => {
-      const newValue = checked
-        ? [...(value || []), item.value]
-        : (value || []).filter((v: any) => v !== item.value);
+      const newValue = checked ? [...(value || []), item.value] : (value || []).filter((v: any) => v !== item.value);
       handleChange(newValue);
     },
     [value, handleChange]
   );
 
-  // Memoized date states and handlers
-  const [singleDate, setSingleDate] = useState<Date | undefined>(() =>
-    value && (field as DateField).mode === 'single' ? new Date(value) : undefined
-  );
-  const [multipleDates, setMultipleDates] = useState<Date[]>(() =>
-    value && (field as DateField).mode === 'multiple'
-      ? value.map((d: string) => new Date(d))
-      : undefined
-  );
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() =>
-    value && (field as DateField).mode === 'range'
-      ? {
-          from: value.from ? new Date(value.from) : undefined,
-          to: value.to ? new Date(value.to) : undefined
-        }
-      : undefined
-  );
+  const [singleDate, setSingleDate] = useState<Date | undefined>(() => {
+    if ((field as DateField).mode === 'single' && value) {
+      return value instanceof Date ? value : typeof value === 'string' ? new Date(value) : undefined;
+    }
+    return undefined;
+  });
+
+  const [multipleDates, setMultipleDates] = useState<Date[] | undefined>(() => {
+    if ((field as DateField).mode === 'multiple' && Array.isArray(value)) {
+      return value
+        .filter((d) => d instanceof Date || (typeof d === 'string' && !isNaN(Date.parse(d))))
+        .map((d) => (d instanceof Date ? d : new Date(d)));
+    }
+    return undefined;
+  });
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    if (
+      (field as DateField).mode === 'range' &&
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      ('from' in value || 'to' in value)
+    ) {
+      const isValidDateValue = (val: any) => {
+        if (!val) return false;
+        if (val instanceof Date) return !isNaN(val.getTime());
+        if (typeof val === 'string') return !isNaN(Date.parse(val));
+        return false;
+      };
+
+      return {
+        from: isValidDateValue(value.from)
+          ? value.from instanceof Date
+            ? value.from
+            : new Date(value.from)
+          : undefined,
+        to: isValidDateValue(value.to) ? (value.to instanceof Date ? value.to : new Date(value.to)) : undefined
+      };
+    }
+    return undefined;
+  });
 
   const handleSingleDateChange = useCallback(
     (date: Date | undefined) => {
       setSingleDate(date);
-      actions.updateFieldValue(field.id, date ? date.toLocaleDateString() : undefined);
-      actions.validateField(field.id);
+      handleChange(date ? date : undefined);
     },
-    [actions, field.id]
+    [handleChange]
   );
 
   const handleMultipleDateChange = useCallback(
     (dates: Date[]) => {
       setMultipleDates(dates);
-      actions.updateFieldValue(field.id, dates);
-      actions.validateField(field.id);
+      handleChange(dates);
     },
-    [actions, field.id]
+    [handleChange]
   );
 
   const handleDateRangeChange = useCallback(
     (range: DateRange) => {
       setDateRange(range);
-      actions.updateFieldValue(field.id, range);
-      actions.validateField(field.id);
+      handleChange(range);
     },
-    [actions, field.id]
+    [handleChange]
   );
 
-  // Memoized disabled dates
+  const handleFileChange = useCallback(
+    (files: File[]) => {
+      console.log('Selected files:', files);
+      // setFiles(files);
+      handleChange(files);
+    },
+    [handleChange]
+  );
+
+  // Memoized disabled dates (same as before)
   const disabledDates = useMemo(() => {
     const disabled: any = {};
 
     if ((field as DateField).options?.disabledPast) {
-      disabled.before = new Date(new Date().setDate(new Date().getDate() - 1));
+      disabled.before = new Date();
+    } else {
+      disabled.before = undefined;
     }
 
     if ((field as DateField).options?.disabledFuture) {
-      disabled.after = new Date(new Date().setDate(new Date().getDate() + 1));
+      disabled.after = new Date();
+    } else {
+      disabled.after = undefined;
     }
 
     if ((field as DateField).options?.disabledWeekdays) {
       disabled.dayOfWeek = (field as DateField).options?.disabledWeekdays;
+    } else {
+      delete disabled.dayOfWeek;
     }
 
     return Object.keys(disabled).length > 0 ? disabled : undefined;
@@ -341,31 +421,20 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     (field as DateField).options?.disabledWeekdays
   ]);
 
-  // Memoized common input props
+  // Memoized common input props (updated with new validation state)
   const commonInputProps = useMemo(
     () => ({
       id: field.id,
       name: field.name,
       disabled: isDisabled,
-      readOnly: isReadOnly,
       placeholder: field.placeholder,
       required: isRequired,
-      onFocus: handleFocus,
-      className: field.error ? 'border-red-500' : ''
+      className: !validationState.isValid || field.error ? 'border-red-500' : ''
     }),
-    [
-      field.id,
-      field.name,
-      field.placeholder,
-      field.error,
-      isDisabled,
-      isReadOnly,
-      isRequired,
-      handleFocus
-    ]
+    [field.id, field.name, field.placeholder, field.error, isDisabled, isRequired, validationState.isValid]
   );
 
-  // Memoized appearance props
+  // Memoized appearance props (same as before)
   const appearanceProps = useMemo(() => {
     if (!field.appearance) return null;
     if (
@@ -395,8 +464,35 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     return null;
   }, [field.appearance, renderAppearance]);
 
+  const multiselectOptions = useMemo(() => {
+    if (field.type === 'multiselect' && Array.isArray(field.options)) {
+      return field.options.map((option: FieldGroupItem) => ({
+        value: option.value,
+        label: option.label
+      }));
+    }
+    return [];
+  }, [field.type, field.type === 'multiselect' ? (field as MultiSelectField).options : null]);
+
+  // Effect to handle dynamic options loading
+  useEffect(() => {
+    if ((field.type === 'select' || field.type === 'multiselect') && field.external) {
+      if (firstRender) return;
+
+      actions.refreshFieldOptions(field.id);
+    }
+  }, [field.id, field.type === 'select' || field.type === 'multiselect' ? field.external : null, firstRender]);
+
   const renderInput = useMemo(() => {
     switch (field.type) {
+      case 'hidden':
+        if (mode === 'editor') {
+          return (
+            <Input {...commonInputProps} className={cn(commonInputProps.className, 'bg-void')} type="text" readOnly />
+          );
+        } else {
+          return <input type="hidden" value={field.value} />;
+        }
       case 'text':
       case 'email':
       case 'password':
@@ -404,28 +500,26 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
         const inputElement = (
           <Input
             {...commonInputProps}
+            className={cn(commonInputProps.className)}
             type={field.type}
-            defaultValue={value || ''}
-            onChange={handleInputChange}
+            value={textValue}
+            readOnly={isReadOnly}
+            onChange={(e) => setTextValue(e.target.value || '')}
           />
         );
 
-        return field.appearance ? (
-          <FormGroup {...appearanceProps}>{inputElement}</FormGroup>
-        ) : (
-          inputElement
-        );
-
+        return field.appearance ? <FormGroup {...appearanceProps}>{inputElement}</FormGroup> : inputElement;
       case 'textarea':
         return (
           <Textarea
             {...commonInputProps}
-            defaultValue={value || ''}
+            value={textValue}
+            readOnly={isReadOnly}
+            disabled={isDisabled}
             rows={field.rows || 3}
-            onChange={handleInputChange}
+            onChange={(e) => setTextValue(e.target.value || '')}
           />
         );
-
       case 'date':
         const commonDateProps = {
           name: field.name,
@@ -433,15 +527,12 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
           placeholder: field.placeholder,
           dateFormat: field.options?.dateFormat,
           disabled: disabledDates,
-          startMonth: field.options?.restrictedMonths?.[0]
-            ? new Date(field.options.restrictedMonths[0])
-            : undefined,
-          endMonth: field.options?.restrictedMonths?.[1]
-            ? new Date(field.options.restrictedMonths[1])
-            : undefined,
+          startMonth: field.options?.restrictedMonths?.[0] ? new Date(field.options.restrictedMonths[0]) : undefined,
+          endMonth: field.options?.restrictedMonths?.[1] ? new Date(field.options.restrictedMonths[1]) : undefined,
           captionLayout: field.options?.dropdownType as DatePickerProps['captionLayout'],
           container: document.getElementById(`item__${field.id}`),
-          className: field.error ? 'border-red-500' : 'border-gray-300'
+          className: !validationState.isValid ? 'border-red-500' : 'border-gray-300',
+          popoverClassName: 'z-[99]'
         };
 
         if (field.mode === 'single') {
@@ -471,7 +562,10 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
             <DatePicker
               mode="range"
               required
+              defaultMonth={dateRange?.from}
               selected={dateRange}
+              min={field.options?.min}
+              max={field.options?.max}
               onSelect={handleDateRangeChange}
               {...commonDateProps}
             />
@@ -483,11 +577,11 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
           <RadioGroup
             name={field.name}
             defaultValue={field.defaultValue}
-            disabled={field.disabled}
+            disabled={isDisabled}
             required={isRequired}
             onValueChange={handleRadioChange}
             orientation={field.appearance?.position}>
-            <MemoizedRadioItems items={field.items || []} fieldName={field.name} />
+            <MemoizedRadioItems items={field.items || []} />
           </RadioGroup>
         );
 
@@ -496,7 +590,8 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
           <MemoizedCheckboxItems
             items={field.items || []}
             fieldName={field.name}
-            value={value}
+            defaultValue={value}
+            disabled={isDisabled}
             required={isRequired}
             onCheckedChange={createCheckboxHandler}
           />
@@ -506,19 +601,16 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
         return (
           <Select
             name={field.name}
-            defaultValue={value}
-            disabled={field.disabled}
+            value={value}
+            disabled={isDisabled}
             required={isRequired}
             onValueChange={handleSelectChange}>
-            <SelectTrigger className="w-full" onFocus={handleFocus}>
-              <SelectValue
-                className="text-slate-400"
-                placeholder={field.placeholder || 'Select an option'}
-              />
+            <SelectTrigger className="w-full">
+              <SelectValue className="text-slate-400" placeholder={field.placeholder || 'Select an option'} />
             </SelectTrigger>
             <SelectContent>
-              {field.options && field.options.length > 0 && (
-                <MemoizedSelectOptions options={field.options || []} />
+              {Array.isArray(field.options) && field.options.length > 0 && (
+                <MemoizedSelectOptions options={field.options} />
               )}
               {field.optionGroups && field.optionGroups.length > 0 && (
                 <MemoizedSelectGroupsOptions optionGroups={field.optionGroups} />
@@ -527,57 +619,67 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
           </Select>
         );
 
-      case 'file':
+      case 'multiselect':
         return (
-          <Dropzone
-            accept={field.validation?.accept}
-            disabled={field.disabled}
-            maxFiles={field.validation?.maxFiles}
-            maxSize={field.validation?.maxSize}
-            multiple={field.multiple}>
-            {({ getRootProps, getInputProps, acceptedFiles }) => (
-              <div
-                {...getRootProps()}
-                className={`border-2 border-dashed rounded-md p-4 ${field.error ? 'border-red-500' : 'border-gray-300'}`}>
-                <input {...getInputProps()} name={field.name} />
-                <p className="text-center">
-                  {field.label ?? 'Drag & drop files here, or click to browse'}
-                </p>
-                <ul>
-                  {acceptedFiles.map((file, index) => (
-                    <li key={`${file.name}_${index}`}>{file.name}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </Dropzone>
+          <MultiSelect
+            name={field.name}
+            defaultValue={value}
+            disabled={isDisabled}
+            placeholder={field.placeholder || 'Select options'}
+            modalPopover={true}
+            color="primary"
+            variant="shadow"
+            options={multiselectOptions}
+            onValueChange={handleMultiSelectChange}
+          />
         );
 
-      case 'submit':
-        return <Button type="submit">{field.label}</Button>;
+      case 'file':
+        return (
+          <FileUpload
+            accept={field.options.accept}
+            server={field.options.server}
+            name={field.name}
+            disabled={isDisabled}
+            required={isRequired}
+            multiple={field.options.multiple}
+            maxFiles={field.options.maxFiles}
+            maxSize={field.options.maxSize}
+            instantUpload={field.options.instantUpload}
+            onFilesChange={handleFileChange}
+            onError={(error) => {
+              actions.setFieldError(field.id, (error as Error).message || 'File upload failed');
+            }}
+            className={cn(!validationState.isValid || field.error ? 'border-red-500 bg-red-50' : '')}
+          />
+        );
 
       default:
         return <div>Unsupported field type</div>;
     }
   }, [
     field,
+    field.error,
     value,
+    mode,
     commonInputProps,
     appearanceProps,
-    handleInputChange,
     isRequired,
+    isReadOnly,
     isDisabled,
     singleDate,
     multipleDates,
     dateRange,
     disabledDates,
+    textValue,
+    validationState.isValid,
     handleSingleDateChange,
     handleMultipleDateChange,
     handleDateRangeChange,
     handleRadioChange,
     handleSelectChange,
-    createCheckboxHandler,
-    handleFocus
+    handleMultiSelectChange,
+    createCheckboxHandler
   ]);
 
   if (!isVisible) return null;
@@ -586,21 +688,41 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
     <FormItem
       id={`item__${field.id}`}
       className={`column-span-${field.width}`}
-      orientation={
-        field.type === 'checkbox' || field.type === 'radio'
-          ? field.appearance?.position
-          : 'vertical'
-      }>
-      {field.type !== 'submit' && <Label>{field.label}</Label>}
+      orientation={field.type === 'checkbox' || field.type === 'radio' ? field.appearance?.position : 'vertical'}>
+      {mode === 'editor' ? <Label>{field.label}</Label> : field.type !== 'hidden' ? <Label>{field.label}</Label> : null}
+      {field.type === 'file' && field.helpText && <p className="form-description">{field.helpText}</p>}
+      {field.type === 'file' && (!validationState.isValid || field.error) && (
+        <p className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</p>
+      )}
       {renderInput}
-      {field.type !== 'submit' && field.error && (
-        <span className="text-red-500 text-sm mt-1">{field.error}</span>
-      )}
-      {field.type !== 'submit' && field.helpText && (
-        <span className="form-description">{field.helpText}</span>
-      )}
+      {field.type !== 'file' ? (
+        !validationState.isValid || field.error ? (
+          <span className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</span>
+        ) : (
+          field.helpText && <span className="form-description">{field.helpText}</span>
+        )
+      ) : null}
     </FormItem>
   );
 });
+
+InputField.displayName = 'InputField';
+
+// Main router component that decides which sub-component to render
+export const FormField: React.FC<{
+  field: FormFieldType;
+  onChange?: FormBuilderProps['onChange'];
+  onCancel?: FormBuilderProps['onCancel'];
+}> = ({ field, onChange, onCancel }) => {
+  if (field.type === 'block' || field.type === 'spacer') {
+    return <BlockField field={field} />;
+  }
+
+  if (field.type === 'submit' || field.type === 'reset' || field.type === 'button') {
+    return <ButtonField field={field as ButtonFieldType} onCancel={onCancel} />;
+  }
+
+  return <InputField field={field as InputFieldType} />;
+};
 
 FormField.displayName = 'FormField';

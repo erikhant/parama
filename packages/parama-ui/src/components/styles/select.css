@@ -1,6 +1,6 @@
 @layer components {
   .select-trigger {
-    @apply form-control flex items-center justify-between;
+    @apply form-control flex items-center justify-between dark:bg-zinc-900 dark:placeholder:text-foreground-dark/50 dark:border-background-dark dark:text-foreground-dark;
   }
 
   .select-trigger-icon {
@@ -18,7 +18,7 @@
   }
 
   .select-content {
-    @apply relative z-50 max-h-[--radix-select-content-available-height] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border border-slate-200 bg-white text-slate-950 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-select-content-transform-origin] dark:border-neutral-800 dark:bg-neutral-900 dark:text-slate-50;
+    @apply relative z-50 max-h-[--radix-select-content-available-height] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-lg border border-slate-200 bg-white text-slate-950 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-select-content-transform-origin] dark:border-neutral-800 dark:bg-neutral-900 dark:text-slate-50;
   }
 
   .select-content-popper {
@@ -34,19 +34,19 @@
   }
 
   .select-label {
-    @apply py-1.5 pl-8 pr-2 text-sm font-semibold dark:text-neutral-400;
+    @apply px-2 py-1.5 text-sm font-semibold text-[#62748e] dark:text-neutral-400;
   }
 
   .select-item {
-    @apply relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-slate-100 focus:text-slate-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-800 dark:focus:text-slate-50;
+    @apply relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none select-none [&_svg:not([class*='text-'])]:text-[#62748e] focus:bg-slate-100 focus:text-slate-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-800 dark:focus:text-slate-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4;
   }
 
   .select-item-indicator {
-    @apply absolute left-2 flex h-3.5 w-3.5 items-center justify-center;
+    @apply absolute right-2 flex size-3.5 items-center justify-center;
   }
 
   .select-item-indicator svg {
-    @apply h-4 w-4;
+    @apply size-4;
   }
 
   .select-separator {
