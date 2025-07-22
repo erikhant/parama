@@ -47,7 +47,8 @@ export default defineConfig({
         'lucide-react',
         'react-error-boundary',
         'uuid',
-        'zustand'
+        'zustand',
+        'sonner'
       ],
       output: {
         assetFileNames: (assetInfo) => {
@@ -72,6 +73,7 @@ export default defineConfig({
           'lodash-es': 'lodash',
           'lucide-react': 'LucideReact',
           'react-error-boundary': 'ReactErrorBoundary',
+          sonner: 'sonner',
           uuid: 'uuid',
           zustand: 'zustand'
         }

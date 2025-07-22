@@ -30,9 +30,9 @@ export interface FormBuilderProps {
   schema: FormSchema;
   validators?: ValidatorRegistry;
   data?: Record<string, any>;
-  variables?: Record<string, any>;
   onSubmit?: (data: Record<string, any>) => void;
   onChange?: (data: Record<string, any>) => void;
+  onCancel?: () => void;
 }
 
 export interface FormEditorOptions {
@@ -49,7 +49,7 @@ export type FieldSettings = 'on' | 'off' | 'readonly';
 
 export interface FormEditorProps {
   onSaveSchema?: (data: FormSchema) => void;
-  loadPreset?: () => PresetTypeDef[];
+  loadPreset?: (() => PresetTypeDef[]) | PresetTypeDef[];
   schema?: FormSchema;
   options?: FormEditorOptions;
 }
@@ -249,7 +249,8 @@ export interface ButtonField extends Pick<BaseField, 'id' | 'label' | 'disabled'
 }
 
 export interface BlockField extends Pick<BaseField, 'id' | 'width' | 'conditions'> {
-  type: 'block';
+  type: 'block' | 'spacer';
+  height?: number;
   content: any; // Can be a React component or HTML content
 }
 

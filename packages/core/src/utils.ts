@@ -55,9 +55,6 @@ export function objectToQueryString(obj: Record<string, unknown>): string {
  */
 export function interpolate(template: string, data: Record<string, unknown>): string {
   return template.replace(/\{\{(.*?)\}\}/g, (_, key) => {
-    console.log('Interpolating with key:', key);
-    console.log('Interpolating with data:', data[key.trim()]);
-
     const value = data[key.trim()];
 
     // Handle undefined/null values
@@ -67,7 +64,6 @@ export function interpolate(template: string, data: Record<string, unknown>): st
 
     // For JavaScript expressions, we need to properly quote string values
     if (typeof value === 'string') {
-      console.log('Interpolating string value:', value);
       return JSON.stringify(value);
     }
 

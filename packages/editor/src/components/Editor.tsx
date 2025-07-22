@@ -9,7 +9,15 @@ import {
   useSensor,
   useSensors
 } from '@dnd-kit/core';
-import type { CheckboxField, FieldGroupItem, FormField as FormFieldType, PresetTypeDef } from '@form-builder/types';
+import type {
+  BlockField,
+  ButtonField,
+  CheckboxField,
+  FieldGroupItem,
+  FormEditorProps,
+  FormField as FormFieldType,
+  PresetTypeDef
+} from '@form-builder/types';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { setupWorkflowDebugger, useFormBuilder } from '@form-builder/core';
@@ -20,8 +28,9 @@ import { useEditor } from '../store/useEditor';
 import { ToolboxItemOverlay, ToolboxPanel } from '../toolbox';
 import { DragPreview } from './DragPreview';
 import { Toolbar } from './Toolbar';
+import { Toaster } from 'sonner';
 
-const defineDefaultValue = (type: string): FormFieldType => {
+const defineDefaultValue = (type: string) => {
   const newField = {
     id: `field-${Date.now()}`,
     name: `name_${type}`,
@@ -79,14 +88,44 @@ const defineDefaultValue = (type: string): FormFieldType => {
           server: ''
         }
       } as unknown as FormFieldType;
-    case 'preset':
-    // TODO: Handle preset type
+    case 'button':
+    case 'submit':
+    case 'reset':
+      return {
+        id: `field-${Date.now()}`,
+        label: 'Submit',
+        type: type as ButtonField['type'],
+        width: 2,
+        action: 'submit',
+        appearance: {
+          color: 'primary',
+          variant: 'fill',
+          size: 'default'
+        }
+      } as ButtonField;
+    case 'block':
+      return {
+        id: `field-${Date.now()}`,
+        type: 'block',
+        width: 12,
+        height: 3,
+        content:
+          '<div style="padding: 20px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px;"><h3>Custom HTML Block</h3><p>Edit this content in the properties panel to add your custom HTML.</p></div>'
+      } as BlockField;
+    case 'spacer':
+      return {
+        id: `field-${Date.now()}`,
+        type: 'spacer',
+        width: 12,
+        height: 2,
+        content: ''
+      } as BlockField;
     default:
       return newField as FormFieldType;
   }
 };
 
-export const Editor = () => {
+export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSaveSchema'] }) => {
   const { actions, schema } = useFormBuilder();
   const { editor, canvas, toolbox } = useEditor();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -204,7 +243,7 @@ export const Editor = () => {
 
   return (
     <>
-      <Toolbar />
+      <Toolbar onSaveSchema={onSaveSchema} />
       <DndContext
         sensors={sensors}
         collisionDetection={rectIntersection}
@@ -228,6 +267,7 @@ export const Editor = () => {
           </DragPreview>
         )}
       </DndContext>
+      <Toaster position="top-center" richColors />
     </>
   );
 };

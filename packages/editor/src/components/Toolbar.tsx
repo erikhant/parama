@@ -3,10 +3,20 @@ import { Button } from '@parama-ui/react';
 import { MonitorIcon, SaveIcon, SmartphoneIcon, TabletIcon } from 'lucide-react';
 import { SchemaViewer } from './SchemaViewer';
 import { Preview } from './Preview';
+import { useEditor } from '../store/useEditor';
+import { FormEditorProps } from '@form-builder/types';
 
-export const Toolbar = () => {
+export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSaveSchema'] }) => {
+  const { editor } = useEditor();
   const { actions, schema, screenSize } = useFormBuilder();
   const fieldLength = actions.getFields().length;
+
+  const handleSaveSchema = () => {
+    if (onSaveSchema) {
+      onSaveSchema(schema);
+    }
+  };
+
   return (
     <div className="w-full inline-flex justify-between items-center h-12 p-2 bg-white border-b border-gray-100">
       <div className="text-lg bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent font-semibold ml-3">
@@ -44,11 +54,11 @@ export const Toolbar = () => {
           disabled={fieldLength === 0}
           onOpenChange={(isOpen) => actions.changeMode(isOpen ? 'preview' : 'editor')}
         />
-        <Button size="sm" className="rounded-md" disabled={fieldLength === 0}>
+        <Button size="sm" className="rounded-md" disabled={fieldLength === 0} onClick={handleSaveSchema}>
           <SaveIcon size={16} />
           Save
         </Button>
-        <SchemaViewer schema={schema} />
+        {editor.options?.showJsonCode && <SchemaViewer schema={schema} />}
       </div>
     </div>
   );

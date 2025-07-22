@@ -2,6 +2,7 @@ import React from 'react';
 import { useEditor } from '../store/useEditor';
 import { ToolboxItem } from './ToolboxItem';
 import { LucideIcon } from 'lucide-react';
+import { ToolboxItemThumbnail } from './ToolboxItemThumbnail';
 
 type ToolboxItemOverlayProps = {
   id: string;
@@ -19,18 +20,7 @@ export const ToolboxItemOverlay: React.FC<ToolboxItemOverlayProps> = ({ id }) =>
         id={id}
         name={field.label}
         className="flex-row items-center justify-start gap-3 font-medium h-auto p-2 bg-white rounded-lg border-gray-100 shadow-none hover:border-gray-200 hover:shadow-none"
-        thumbnail={
-          typeof field.icon === 'string' ? (
-            field.icon
-          ) : (
-            <div className="bg-gray-100 rounded-md p-3">
-              {React.createElement(field.icon as LucideIcon, {
-                className: 'text-gray-500',
-                size: 24
-              })}
-            </div>
-          )
-        }
+        thumbnail={<ToolboxItemThumbnail item={field} size={24} className="shrink-0" />}
       />
     )
   );

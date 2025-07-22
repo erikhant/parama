@@ -5,7 +5,7 @@ import { EditorProvider } from './EditorProvider';
 export const FormEditor: React.FC<FormEditorProps> = (props) => {
   return (
     <EditorProvider {...props}>
-      <Editor />
+      <Editor onSaveSchema={props.onSaveSchema} />
     </EditorProvider>
   );
 };

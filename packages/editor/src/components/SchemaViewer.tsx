@@ -1,3 +1,5 @@
+import { Code2Icon } from 'lucide-react';
+import { toast } from 'sonner';
 import { Editor } from '@monaco-editor/react';
 import {
   Button,
@@ -9,13 +11,27 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@parama-ui/react';
-import { Code2Icon } from 'lucide-react';
 
 interface SchemaViewerProps {
   schema: Record<string, any>;
 }
 
 export const SchemaViewer: React.FC<SchemaViewerProps> = ({ schema }) => {
+  const handleCopy = () => {
+    toast.success('Copied to clipboard');
+    navigator.clipboard.writeText(JSON.stringify(schema, null, 2));
+  };
+  const handleDownload = () => {
+    const blob = new Blob([JSON.stringify(schema, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'schema.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -24,7 +40,7 @@ export const SchemaViewer: React.FC<SchemaViewerProps> = ({ schema }) => {
           Code
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:!max-w-3xl">
         <DialogHeader>
           <DialogTitle>JSON Schema</DialogTitle>
           <DialogDescription>Schema form generated</DialogDescription>
@@ -56,7 +72,10 @@ export const SchemaViewer: React.FC<SchemaViewerProps> = ({ schema }) => {
           />
         </div>
         <DialogFooter>
-          <Button>Copy JSON</Button>
+          <Button variant="outline" color="secondary" onClick={handleDownload}>
+            Download
+          </Button>
+          <Button onClick={handleCopy}>Copy JSON</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

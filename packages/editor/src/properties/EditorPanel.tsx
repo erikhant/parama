@@ -15,6 +15,8 @@ import { FormMetadata } from './FormMetadata';
 import { EventsEditor } from './EventsEditor';
 import { GeneralButtonEditor } from './button/GeneralButtonEditor';
 import { AppearanceButtonEditor } from './button/AppearanceButtonEditor';
+import { GeneralBlockEditor } from './block/GeneralBlockEditor';
+import { BlockContentEditor } from './block/BlockContentEditor';
 
 // Types for editor configuration
 interface EditorConfig {
@@ -25,21 +27,24 @@ interface EditorConfig {
   showConditions: boolean;
   showEvents: boolean;
   useButtonEditor: boolean;
+  useBlockEditor: boolean;
 }
 
 // Helper function to determine which editors should be rendered
 const getEditorConfig = (field: FormField, editorOptions: any): EditorConfig => {
   const isButtonType = field.type === 'button' || field.type === 'submit' || field.type === 'reset';
   const isHiddenType = field.type === 'hidden';
+  const isBlockType = field.type === 'block' || field.type === 'spacer';
 
   return {
     showGeneral: editorOptions?.generalSettings !== 'off' && !isHiddenType,
-    showProperties: editorOptions?.propertiesSettings !== 'off',
-    showAppearance: editorOptions?.appearanceSettings !== 'off',
-    showValidation: editorOptions?.validationSettings !== 'off' && !isButtonType,
+    showProperties: editorOptions?.propertiesSettings !== 'off' && !isBlockType && !isButtonType,
+    showAppearance: editorOptions?.appearanceSettings !== 'off' && !isBlockType,
+    showValidation: editorOptions?.validationSettings !== 'off' && !isButtonType && !isBlockType,
     showConditions: editorOptions?.conditionsSettings !== 'off' && !isHiddenType,
-    showEvents: editorOptions?.eventsSettings !== 'off' && !isButtonType,
-    useButtonEditor: isButtonType
+    showEvents: editorOptions?.eventsSettings !== 'off' && !isHiddenType && !isButtonType && !isBlockType,
+    useButtonEditor: isButtonType,
+    useBlockEditor: isBlockType
   };
 };
 
@@ -56,9 +61,14 @@ const FieldEditors: React.FC<FieldEditorsProps> = ({ field, editorConfig, onChan
       {editorConfig.showGeneral &&
         (editorConfig.useButtonEditor ? (
           <GeneralButtonEditor field={field} onChange={onChange} />
+        ) : editorConfig.useBlockEditor ? (
+          <GeneralBlockEditor field={field as any} onChange={onChange} />
         ) : (
           <GeneralEditor field={field} onChange={onChange} />
         ))}
+      {editorConfig.useBlockEditor && field.type === 'block' && (
+        <BlockContentEditor field={field as any} onChange={onChange} />
+      )}
       {editorConfig.showProperties && <PropertiesEditor field={field} onChange={onChange} />}
       {editorConfig.showAppearance &&
         (editorConfig.useButtonEditor ? (

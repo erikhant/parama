@@ -1,20 +1,22 @@
-import { create } from 'zustand';
 import { FieldTypeDef, FormEditorOptions, FormEditorProps, FormField, PresetTypeDef } from '@form-builder/types';
+import type { LucideIcon } from 'lucide-react';
 import {
   ArrowDown10,
   CalendarDays,
   CheckCheck,
   ChevronDown,
   CircleDot,
+  CodeIcon,
   EyeOff,
   MousePointerClick,
   RectangleEllipsis,
+  SeparatorHorizontalIcon,
   TextCursorInput,
   Upload,
   WholeWord
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
+import { create } from 'zustand';
 
 const fieldTypes: FieldTypeDef[] = [
   {
@@ -99,7 +101,7 @@ const fieldTypes: FieldTypeDef[] = [
   },
   {
     id: uuid(),
-    type: 'button',
+    type: 'submit',
     label: 'Button',
     icon: MousePointerClick as LucideIcon,
     group: 'fields',
@@ -112,6 +114,22 @@ const fieldTypes: FieldTypeDef[] = [
     icon: Upload as LucideIcon,
     group: 'fields',
     description: 'Upload file for selecting files.'
+  },
+  {
+    id: uuid(),
+    type: 'spacer',
+    label: 'Spacer',
+    icon: SeparatorHorizontalIcon as LucideIcon,
+    group: 'fields',
+    description: 'A spacer block for layout purposes.'
+  },
+  {
+    id: uuid(),
+    type: 'block',
+    label: 'HTML Block',
+    icon: CodeIcon as LucideIcon,
+    group: 'fields',
+    description: 'Custom HTML content block.'
   }
 ];
 
@@ -154,7 +172,7 @@ export const useEditor = create<FormEditorState>((set, get) => ({
       },
       toolbox: {
         ...state.toolbox,
-        presets: typeof editorProps.loadPreset === 'function' ? editorProps.loadPreset() : []
+        presets: typeof editorProps.loadPreset === 'function' ? editorProps.loadPreset() : editorProps.loadPreset || []
       }
     }));
   },

@@ -10,7 +10,8 @@ import type {
   RadioField,
   CheckboxField,
   SelectField,
-  ButtonField as ButtonFieldType
+  ButtonField as ButtonFieldType,
+  FormBuilderProps
 } from '@form-builder/types';
 import {
   Button,
@@ -141,9 +142,33 @@ type InputFieldType = TextField | FileField | RadioField | CheckboxField | Selec
 
 // Separate component for block fields
 const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
+  const { mode } = useFormBuilder();
+  const isEditor = mode === 'editor';
+
+  if (field.type === 'spacer') {
+    const height = field.height || 2;
+    const spacerHeight = height * 24; // 24px per height unit
+
+    return (
+      <div className={`column-span-${field.width}`} style={{ height: `${spacerHeight}px` }}>
+        {isEditor && (
+          <div className="h-full bg-void border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+            <span className="text-gray-500 text-sm">Spacer ({height} units)</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className={`column-span-${field.width}`}>
-      {typeof field.content === 'string' ? <div dangerouslySetInnerHTML={{ __html: field.content }} /> : field.content}
+    <div
+      className={`column-span-${field.width}`}
+      style={{ minHeight: field.height ? `${field.height * 24}px` : 'auto' }}>
+      {typeof field.content === 'string' ? (
+        <div className="min-h-full" dangerouslySetInnerHTML={{ __html: field.content }} />
+      ) : (
+        field.content
+      )}
     </div>
   );
 });
@@ -151,36 +176,31 @@ const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
 BlockField.displayName = 'BlockField';
 
 // Separate component for button fields
-const ButtonFieldComponent: React.FC<{ field: ButtonFieldType }> = memo(({ field }) => {
-  const { actions } = useFormBuilder();
+const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps['onCancel'] }> = memo(
+  ({ field, onCancel }) => {
+    const { actions } = useFormBuilder();
 
-  const handleReset = () => {
-    actions.resetForm();
-  };
+    const handleReset = () => {
+      actions.resetForm();
+    };
 
-  if (field.action === 'reset') {
     return (
-      <Button type="button" color={field.appearance?.color} variant={field.appearance?.variant} onClick={handleReset}>
-        {field.label}
-      </Button>
-    );
-  } else if (field.action === 'cancel') {
-    // Handle cancel action, e.g., close a modal or reset state
-    return (
-      <Button type={field.type} color={field.appearance?.color} variant={field.appearance?.variant}>
-        {field.label}
-      </Button>
-    );
-  } else {
-    return (
-      <Button type={field.type} color={field.appearance?.color} variant={field.appearance?.variant}>
-        {field.label}
-      </Button>
+      <div className={`column-span-${field.width}`}>
+        <Button
+          type={field.type}
+          color={field.appearance?.color}
+          size={field.appearance?.size}
+          variant={field.appearance?.variant}
+          className="w-full"
+          onClick={field.action === 'cancel' ? onCancel : field.action === 'reset' ? handleReset : undefined}>
+          {field.label}
+        </Button>
+      </div>
     );
   }
-});
+);
 
-ButtonFieldComponent.displayName = 'ButtonFieldComponent';
+ButtonField.displayName = 'ButtonField';
 
 // Main component for form input fields (excluding block and button types)
 const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
@@ -675,10 +695,13 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
         <p className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</p>
       )}
       {renderInput}
-      {field.type !== 'file' && (!validationState.isValid || field.error) && (
-        <span className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</span>
-      )}
-      {field.type !== 'file' && field.helpText && <span className="form-description">{field.helpText}</span>}
+      {field.type !== 'file' ? (
+        !validationState.isValid || field.error ? (
+          <span className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</span>
+        ) : (
+          field.helpText && <span className="form-description">{field.helpText}</span>
+        )
+      ) : null}
     </FormItem>
   );
 });
@@ -686,16 +709,20 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
 InputField.displayName = 'InputField';
 
 // Main router component that decides which sub-component to render
-export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) => {
-  if (field.type === 'block') {
+export const FormField: React.FC<{
+  field: FormFieldType;
+  onChange?: FormBuilderProps['onChange'];
+  onCancel?: FormBuilderProps['onCancel'];
+}> = ({ field, onChange, onCancel }) => {
+  if (field.type === 'block' || field.type === 'spacer') {
     return <BlockField field={field} />;
   }
 
   if (field.type === 'submit' || field.type === 'reset' || field.type === 'button') {
-    return <ButtonFieldComponent field={field as ButtonFieldType} />;
+    return <ButtonField field={field as ButtonFieldType} onCancel={onCancel} />;
   }
 
   return <InputField field={field as InputFieldType} />;
-});
+};
 
 FormField.displayName = 'FormField';

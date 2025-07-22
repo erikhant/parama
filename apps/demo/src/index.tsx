@@ -12,7 +12,7 @@ const initialSchema: FormSchema = {
   description: 'Demo form to test file validation editor functionality',
   layout: {
     colSize: 12,
-    gap: 16
+    gap: 6
   },
   fields: [
     {
@@ -101,19 +101,7 @@ function App() {
 
   return (
     <div style={{ height: '100vh', width: '100%' }}>
-      <FormEditor
-        schema={initialSchema}
-        onSaveSchema={handleSaveSchema}
-        options={{
-          showJsonCode: true,
-          generalSettings: 'on',
-          propertiesSettings: 'on',
-          appearanceSettings: 'on',
-          validationSettings: 'on',
-          conditionsSettings: 'on',
-          eventsSettings: 'on'
-        }}
-      />
+      <FormEditor schema={initialSchema} onSaveSchema={handleSaveSchema} />
     </div>
   );
 }

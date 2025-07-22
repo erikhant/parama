@@ -45,28 +45,30 @@ export const ConditionEditor = ({ field, onChange }: ConditionEditorProps) => {
           <ConditionTooltip />
         </div>
       </FormItem>
-      <FormItem>
-        <Label className="block text-sm font-medium">Disabled</Label>
-        <FormGroup prefix="If">
-          <Input
-            type="text"
-            disabled={editor.options?.conditionsSettings === 'readonly'}
-            value={field.conditions?.disabled?.expression || ''}
-            onChange={(e) =>
-              onChange({
-                conditions: {
-                  ...field.conditions,
-                  disabled: e.target.value ? { expression: e.target.value } : undefined
-                }
-              })
-            }
-          />
-        </FormGroup>
-        <div className="flex items-center gap-1">
-          <p className="form-description">Use expression.</p>
-          <ConditionTooltip />
-        </div>
-      </FormItem>
+      {field.type !== 'block' && field.type !== 'spacer' && (
+        <FormItem>
+          <Label className="block text-sm font-medium">Disabled</Label>
+          <FormGroup prefix="If">
+            <Input
+              type="text"
+              disabled={editor.options?.conditionsSettings === 'readonly'}
+              value={field.conditions?.disabled?.expression || ''}
+              onChange={(e) =>
+                onChange({
+                  conditions: {
+                    ...field.conditions,
+                    disabled: e.target.value ? { expression: e.target.value } : undefined
+                  }
+                })
+              }
+            />
+          </FormGroup>
+          <div className="flex items-center gap-1">
+            <p className="form-description">Use expression.</p>
+            <ConditionTooltip />
+          </div>
+        </FormItem>
+      )}
     </SectionPanel>
   );
 };

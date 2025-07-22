@@ -3,7 +3,7 @@ import '@parama-ui/dist/styles.css';
 import '../../../packages/editor/dist/styles.css'; // Ensure editor styles are included
 import { createRoot } from 'react-dom/client';
 import { FormEditor } from '@form-builder/editor';
-import { FormSchema } from '@form-builder/types';
+import type { FormSchema, PresetTypeDef } from '@form-builder/types';
 
 // Test schema using file upload field to verify all functionality
 const testSchema: FormSchema = {
@@ -13,84 +13,92 @@ const testSchema: FormSchema = {
   description: 'Testing the published packages with FormEditor functionality',
   layout: {
     colSize: 12,
-    gap: 16
+    gap: 5
   },
-  fields: [
-    {
-      id: 'profile-avatar',
-      name: 'avatar',
-      type: 'file',
-      label: 'Profile Avatar',
-      helpText: 'Upload your profile picture (testing file field)',
-      disabled: false,
-      defaultValue: null,
-      value: null,
-      readOnly: false,
-      width: 12,
-      validations: [
-        {
-          trigger: 'change',
-          type: 'required',
-          message: 'Profile picture is required'
-        }
-      ],
-      options: {
-        accept: {
-          'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
-        },
-        maxSize: 5 * 1024 * 1024, // 5MB
-        maxFiles: 1,
-        multiple: false,
-        server: '',
-        instantUpload: false,
-        bulkUpload: false
-      },
-      appearance: {
-        droppable: true
-      }
-    },
-    {
-      id: 'first-name',
-      name: 'firstName',
-      type: 'text',
-      label: 'First Name',
-      helpText: 'Enter your first name',
-      disabled: false,
-      defaultValue: '',
-      value: '',
-      readOnly: false,
-      width: 6,
-      validations: [
-        {
-          trigger: 'change',
-          type: 'required',
-          message: 'First name is required'
-        }
-      ],
-      appearance: {}
-    },
-    {
-      id: 'last-name',
-      name: 'lastName',
-      type: 'text',
-      label: 'Last Name',
-      helpText: 'Enter your last name',
-      disabled: false,
-      defaultValue: '',
-      value: '',
-      readOnly: false,
-      width: 6,
-      validations: [
-        {
-          trigger: 'change',
-          type: 'required',
-          message: 'Last name is required'
-        }
-      ],
-      appearance: {}
-    }
-  ]
+  fields: []
 };
+
+const presets: PresetTypeDef[] = [
+  {
+    id: Date.now().toString(),
+    type: 'preset',
+    label: 'Profile',
+    group: 'presets',
+    description: 'A preset for user profile forms',
+    fields: [
+      {
+        id: 'profile-avatar',
+        name: 'avatar',
+        type: 'file',
+        label: 'Profile Avatar',
+        helpText: 'Upload your profile picture (testing file field)',
+        disabled: false,
+        defaultValue: null,
+        value: null,
+        readOnly: false,
+        width: 12,
+        validations: [
+          {
+            trigger: 'change',
+            type: 'required',
+            message: 'Profile picture is required'
+          }
+        ],
+        options: {
+          accept: {
+            'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
+          },
+          maxSize: 5 * 1024 * 1024, // 5MB
+          maxFiles: 1,
+          multiple: false,
+          server: '',
+          instantUpload: false,
+          bulkUpload: false
+        }
+      },
+      {
+        id: 'first-name',
+        name: 'firstName',
+        type: 'text',
+        label: 'First Name',
+        helpText: 'Enter your first name',
+        disabled: false,
+        defaultValue: '',
+        value: '',
+        readOnly: false,
+        width: 6,
+        validations: [
+          {
+            trigger: 'change',
+            type: 'required',
+            message: 'First name is required'
+          }
+        ],
+        appearance: {}
+      },
+      {
+        id: 'last-name',
+        name: 'lastName',
+        type: 'text',
+        label: 'Last Name',
+        helpText: 'Enter your last name',
+        disabled: false,
+        defaultValue: '',
+        value: '',
+        readOnly: false,
+        width: 6,
+        validations: [
+          {
+            trigger: 'change',
+            type: 'required',
+            message: 'Last name is required'
+          }
+        ],
+        appearance: {}
+      }
+    ]
+  }
+];
 
 function ProductionDemo() {
   const handleSaveSchema = (schema: FormSchema) => {
@@ -105,7 +113,7 @@ function ProductionDemo() {
         JavaScript/TypeScript from the dist folders instead of source files.
       </p>
       <div className="demo-container">
-        <FormEditor schema={testSchema} onSaveSchema={handleSaveSchema} />
+        <FormEditor schema={testSchema} onSaveSchema={handleSaveSchema} loadPreset={presets} />
       </div>
     </div>
   );

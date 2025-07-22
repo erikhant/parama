@@ -5,6 +5,7 @@ import { ToolboxItem } from './ToolboxItem';
 import { ToolboxSearch } from './ToolboxSearch';
 import { FieldTypeDef, PresetTypeDef } from '@form-builder/types';
 import { ToolboxSearchWithHook } from './ToolboxSearchWithHook';
+import { ToolboxItemThumbnail } from './ToolboxItemThumbnail';
 
 type ToolboxListProps = {
   items: FieldTypeDef[] | PresetTypeDef[];
@@ -74,18 +75,7 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
                 name={item.label}
                 description={item.description}
                 className="flex-row items-center justify-start gap-3 h-auto p-2.5 bg-white rounded-lg border-gray-100 shadow-none hover:border-blue-300 hover:shadow-none leading-none transition-colors"
-                thumbnail={
-                  typeof item.icon === 'string' ? (
-                    item.icon
-                  ) : (
-                    <div className="bg-slate-100 rounded-md p-3">
-                      {React.createElement(item.icon as LucideIcon, {
-                        className: 'text-gray-600',
-                        size: 24
-                      })}
-                    </div>
-                  )
-                }
+                thumbnail={<ToolboxItemThumbnail item={item} size={24} className="shrink-0" />}
               />
             </SortableItem>
           ))

@@ -55,6 +55,7 @@ export interface FormBuilderState {
     // Data management
     updateFieldValue: (id: string, value: any) => void;
     getFormData: () => Record<string, any>;
+    getFormDataByNames: () => Record<string, any>;
     resetForm: () => void;
 
     // Validation system
@@ -568,21 +569,55 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
 
       /**
        * Gets current form data
-       * @returns Current form data
+       * @returns Current form data with field IDs as keys
        */
       getFormData: () => {
         return get().formData;
       },
 
       /**
+       * Gets current form data with field names as keys
+       * @returns Current form data remapped to use field names instead of IDs
+       */
+      getFormDataByNames: () => {
+        const formData = get().formData;
+        const usedNames = new Set<string>();
+
+        // Remap form data keys from field IDs to field names
+        // Only include fields that have both name and data value
+        return get().schema.fields.reduce(
+          (acc, field) => {
+            // Only process fields that have a name property (excluding ButtonField and BlockField)
+            if ('name' in field && field.name) {
+              const fieldValue = formData[field.id];
+              if (fieldValue !== undefined) {
+                // Handle duplicate field names by appending the field ID
+                let fieldName = field.name;
+                if (usedNames.has(fieldName)) {
+                  fieldName = `${field.name}_${field.id}`;
+                  console.warn(`Duplicate field name "${field.name}" found. Using "${fieldName}" instead.`);
+                }
+                usedNames.add(fieldName);
+                acc[fieldName] = fieldValue;
+              }
+            }
+            return acc;
+          },
+          {} as Record<string, any>
+        );
+      },
+
+      /**
        * Submits the form with validation
-       * @returns Promise with validation result and form data
+       * @returns Promise with validation result and form data with field names as keys
        */
       submitForm: async () => {
         const isValid = await get().actions.validateForm();
+        const remappedData = get().actions.getFormDataByNames();
+
         return {
           isValid,
-          data: get().formData
+          data: remappedData
         };
       }
     }
