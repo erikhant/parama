@@ -24,6 +24,7 @@
   "references": [
     { "path": "packages/types" },
     { "path": "packages/core" },
+    { "path": "packages/editor" },
     { "path": "packages/renderer" },
     { "path": "packages/parama-ui" }
   ],

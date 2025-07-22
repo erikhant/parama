@@ -35,7 +35,7 @@ export const GeneralEditor = ({ field, onChange }: GeneralEditorProps) => {
           type="text"
           placeholder="Field label"
           disabled={editor.options?.generalSettings === 'readonly'}
-          value={field.label || ''}
+          value={('label' in field ? field.label : '') || ''}
           onChange={(e) => onChange({ label: e.target.value })}
         />
       </FormItem>
@@ -45,7 +45,7 @@ export const GeneralEditor = ({ field, onChange }: GeneralEditorProps) => {
           type="text"
           placeholder="e.g. This field is required"
           disabled={editor.options?.generalSettings === 'readonly'}
-          value={field.helpText || ''}
+          value={('helpText' in field ? field.helpText : '') || ''}
           onChange={(e) => onChange({ helpText: e.target.value })}
         />
         <p className="form-description">Give a hint to the user</p>

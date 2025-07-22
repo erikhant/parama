@@ -98,15 +98,17 @@ export const Editor = () => {
     })
   );
 
-  // useEffect(() => {
-  //   // Enable all debug features
-  //   const cleanupDebugger = setupWorkflowDebugger();
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
 
-  //   return () => {
-  //     // Cleanup debugger on unmount
-  //     cleanupDebugger?.();
-  //   };
-  // }, []);
+    // Enable all debug features
+    const cleanupDebugger = setupWorkflowDebugger();
+
+    return () => {
+      // Cleanup debugger on unmount
+      cleanupDebugger?.();
+    };
+  }, []);
 
   const handleDragStart = ({ active }: DragStartEvent) => {
     setActiveId(active.id as string);
@@ -134,8 +136,6 @@ export const Editor = () => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    // console.log('active', active);
-    // console.log('over', over);
 
     setActiveId(null);
     const insertionIndex = canvas.currentInsertionIndex;

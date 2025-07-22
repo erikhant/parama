@@ -23,13 +23,30 @@ export default defineConfig({
       formats: ['es', 'umd', 'cjs']
     },
     rollupOptions: {
-      external: ['react', 'react-dom', '@form-builder/core', '@form-builder/types'],
+      external: [
+        'react',
+        'react-dom',
+        '@form-builder/core',
+        '@form-builder/types',
+        '@parama-ui/react',
+        'lodash-es',
+        'lucide-react',
+        'react-dropzone',
+        'react-select',
+        'use-debounce'
+      ],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
           '@form-builder/core': 'FormBuilderCore',
-          '@form-builder/types': 'FormBuilderTypes'
+          '@form-builder/types': 'FormBuilderTypes',
+          '@parama-ui/react': 'ParamaUI',
+          'lodash-es': 'lodash',
+          'lucide-react': 'LucideReact',
+          'react-dropzone': 'ReactDropzone',
+          'react-select': 'ReactSelect',
+          'use-debounce': 'useDebounce'
         }
       }
     },
@@ -37,16 +54,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      // Link to other workspace packages
-      '@form-builder/core': path.resolve(__dirname, '../core/src'),
-      '@form-builder/types': path.resolve(__dirname, '../types/src'),
-      '@form-builder/renderer': path.resolve(__dirname, '../renderer/src'),
-      '@parama-ui/react': path.resolve(__dirname, '../parama-ui/dist/index.es.js'),
-      '@parama-ui/react/parama-ui.min.css': path.resolve(
-        __dirname,
-        '../parama-ui/dist/parama-ui.min.css'
-      )
+      '@': path.resolve(__dirname, 'src')
     }
   },
   optimizeDeps: {

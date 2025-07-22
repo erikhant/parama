@@ -43,7 +43,7 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
   const handleAddEvent = () => {
     if (!newEvent.target) return;
 
-    const updatedEvents = [...(field.events || []), newEvent as Events];
+    const updatedEvents = [...(('events' in field ? field.events : []) || []), newEvent as Events];
     onChange({ events: updatedEvents });
     setIsAddingEvent(false);
     setNewEvent({
@@ -54,13 +54,13 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
   };
 
   const handleRemoveEvent = (index: number) => {
-    const updatedEvents = [...(field.events || [])];
+    const updatedEvents = [...(('events' in field ? field.events : []) || [])];
     updatedEvents.splice(index, 1);
     onChange({ events: updatedEvents });
   };
 
   const handleUpdateEvent = (index: number, updates: Partial<Events>) => {
-    const updatedEvents = [...(field.events || [])];
+    const updatedEvents = [...(('events' in field ? field.events : []) || [])];
     updatedEvents[index] = { ...updatedEvents[index], ...updates };
     onChange({ events: updatedEvents });
   };
@@ -82,14 +82,18 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
 
   return (
     <SectionPanel title="Events" description="Trigger actions based on events" className="space-y-2">
-      {(field.events?.length || 0) > 0 && (
+      {(('events' in field ? field.events?.length : 0) || 0) > 0 && (
         <Accordion type="multiple" className="mb-2">
-          {field.events?.map((event, index) => (
+          {('events' in field ? field.events : [])?.map((event: Events, index: number) => (
             <AccordionItem key={index} value={`event-${index}`}>
               <AccordionTrigger className="text-sm py-2">
                 {event.type === 'setValue' ? 'Set Value' : event.type === 'reset' ? 'Reset Field' : 'Fetch Options'}
                 <span className="ml-2 text-xs opacity-70">
-                  → {availableFields.find((f) => f.id === event.target)?.name || event.target}
+                  →{' '}
+                  {(() => {
+                    const targetField = availableFields.find((f) => f.id === event.target);
+                    return targetField ? ('name' in targetField ? targetField.name : targetField.id) : event.target;
+                  })()}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="!px-2 pb-4 ">
@@ -123,7 +127,7 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
                       <SelectContent>
                         {availableFields.map((f) => (
                           <SelectItem key={f.id} value={f.id}>
-                            {f.name}
+                            {'name' in f ? f.name : f.id}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -195,7 +199,7 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
               <SelectContent>
                 {availableFields.map((f) => (
                   <SelectItem key={f.id} value={f.id}>
-                    {f.name}
+                    {'name' in f ? f.name : f.id}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -257,11 +261,6 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
           </Button>
         </div>
       )}
-
-      {/* <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-        <p>Events are triggered when a field's value changes.</p>
-        <EventTooltip />
-      </div> */}
     </SectionPanel>
   );
 };

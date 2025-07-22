@@ -8,7 +8,7 @@ import { ToolboxSearchWithHook } from './ToolboxSearchWithHook';
 
 type ToolboxListProps = {
   items: FieldTypeDef[] | PresetTypeDef[];
-  section?: string;
+  section?: FieldTypeDef['group'];
   showSearch?: boolean;
   searchPlaceholder?: string;
 };
@@ -42,7 +42,6 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
           placeholder={searchPlaceholder}
           debounceMs={350}
         />
-        // <ToolboxSearch items={items} onFilteredItems={handleFilteredItems} placeholder={searchPlaceholder} />
       )}
 
       <div className="space-y-2 p-4 pt-2">
@@ -50,7 +49,7 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
           <div className="text-center text-gray-500 text-sm py-8">
             {items.length === 0 ? (
               <div>
-                <div className="text-gray-400 mb-2">No items available</div>
+                {!section && <div className="text-gray-400 mb-2">No items available</div>}
                 <div className="text-xs text-gray-400">
                   {section === 'presets' ? 'No presets have been loaded' : 'No fields are defined'}
                 </div>

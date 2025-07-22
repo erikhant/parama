@@ -1,15 +1,27 @@
 {
   "name": "@form-builder/types",
-  "main": "./dist/index.js",
   "version": "0.1.0",
+  "description": "Type definitions for the form builder system",
   "types": "./dist/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "bundle": "pnpm exec rollup -c rollup.config.js",
     "dev": "tsc --watch --emitDeclarationOnly --outDir dist",
     "clean": "rimraf dist"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/node": "^22.15.18",
     "rollup": "^3.29.5",
     "rollup-plugin-dts": "^6.2.1",

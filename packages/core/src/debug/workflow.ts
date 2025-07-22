@@ -69,7 +69,7 @@ export function setupWorkflowDebugger(options: DebugOptions = {}) {
         'color: inherit'
       );
       const field = store.actions.getField(fieldId);
-      console.log('Field rules:', field?.validations);
+      console.log('Field rules:', field && 'validations' in field ? field.validations : 'No validations');
       const result = await originalValidateField(fieldId, trigger as ValidationTrigger);
       console.log('Validation result:', result);
       console.log('Validation messages:', store.validation[fieldId]?.messages);

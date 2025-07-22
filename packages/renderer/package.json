@@ -1,9 +1,24 @@
 {
   "name": "@form-builder/renderer",
   "version": "0.1.0",
+  "description": "React components for rendering forms from the form builder",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "type-check": "tsc --noEmit",
     "build": "tsc && vite build",
@@ -11,6 +26,7 @@
     "clean": "rimraf dist node_modules"
   },
   "dependencies": {
+    "@form-builder/core": "workspace:*",
     "@form-builder/types": "workspace:*",
     "@parama-ui/react": "workspace:*",
     "@types/react-select": "^5.0.1",
@@ -41,6 +57,9 @@
   },
   "peerDependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@form-builder/core": "^0.1.0",
+    "@form-builder/types": "^0.1.0",
+    "@parama-ui/react": "^1.0.0"
   }
 }

@@ -305,7 +305,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       getField: (id) => {
         const byId = get().schema.fields.find((field) => field.id === id);
         if (!byId) {
-          const byName = get().schema.fields.find((field) => field.name === id);
+          const byName = get().schema.fields.find((field) => 'name' in field && field.name === id);
           return byName;
         }
         return byId;
@@ -321,7 +321,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const field = get().actions.getField(id);
         if (!field) return undefined;
 
-        return get().formData[field.id] ?? field.defaultValue;
+        return get().formData[field.id] ?? ('defaultValue' in field ? field.defaultValue : undefined);
       },
 
       /**
@@ -424,7 +424,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        */
       validateField: async (fieldId, trigger = 'change') => {
         const field = get().actions.getField(fieldId);
-        if (!field?.validations) return true;
+        if (!field || !('validations' in field) || !field.validations) return true;
 
         // Cancel any pending debounced validation
         if (get().debouncedValidators[fieldId]) {
@@ -441,17 +441,17 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
           }
         }));
 
-        const value = get().formData[fieldId] ?? field.defaultValue;
+        const value = get().formData[fieldId] ?? ('defaultValue' in field ? field.defaultValue : undefined);
         const results = await Promise.all(
           field.validations
-            .filter((rule) => !rule.trigger || rule.trigger === trigger)
-            .map(async (rule) => {
+            .filter((rule: any) => !rule.trigger || rule.trigger === trigger)
+            .map(async (rule: any) => {
               return await evaluateValidations(fieldId, rule, value, get().formData);
             })
         );
 
         // Eliminate 'true or undefined' results (no error)
-        const messages = results.filter((r) => typeof r === 'string') as string[];
+        const messages = results.filter((r: any) => typeof r === 'string') as string[];
         const isValid = messages.length === 0;
 
         set((state) => ({

@@ -1,11 +1,13 @@
 import './index.css';
-import React from 'react';
+import '@parama-ui/react/styles';
 import { createRoot } from 'react-dom/client';
 import { FormEditor } from '@form-builder/editor';
 import { FormSchema } from '@form-builder/types';
 
 // Demo schema with file field to test the validation editor
 const initialSchema: FormSchema = {
+  id: 'demo-file-upload-form',
+  version: '1.0.0',
   title: 'File Upload Demo Form',
   description: 'Demo form to test file validation editor functionality',
   layout: {
@@ -78,18 +80,15 @@ const initialSchema: FormSchema = {
     },
     {
       id: 'submit',
-      name: 'submit',
       type: 'submit',
       label: 'Submit Form',
+      action: 'submit',
       disabled: false,
-      defaultValue: null,
-      value: null,
-      readOnly: false,
       width: 12,
       appearance: {
         color: 'primary',
-        variant: 'solid',
-        size: 'md'
+        variant: 'fill',
+        size: 'sm'
       }
     }
   ]

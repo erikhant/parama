@@ -1,7 +1,24 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "jsx": "react",
-    "esModuleInterop": true
-  }
+    "target": "ESNext",
+    "module": "ESNext",
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "Bundler",
+    "composite": false,
+    "esModuleInterop": true,
+    "strict": true,
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@form-builder/*": ["../../packages/*/src"],
+      "@form-builder/core": ["../../packages/core/src"],
+      "@form-builder/editor": ["../../packages/editor/src"],
+      "@form-builder/renderer": ["../../packages/renderer/src"],
+      "@form-builder/types": ["../../packages/types/src"],
+      "@parama-ui/react": ["../../packages/parama-ui/src"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }

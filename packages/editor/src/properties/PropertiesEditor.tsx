@@ -136,10 +136,10 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
       newGroups[groupIndex] = { ...newGroups[groupIndex], ...updates };
       onChange({ optionGroups: newGroups, defaultValue });
       // If the deleted option was the default value, clear it
-      if (Array.isArray(field.defaultValue)) {
+      if ('defaultValue' in field && Array.isArray(field.defaultValue)) {
         const newDefaultValue = field.defaultValue.filter((value: string) => value !== defaultValue);
         onChange({ defaultValue: newDefaultValue.length > 0 ? newDefaultValue : undefined });
-      } else if (field.defaultValue === defaultValue) {
+      } else if ('defaultValue' in field && field.defaultValue === defaultValue) {
         onChange({ defaultValue: undefined });
       }
     },
@@ -205,7 +205,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
       let updates: Partial<CheckboxField | RadioField> = { items: newItems };
 
       // If the deleted item was in the default value, also update the default value
-      if (deletedItem && field.defaultValue?.includes(deletedItem.value)) {
+      if (deletedItem && 'defaultValue' in field && field.defaultValue?.includes(deletedItem.value)) {
         if (field.type === 'radio') {
           updates.defaultValue = undefined;
           updateFieldValue(field.id, undefined);
@@ -218,7 +218,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
 
       onChange(updates);
     },
-    [(field as CheckboxField | RadioField).items, field.defaultValue, onChange]
+    [(field as CheckboxField | RadioField).items, 'defaultValue' in field ? field.defaultValue : undefined, onChange]
   );
 
   const handleDeleteAllItems = useCallback(() => {
@@ -226,7 +226,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
     if ((field as CheckboxField | RadioField).items) updates.items = undefined;
     onChange({ ...updates, defaultValue: undefined });
     updateFieldValue(field.id, undefined);
-  }, [(field as CheckboxField | RadioField).items, field.defaultValue, onChange]);
+  }, [(field as CheckboxField | RadioField).items, 'defaultValue' in field ? field.defaultValue : undefined, onChange]);
 
   const [restrictedDates, setRestrictedDates] = useState<DateRange | undefined>(() =>
     (field as DateField).options?.restrictedMonths && (field as DateField).options!.restrictedMonths!.length >= 2

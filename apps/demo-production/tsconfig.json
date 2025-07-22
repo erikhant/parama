@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@form-builder/types": ["../../packages/types/dist"],
+      "@form-builder/core": ["../../packages/core/dist"],
+      "@form-builder/renderer": ["../../packages/renderer/dist"],
+      "@form-builder/editor": ["../../packages/editor/dist"],
+      "@parama-ui/react": ["../../packages/parama-ui/dist"],
+      "@parama-ui/react/styles": ["../../packages/parama-ui/dist/parama-ui.min.css"]
+    }
+  },
+  "include": ["src"],
+  "references": []
+}

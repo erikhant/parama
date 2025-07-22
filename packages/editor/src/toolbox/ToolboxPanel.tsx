@@ -18,18 +18,10 @@ export const ToolboxPanel = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="fields">
-          <ToolboxList items={toolbox.fields} showSearch={true} searchPlaceholder="Search fields" />
+          <ToolboxList items={toolbox.fields} showSearch={true} section="fields" searchPlaceholder="Search fields" />
         </TabsContent>
         <TabsContent value="presets">
-          {/* Enhanced preset management */}
-          {/* <PresetManager
-            presets={toolbox.presets}
-            onFilteredPresets={handleFilteredPresets}
-            onCreatePreset={handleCreatePreset}
-            onImportPresets={handleImportPresets}
-            showActions={true}
-          /> */}
-          <ToolboxList items={toolbox.presets} showSearch={true} searchPlaceholder="Search presets" />
+          <ToolboxList items={toolbox.presets} showSearch={true} section="presets" searchPlaceholder="Search presets" />
         </TabsContent>
       </Tabs>
     </div>

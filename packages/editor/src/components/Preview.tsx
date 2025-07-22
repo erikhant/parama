@@ -1,5 +1,5 @@
 import { useFormBuilder } from '@form-builder/core';
-import { FormBuilder } from '@form-builder/renderer';
+import { FormRenderer } from '@form-builder/renderer';
 import { FormSchema } from '@form-builder/types';
 import {
   Button,
@@ -51,12 +51,12 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
         </SheetHeader>
         <div className="grid gap-4 px-1 py-4 min-h-[calc(100vh-150px)] overflow-y-auto">
           <div>
-            <FormBuilder schema={schema} />
+            <FormRenderer schema={schema} />
           </div>
         </div>
         <SheetFooter>
           <SheetClose asChild onClick={actions.resetForm}>
-            <Button type="submit">Save</Button>
+            <Button type="button">Close</Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>

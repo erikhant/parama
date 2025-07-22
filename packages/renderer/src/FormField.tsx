@@ -1,10 +1,16 @@
 import { useFormBuilder } from '@form-builder/core';
 import type {
+  BlockField,
   DateField,
   FieldGroupItem,
   FormField as FormFieldType,
   MultiSelectField,
-  SelectField
+  TextField,
+  FileField,
+  RadioField,
+  CheckboxField,
+  SelectField,
+  ButtonField as ButtonFieldType
 } from '@form-builder/types';
 import {
   Button,
@@ -33,7 +39,6 @@ import {
 import * as LucideIcons from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
-import '../../parama-ui/dist/parama-ui.min.css';
 
 // Memoized components remain the same
 const MemoizedIcon = memo(({ iconName, size = 15 }: { iconName: string; size?: number }) => {
@@ -131,8 +136,56 @@ const MemoizedCheckboxItems = memo(
   )
 );
 
-export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) => {
+// Type for input fields that have all the common properties
+type InputFieldType = TextField | FileField | RadioField | CheckboxField | SelectField | MultiSelectField | DateField;
+
+// Separate component for block fields
+const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
+  return (
+    <div className={`column-span-${field.width}`}>
+      {typeof field.content === 'string' ? <div dangerouslySetInnerHTML={{ __html: field.content }} /> : field.content}
+    </div>
+  );
+});
+
+BlockField.displayName = 'BlockField';
+
+// Separate component for button fields
+const ButtonFieldComponent: React.FC<{ field: ButtonFieldType }> = memo(({ field }) => {
+  const { actions } = useFormBuilder();
+
+  const handleReset = () => {
+    actions.resetForm();
+  };
+
+  if (field.action === 'reset') {
+    return (
+      <Button type="button" color={field.appearance?.color} variant={field.appearance?.variant} onClick={handleReset}>
+        {field.label}
+      </Button>
+    );
+  } else if (field.action === 'cancel') {
+    // Handle cancel action, e.g., close a modal or reset state
+    return (
+      <Button type={field.type} color={field.appearance?.color} variant={field.appearance?.variant}>
+        {field.label}
+      </Button>
+    );
+  } else {
+    return (
+      <Button type={field.type} color={field.appearance?.color} variant={field.appearance?.variant}>
+        {field.label}
+      </Button>
+    );
+  }
+});
+
+ButtonFieldComponent.displayName = 'ButtonFieldComponent';
+
+// Main component for form input fields (excluding block and button types)
+const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
   const { formData, actions, visibleFields, disabledFields, readOnlyFields, mode } = useFormBuilder();
+
   const value = formData[field.id] ?? field.defaultValue;
   const validationState = actions.getFieldValidation(field.id);
 
@@ -210,15 +263,8 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
   );
 
   const isRequired = useMemo(() => {
-    const requiredRules = field.validations?.filter((rule) => rule.type === 'required')[0];
+    const requiredRules = field.validations?.filter((rule: any) => rule.type === 'required')[0];
     return requiredRules ? true : false;
-    // if (requiredRules && requiredRules.expression) {
-    //   const expr = interpolate(requiredRules.expression, formData);
-    //   const isValid = new Function(`return ${expr}`)();
-    //   return isValid as boolean;
-    // } else {
-    //   return false;
-    // }
   }, [field.validations]);
 
   const handleSelectChange = useCallback(
@@ -400,7 +446,7 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
 
   const multiselectOptions = useMemo(() => {
     if (field.type === 'multiselect' && Array.isArray(field.options)) {
-      return field.options.map((option) => ({
+      return field.options.map((option: FieldGroupItem) => ({
         value: option.value,
         label: option.label
       }));
@@ -588,9 +634,6 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
           />
         );
 
-      case 'submit':
-        return <Button type="submit">{field.label}</Button>;
-
       default:
         return <div>Unsupported field type</div>;
     }
@@ -626,26 +669,33 @@ export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) =>
       id={`item__${field.id}`}
       className={`column-span-${field.width}`}
       orientation={field.type === 'checkbox' || field.type === 'radio' ? field.appearance?.position : 'vertical'}>
-      {field.type !== 'submit' ? (
-        mode === 'editor' ? (
-          <Label>{field.label}</Label>
-        ) : field.type !== 'hidden' ? (
-          <Label>{field.label}</Label>
-        ) : null
-      ) : null}
+      {mode === 'editor' ? <Label>{field.label}</Label> : field.type !== 'hidden' ? <Label>{field.label}</Label> : null}
       {field.type === 'file' && field.helpText && <p className="form-description">{field.helpText}</p>}
       {field.type === 'file' && (!validationState.isValid || field.error) && (
         <p className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</p>
       )}
       {renderInput}
-      {field.type !== 'submit' && field.type !== 'file' && (!validationState.isValid || field.error) && (
+      {field.type !== 'file' && (!validationState.isValid || field.error) && (
         <span className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</span>
       )}
-      {field.type !== 'submit' && field.type !== 'file' && field.helpText && (
-        <span className="form-description">{field.helpText}</span>
-      )}
+      {field.type !== 'file' && field.helpText && <span className="form-description">{field.helpText}</span>}
     </FormItem>
   );
+});
+
+InputField.displayName = 'InputField';
+
+// Main router component that decides which sub-component to render
+export const FormField: React.FC<{ field: FormFieldType }> = memo(({ field }) => {
+  if (field.type === 'block') {
+    return <BlockField field={field} />;
+  }
+
+  if (field.type === 'submit' || field.type === 'reset' || field.type === 'button') {
+    return <ButtonFieldComponent field={field as ButtonFieldType} />;
+  }
+
+  return <InputField field={field as InputFieldType} />;
 });
 
 FormField.displayName = 'FormField';

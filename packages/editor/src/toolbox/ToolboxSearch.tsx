@@ -48,8 +48,12 @@ export const ToolboxSearch: React.FC<ToolboxSearchProps> = ({ items, onFilteredI
         return presetItem.fields.some((field) => {
           return (
             field.type.toLowerCase().includes(searchLower) ||
-            (field.label && field.label.toLowerCase().includes(searchLower)) ||
-            (field.placeholder && field.placeholder.toLowerCase().includes(searchLower))
+            (('label' in field ? field.label : field.id) &&
+              ('label' in field ? field.label : field.id).toLowerCase().includes(searchLower)) ||
+            (('placeholder' in field ? field.placeholder : '') &&
+              ('placeholder' in field && field.placeholder
+                ? field.placeholder.toLowerCase().includes(searchLower)
+                : false))
           );
         });
       }

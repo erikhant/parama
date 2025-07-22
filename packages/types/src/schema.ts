@@ -23,14 +23,16 @@ export type FormField =
   | SelectField
   | MultiSelectField
   | DateField
-  | SubmitForm;
+  | ButtonField
+  | BlockField;
 
 export interface FormBuilderProps {
   schema: FormSchema;
   validators?: ValidatorRegistry;
   data?: Record<string, any>;
-  // templates?: FormTemplate[];
   variables?: Record<string, any>;
+  onSubmit?: (data: Record<string, any>) => void;
+  onChange?: (data: Record<string, any>) => void;
 }
 
 export interface FormEditorOptions {
@@ -132,7 +134,6 @@ export interface BaseField {
   conditions?: FieldConditions;
   events?: Events[];
   validations?: ValidationRule[];
-  // ... common properties
 }
 
 export interface FieldGroupItem {
@@ -227,7 +228,6 @@ export interface SelectField extends BaseField {
     items: FieldGroupItem[];
   }[];
   external?: ExternalDataSource<FieldGroupItem>;
-  // dynamicOptions?: DynamicOptions;
 }
 
 export interface MultiSelectField extends BaseField {
@@ -238,8 +238,19 @@ export interface MultiSelectField extends BaseField {
   external?: ExternalDataSource<FieldGroupItem>;
 }
 
-export interface SubmitForm extends BaseField {
-  type: 'submit';
+export interface ButtonField extends Pick<BaseField, 'id' | 'label' | 'disabled' | 'width' | 'conditions'> {
+  type: 'submit' | 'reset' | 'button';
+  action: 'submit' | 'reset' | 'cancel';
+  appearance?: {
+    color?: 'primary' | 'secondary';
+    variant?: 'fill' | 'outline' | 'ghost' | 'shadow';
+    size?: 'xs' | 'sm' | 'lg' | 'default';
+  };
+}
+
+export interface BlockField extends Pick<BaseField, 'id' | 'width' | 'conditions'> {
+  type: 'block';
+  content: any; // Can be a React component or HTML content
 }
 
 export interface FieldTypeDef {

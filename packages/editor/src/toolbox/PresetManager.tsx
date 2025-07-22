@@ -52,7 +52,8 @@ export const PresetManager: React.FC<PresetManagerProps> = ({
           preset.fields.some(
             (field) =>
               field.type.toLowerCase().includes(searchLower) ||
-              (field.label && field.label.toLowerCase().includes(searchLower))
+              (('label' in field ? field.label : field.id) &&
+                ('label' in field ? field.label : field.id).toLowerCase().includes(searchLower))
           )
         );
       });

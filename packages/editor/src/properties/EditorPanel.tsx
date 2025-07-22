@@ -13,6 +13,65 @@ import ValidationEditor from './ValidationEditor';
 import { LayoutEditor } from './LayoutEditor';
 import { FormMetadata } from './FormMetadata';
 import { EventsEditor } from './EventsEditor';
+import { GeneralButtonEditor } from './button/GeneralButtonEditor';
+import { AppearanceButtonEditor } from './button/AppearanceButtonEditor';
+
+// Types for editor configuration
+interface EditorConfig {
+  showGeneral: boolean;
+  showProperties: boolean;
+  showAppearance: boolean;
+  showValidation: boolean;
+  showConditions: boolean;
+  showEvents: boolean;
+  useButtonEditor: boolean;
+}
+
+// Helper function to determine which editors should be rendered
+const getEditorConfig = (field: FormField, editorOptions: any): EditorConfig => {
+  const isButtonType = field.type === 'button' || field.type === 'submit' || field.type === 'reset';
+  const isHiddenType = field.type === 'hidden';
+
+  return {
+    showGeneral: editorOptions?.generalSettings !== 'off' && !isHiddenType,
+    showProperties: editorOptions?.propertiesSettings !== 'off',
+    showAppearance: editorOptions?.appearanceSettings !== 'off',
+    showValidation: editorOptions?.validationSettings !== 'off' && !isButtonType,
+    showConditions: editorOptions?.conditionsSettings !== 'off' && !isHiddenType,
+    showEvents: editorOptions?.eventsSettings !== 'off' && !isButtonType,
+    useButtonEditor: isButtonType
+  };
+};
+
+// Component for rendering field editors based on configuration
+interface FieldEditorsProps {
+  field: FormField;
+  editorConfig: EditorConfig;
+  onChange: (updates: Partial<FormField>) => void;
+}
+
+const FieldEditors: React.FC<FieldEditorsProps> = ({ field, editorConfig, onChange }) => {
+  return (
+    <>
+      {editorConfig.showGeneral &&
+        (editorConfig.useButtonEditor ? (
+          <GeneralButtonEditor field={field} onChange={onChange} />
+        ) : (
+          <GeneralEditor field={field} onChange={onChange} />
+        ))}
+      {editorConfig.showProperties && <PropertiesEditor field={field} onChange={onChange} />}
+      {editorConfig.showAppearance &&
+        (editorConfig.useButtonEditor ? (
+          <AppearanceButtonEditor field={field} onChange={onChange} />
+        ) : (
+          <AppearanceEditor field={field} onChange={onChange} />
+        ))}
+      {editorConfig.showValidation && <ValidationEditor field={field} onChange={onChange} />}
+      {editorConfig.showConditions && <ConditionEditor field={field} onChange={onChange} />}
+      {editorConfig.showEvents && <EventsEditor field={field} onChange={onChange} />}
+    </>
+  );
+};
 
 export const EditorPanel: React.FC = () => {
   const { selectedFieldId, schema, actions } = useFormBuilder();
@@ -44,13 +103,13 @@ export const EditorPanel: React.FC = () => {
       const field = actions.getField(selectedFieldId) || null;
       editor.setLocalField(field);
       setCollapsed(false);
-      // setWidthValue(field?.width || 1);
     } else {
       editor.setLocalField(null);
       setCollapsed(true);
     }
   }, [selectedFieldId, schema.fields]);
 
+  // Show layout editor when no field is selected but form has fields
   if (schema.fields.length > 0 && !properties.localField) {
     return (
       <div className="w-72 shrink-0 max-h-screen overflow-y-auto overflow-x-hidden bg-gray-50 border-l-2 border-gray-100/60">
@@ -60,6 +119,7 @@ export const EditorPanel: React.FC = () => {
     );
   }
 
+  // Show empty state when no field is provided
   if (!properties.localField) {
     return (
       <div className="w-72 shrink-0 max-h-screen overflow-y-auto overflow-x-hidden bg-gray-50 border-l-2 border-gray-100/60">
@@ -67,6 +127,9 @@ export const EditorPanel: React.FC = () => {
       </div>
     );
   }
+
+  // Get editor configuration based on field type and editor options
+  const editorConfig = getEditorConfig(properties.localField, editor.options);
 
   return (
     <div
@@ -83,27 +146,12 @@ export const EditorPanel: React.FC = () => {
       {!collapsed && (
         <>
           <div className="p-3 space-y-3">
-            <h2 className="text-sm font-semibold text-gray-700 line-clamp-1">{properties.localField.label}</h2>
+            <h2 className="text-sm font-semibold text-gray-700 line-clamp-1">
+              {'label' in properties.localField ? properties.localField.label : properties.localField.id}
+            </h2>
             <small className="text-gray-500">{properties.localField?.id}</small>
           </div>
-          {editor.options?.generalSettings !== 'off' && properties.localField.type !== 'hidden' && (
-            <GeneralEditor field={properties.localField} onChange={handleFieldChange} />
-          )}
-          {editor.options?.propertiesSettings !== 'off' && (
-            <PropertiesEditor field={properties.localField} onChange={handleFieldChange} />
-          )}
-          {editor.options?.appearanceSettings !== 'off' && (
-            <AppearanceEditor field={properties.localField} onChange={handleFieldChange} />
-          )}
-          {editor.options?.validationSettings !== 'off' && (
-            <ValidationEditor field={properties.localField} onChange={handleFieldChange} />
-          )}
-          {editor.options?.conditionsSettings !== 'off' && properties.localField.type !== 'hidden' && (
-            <ConditionEditor field={properties.localField} onChange={handleFieldChange} />
-          )}
-          {editor.options?.eventsSettings !== 'off' && (
-            <EventsEditor field={properties.localField} onChange={handleFieldChange} />
-          )}
+          <FieldEditors field={properties.localField} editorConfig={editorConfig} onChange={handleFieldChange} />
         </>
       )}
     </div>

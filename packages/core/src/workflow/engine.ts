@@ -8,9 +8,8 @@ import type {
 } from '@form-builder/types';
 import _, { debounce } from 'lodash';
 import { FormBuilderState } from '../store';
-import { interceptExpressionTemplate, interpolate, objectToQueryString } from '../utils';
+import { interceptExpressionTemplate, interpolate } from '../utils';
 import { DependencyGraph } from './graph';
-import { url } from 'node:inspector/promises';
 
 interface WorkflowEngineOptions {
   getState: () => FormBuilderState;
@@ -23,9 +22,6 @@ export class WorkflowEngine {
   private getState: () => FormBuilderState;
   private setState: (updater: (state: FormBuilderState) => FormBuilderState) => void;
   private debounceWait: number;
-  private pendingActions: Map<string, Function> = new Map();
-  private actionQueue: Set<string> = new Set();
-  private isProcessingQueue = false;
 
   constructor(options: WorkflowEngineOptions) {
     this.graph = new DependencyGraph();
@@ -42,66 +38,51 @@ export class WorkflowEngine {
     // Clear existing dependencies first
     this.graph.removeField(field.id);
 
-    console.log(`Registering dependencies for field ${field.id} (${field.name})`);
-
     // Register condition dependencies
     if (field.conditions) {
       const conditionDeps = this.extractConditionDependencies(field.conditions);
-      console.log(`Found condition dependencies for ${field.id}:`, conditionDeps);
 
       conditionDeps.forEach((fieldName) => {
         // Find field by name and get its ID
         const state = this.getState();
         const dependencyField = state.actions.getField(fieldName);
         if (dependencyField) {
-          console.log(`Adding dependency: ${dependencyField.id} -> ${field.id} (by name: ${fieldName})`);
           this.graph.addDependency(dependencyField.id, field.id);
         } else {
           // Also try to find by ID in case the expression uses ID instead of name
           const fieldById = state.schema.fields.find((f) => f.id === fieldName);
           if (fieldById) {
-            console.log(`Adding dependency: ${fieldById.id} -> ${field.id} (by ID: ${fieldName})`);
             this.graph.addDependency(fieldById.id, field.id);
-          } else {
-            console.warn(`Could not find dependency field "${fieldName}" for field ${field.id}`);
           }
         }
       });
     }
 
     // Register validation dependencies
-    if (field.validations) {
+    if ('validations' in field && field.validations) {
       const validationDeps = this.extractValidationDependencies(field.validations);
-      console.log(`Found validation dependencies for ${field.id}:`, validationDeps);
 
       validationDeps.forEach((fieldName) => {
         // Find field by name and get its ID
         const state = this.getState();
         const dependencyField = state.actions.getField(fieldName);
         if (dependencyField) {
-          console.log(`Adding validation dependency: ${dependencyField.id} -> ${field.id} (by name: ${fieldName})`);
           this.graph.addDependency(dependencyField.id, field.id);
         } else {
           // Also try to find by ID in case the expression uses ID instead of name
           const fieldById = state.schema.fields.find((f) => f.id === fieldName);
           if (fieldById) {
-            console.log(`Adding validation dependency: ${fieldById.id} -> ${field.id} (by ID: ${fieldName})`);
             this.graph.addDependency(fieldById.id, field.id);
-          } else {
-            console.warn(`Could not find validation dependency field "${fieldName}" for field ${field.id}`);
           }
         }
       });
     }
 
     // Register event dependencies
-    if (field.events) {
+    if ('events' in field && field.events) {
       const eventDeps = this.extractEventDependencies(field.events);
-      console.log(`Found event dependencies for ${field.id}:`, eventDeps);
 
       eventDeps.forEach((fieldDependentId) => {
-        // Find field by name and get its ID
-        console.log(`Adding event dependency: ${fieldDependentId} -> ${field.id} (by name: ${fieldDependentId})`);
         this.graph.addDependency(fieldDependentId, field.id);
       });
     }
@@ -119,33 +100,30 @@ export class WorkflowEngine {
 
     // 2. Evaluate conditions FIRST
     const dependents = this.graph.getDependents(fieldId);
-    console.log(`Processing field change for ${fieldId}, found dependents:`, dependents);
 
     dependents.forEach((depId) => {
       const depField = state.actions.getField(depId);
       if (depField?.conditions) {
-        console.log(`Evaluating conditions for dependent field ${depId}:`, depField.conditions);
         this.evaluateDependentConditions(depField);
       }
 
-      if (depField?.validations) {
+      if (depField && 'validations' in depField && depField.validations) {
         state.actions.validateField(depId, 'change');
       }
     });
 
     // 3. Run validations SECOND
-    if (field.validations && field.validations.length > 0) {
+    if ('validations' in field && field.validations && field.validations.length > 0) {
       const isValid = await state.actions.validateField(fieldId, 'change');
-      console.log(`Field ${fieldId} validation result:`, isValid);
 
       // 4a. Execute onValueChange actions LAST
-      if (isValid && field.events && field.events.length > 0) {
+      if (isValid && 'events' in field && field.events && field.events.length > 0) {
         this.executeEvents(field.events);
       }
     }
 
     // 4b. Execute onValueChange actions LAST
-    else if (field.events && field.events.length > 0) {
+    else if ('events' in field && field.events && field.events.length > 0) {
       this.executeEvents(field.events);
     }
   }
@@ -156,7 +134,6 @@ export class WorkflowEngine {
     for (const event of events) {
       const targetField = this.getState().actions.getField(event.target);
       if (!targetField) {
-        console.error(`Target field ${event.target} not found for event`, event);
         continue;
       }
       switch (event.type) {
@@ -165,7 +142,10 @@ export class WorkflowEngine {
           break;
 
         case 'reset':
-          this.getState().actions.updateFieldValue(targetField.id, targetField.defaultValue || '');
+          this.getState().actions.updateFieldValue(
+            targetField.id,
+            ('defaultValue' in targetField ? targetField.defaultValue : '') || ''
+          );
           break;
 
         case 'setValue':
@@ -175,7 +155,6 @@ export class WorkflowEngine {
           break;
 
         default:
-          console.warn(`Unknown event type: ${event.type} for field ${targetField.id}`);
           break;
       }
     }
@@ -194,7 +173,6 @@ export class WorkflowEngine {
     const { url, headers, mapper } = field.external;
 
     if (!mapper || !mapper.dataSource || !mapper.dataMapper) {
-      console.error(`Field ${field.id} is missing external mapper configuration`);
       return;
     }
 
@@ -317,65 +295,16 @@ export class WorkflowEngine {
     this.graph.removeField(fieldId);
   }
 
-  // Private helper methods
-  private scheduleAction(fieldId: string, actionType: string, action: Function): void {
-    const actionKey = `${fieldId}-${actionType}`;
-
-    // Cancel pending action if exists
-    if (this.pendingActions.has(actionKey)) {
-      this.pendingActions.get(actionKey)!();
-      this.pendingActions.delete(actionKey);
-    }
-
-    // Create debounced action
-    const debouncedAction = debounce(() => {
-      action();
-      this.pendingActions.delete(actionKey);
-    }, this.debounceWait);
-
-    this.pendingActions.set(actionKey, debouncedAction.cancel);
-    this.actionQueue.add(actionKey);
-    debouncedAction();
-  }
-
-  private async processQueue(): Promise<void> {
-    if (this.isProcessingQueue || this.actionQueue.size === 0) return;
-
-    this.isProcessingQueue = true;
-    try {
-      while (this.actionQueue.size > 0) {
-        const [actionKey] = this.actionQueue;
-        this.actionQueue.delete(actionKey);
-
-        // Action already executed via debounce
-        if (!this.pendingActions.has(actionKey)) continue;
-
-        // Force execute pending action
-        this.pendingActions.get(actionKey)!();
-        this.pendingActions.delete(actionKey);
-      }
-    } finally {
-      this.isProcessingQueue = false;
-    }
-  }
-
   private evaluateCondition(condition: Condition | undefined, formData: Record<string, any>): boolean {
     if (!condition?.expression) return true;
     const interceptExpression = interceptExpressionTemplate(condition.expression, this.getState());
-    console.log(`Intercepting expression: "${interceptExpression}"`);
     try {
       // Replace formData references with actual values
       const expr = interpolate(interceptExpression, formData);
-      console.log(`Evaluating condition: "${condition.expression}" => "${expr}"`);
       // Create safe evaluation
       const result = new Function(`return ${expr}`)();
-      console.log(`Condition result: ${result}`);
       return result;
     } catch (error) {
-      console.error('Condition evaluation failed:', error);
-      console.error('Original expression:', condition.expression);
-      console.error('Interpolated expression:', interpolate(condition.expression, formData));
-      console.error('Available form data:', Object.keys(formData));
       return condition.fallback ?? false;
     }
   }
@@ -389,11 +318,6 @@ export class WorkflowEngine {
       deps.add(match[1].trim());
     }
 
-    // Debug logging (remove in production)
-    if (deps.size > 0) {
-      console.log('Condition dependencies found:', Array.from(deps), 'from conditions:', conditions);
-    }
-
     return Array.from(deps).filter((dep) => dep.length > 0);
   }
 
@@ -404,11 +328,6 @@ export class WorkflowEngine {
         deps.add(e.target);
       }
     });
-
-    // Debug logging (remove in production)
-    if (deps.size > 0) {
-      console.log('Event dependencies found:', Array.from(deps), 'from event:', event);
-    }
 
     return Array.from(deps);
   }

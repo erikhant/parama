@@ -40,7 +40,10 @@ interface FileTypeOption {
 export default function ValidationEditor({ field, onChange }: ValidationEditorProps) {
   const { editor } = useEditor();
   const { getFieldValue } = useFormBuilder().actions;
-  const validations = useMemo(() => field.validations || [], [field.validations]);
+  const validations = useMemo(
+    () => ('validations' in field ? field.validations : []) || [],
+    ['validations' in field ? field.validations : []]
+  );
   const builtInTextValidatorTemplate = useMemo(
     () => builtInValidatorTemplate.filter((r) => r.name !== 'passwordStrength'),
     []
@@ -51,13 +54,13 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
   );
 
   const getValidationByType = useCallback(
-    (type: ValidationRule['type']) => validations.find((v) => v.type === type),
+    (type: ValidationRule['type']) => validations.find((v: ValidationRule) => v.type === type),
     [validations]
   );
 
   const handleValidationChange = useCallback(
     (rule: ValidationRule) => {
-      const idx = validations.findIndex((v) => v.type === rule.type);
+      const idx = validations.findIndex((v: ValidationRule) => v.type === rule.type);
       if (idx !== -1) {
         const updated = [...validations];
         updated[idx] = { ...updated[idx], ...rule };
@@ -75,7 +78,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
 
   const removeValidation = useCallback(
     (type: string) => {
-      const filtered = validations.filter((v) => v.type !== type);
+      const filtered = validations.filter((v: ValidationRule) => v.type !== type);
       if (filtered.length !== validations.length) {
         onChange({ validations: filtered });
       }

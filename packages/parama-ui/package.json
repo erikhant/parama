@@ -1,10 +1,27 @@
 {
   "name": "@parama-ui/react",
-  "private": true,
+  "private": false,
   "version": "1.0.0",
   "type": "module",
   "description": "A reusable UI component library built with React, TailwindCSS and Radix UI.",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "style": "./dist/parama-ui.min.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./styles": "./dist/parama-ui.min.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "react",
     "ui",
@@ -15,18 +32,6 @@
     "radix-ui"
   ],
   "author": "Parama Team",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.es.js",
-  "style": "dist/parama-ui.min.css",
-  "files": [
-    "dist"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
-    }
-  },
   "scripts": {
     "dev": "vite && NODE_ENV=development",
     "build": "vite build && npx tailwindcss -i src/styles/prod.css -o dist/parama-ui.min.css --minify",

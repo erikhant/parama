@@ -7,6 +7,7 @@ import {
   ChevronDown,
   CircleDot,
   EyeOff,
+  MousePointerClick,
   RectangleEllipsis,
   TextCursorInput,
   Upload,
@@ -95,6 +96,14 @@ const fieldTypes: FieldTypeDef[] = [
     icon: CircleDot as LucideIcon,
     group: 'fields',
     description: 'Select one option from a set.'
+  },
+  {
+    id: uuid(),
+    type: 'button',
+    label: 'Button',
+    icon: MousePointerClick as LucideIcon,
+    group: 'fields',
+    description: 'Trigger an action with a button.'
   },
   {
     id: uuid(),
