@@ -110,7 +110,7 @@ import { FormEditor } from '@form-builder/editor';
 import '@parama-ui/react/styles';
 
 function App() {
-  return <FormEditor initialSchema={yourSchema} onSave={(schema) => console.log(schema)} />;
+  return <FormEditor schema={yourSchema} onSaveSchema={(schema) => console.log(schema)} />;
 }
 ```
 

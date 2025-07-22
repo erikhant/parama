@@ -30,8 +30,6 @@ chmod +x publish.sh
 
 ### Method 2: Manual Publishing
 
-### Method 2: Manual Publishing
-
 #### 1. Switch to Production Workspace
 
 ```bash

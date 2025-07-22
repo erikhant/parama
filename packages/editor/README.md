@@ -22,7 +22,7 @@ function App() {
     console.log('Form schema:', schema);
   };
 
-  return <FormEditor initialSchema={yourSchema} onSave={handleSave} />;
+  return <FormEditor schema={yourSchema} onSaveSchema={handleSave} />;
 }
 ```
 
