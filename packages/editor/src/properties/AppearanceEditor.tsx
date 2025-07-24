@@ -26,6 +26,22 @@ type AppearanceEditorProps = {
 export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => {
   const { editor } = useEditor();
 
+  // Always declare all state hooks at the top to maintain consistent hook order
+  // These are used by date fields but must be declared for all field types
+  const [enableSelectionMonth, setEnableSelectionMonth] = useState(() => {
+    if (field.type === 'date') {
+      return field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years';
+    }
+    return false;
+  });
+
+  const [enableSelectionYear, setEnableSelectionYear] = useState(() => {
+    if (field.type === 'date') {
+      return field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-months';
+    }
+    return false;
+  });
+
   const renderAppearanceOptions = () => {
     switch (field.type) {
       case 'text':
@@ -492,13 +508,6 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
           </SectionPanel>
         );
       case 'date':
-        const [enableSelectionMonth, setEnableSelectionMonth] = useState(
-          field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years'
-        );
-        const [enableSelectionYear, setEnableSelectionYear] = useState(
-          field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-months'
-        );
-
         return (
           <SectionPanel title="Appearance">
             <FormItem orientation="horizontal">

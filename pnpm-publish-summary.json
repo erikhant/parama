@@ -1,24 +1,8 @@
 {
 	"publishedPackages": [
 		{
-			"name": "@form-builder/types",
-			"version": "0.1.0"
-		},
-		{
-			"name": "@parama-ui/react",
-			"version": "1.0.0"
-		},
-		{
-			"name": "@form-builder/core",
-			"version": "0.1.0"
-		},
-		{
-			"name": "@form-builder/renderer",
-			"version": "0.1.0"
-		},
-		{
-			"name": "@form-builder/editor",
-			"version": "0.1.0"
+			"name": "@parama-dev/form-builder-editor",
+			"version": "0.2.3"
 		}
 	]
 }

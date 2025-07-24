@@ -159,6 +159,7 @@ interface FormEditorState {
 
 const defaultOptions: FormEditorOptions = {
   showJsonCode: true,
+  propertiesSettings: 'on',
   generalSettings: 'on',
   appearanceSettings: 'on',
   validationSettings: 'on',

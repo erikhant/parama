@@ -1,17 +1,17 @@
-# @form-builder/types
+# @parama-dev/form-builder-types
 
 Type definitions for the form builder system.
 
 ## Installation
 
 ```bash
-npm install @form-builder/types
+npm install @parama-dev/form-builder-types
 ```
 
 ## Usage
 
 ```typescript
-import { FormSchema, FieldType } from '@form-builder/types';
+import { FormSchema, FieldType } from '@parama-dev/form-builder-types';
 
 const schema: FormSchema = {
   // your schema

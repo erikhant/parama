@@ -9,7 +9,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   root: __dirname,
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+      jsxImportSource: 'react'
+    }),
     dts({
       insertTypesEntry: true,
       exclude: ['**/__tests__/**'],
@@ -33,6 +36,8 @@ export default defineConfig({
       external: [
         'react',
         'react-dom',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
         '@parama-dev/form-builder-core',
         '@parama-dev/form-builder-types',
         '@parama-dev/form-builder-renderer',
@@ -60,6 +65,8 @@ export default defineConfig({
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
+          'react/jsx-runtime': 'React',
+          'react/jsx-dev-runtime': 'React',
           '@parama-dev/form-builder-core': 'FormBuilderCore',
           '@parama-dev/form-builder-types': 'FormBuilderTypes',
           '@parama-dev/form-builder-renderer': 'FormBuilderRenderer',

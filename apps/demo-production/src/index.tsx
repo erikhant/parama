@@ -2,8 +2,8 @@ import './index.css';
 import '@parama-ui/dist/styles.css';
 import '../../../packages/editor/dist/styles.css'; // Ensure editor styles are included
 import { createRoot } from 'react-dom/client';
-import { FormEditor } from '@form-builder/editor';
-import type { FormSchema, PresetTypeDef } from '@form-builder/types';
+import { FormEditor } from '@parama-dev/form-builder-editor';
+import type { FormSchema, PresetTypeDef } from '@parama-dev/form-builder-types';
 
 // Test schema using file upload field to verify all functionality
 const testSchema: FormSchema = {

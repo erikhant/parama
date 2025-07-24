@@ -38,6 +38,11 @@
   .canvas-xl {
     @apply w-full;
   }
+
+  .toolbox-search-x {
+    @apply absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1;
+  }
+
   @keyframes fadeInScale {
     from {
       opacity: 0;

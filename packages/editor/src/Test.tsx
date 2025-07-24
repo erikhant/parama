@@ -1,6 +1,6 @@
 import './index.css';
 import '../../parama-ui/dist/parama-ui.min.css';
-import { FormEditor } from '@parama-dev/form-builder-editor';
+import { FormEditor } from '../src/components/FormEditor';
 import { createRoot } from 'react-dom/client';
 import type { FormSchema } from '@parama-dev/form-builder-types';
 
@@ -40,7 +40,19 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <FormEditor schema={initialSchema} onSaveSchema={handleSave} />
+      <FormEditor
+        schema={initialSchema}
+        onSaveSchema={handleSave}
+        options={{
+          brand: (
+            <img
+              src="https://www.pikpng.com/pngl/b/34-345940_download-in-png-format-png-format-clipart.png"
+              alt="Brand Logo"
+              className="h-6"
+            />
+          )
+        }}
+      />
     </div>
   );
 }

@@ -1,17 +1,17 @@
-# @form-builder/core
+# @parama-dev/form-builder-core
 
 Core functionality for the form builder system.
 
 ## Installation
 
 ```bash
-npm install @form-builder/core @form-builder/types
+npm install @parama-dev/form-builder-core @parama-dev/form-builder-types
 ```
 
 ## Usage
 
 ```typescript
-import { FormEngine } from '@form-builder/core';
+import { FormEngine } from '@parama-dev/form-builder-core';
 
 const engine = new FormEngine(schema);
 ```

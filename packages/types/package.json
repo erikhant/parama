@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-types",
-  "version": "0.1.1",
+  "version": "0.2.2",
   "description": "Type definitions for the form builder system",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -30,7 +30,13 @@
     "rollup-plugin-dts": "^6.2.1",
     "typescript": "^5.3.3"
   },
-  "dependencies": {
+  "peerDependencies": {
     "ajv": "^8.17.1"
-  }
+  },
+  "peerDependenciesMeta": {
+    "ajv": {
+      "optional": false
+    }
+  },
+  "dependencies": {}
 }

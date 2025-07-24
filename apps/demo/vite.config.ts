@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@form-builder': path.resolve(__dirname, '../../packages'),
+      '@parama-dev/form-builder-*': path.resolve(__dirname, '../../packages'),
       '@parama-ui/react/styles': path.resolve(__dirname, '../../packages/parama-ui/dist/parama-ui.min.css')
     }
   },

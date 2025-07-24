@@ -36,6 +36,8 @@ export interface FormBuilderProps {
 }
 
 export interface FormEditorOptions {
+  brand?: object | string; // Can be a React component or a string
+  containerClassname?: string;
   showJsonCode?: boolean;
   generalSettings?: FieldSettings;
   propertiesSettings?: FieldSettings;

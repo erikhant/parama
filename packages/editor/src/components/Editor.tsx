@@ -29,6 +29,7 @@ import { ToolboxItemOverlay, ToolboxPanel } from '../toolbox';
 import { DragPreview } from './DragPreview';
 import { Toolbar } from './Toolbar';
 import { Toaster } from 'sonner';
+import { cn } from '@parama-ui/react';
 
 const defineDefaultValue = (type: string) => {
   const newField = {
@@ -251,7 +252,11 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragMove={handleDragMove}>
-        <div className="editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden">
+        <div
+          className={cn(
+            'editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden',
+            editor.options?.containerClassname
+          )}>
           <ToolboxPanel />
           <FormCanvas />
           <EditorPanel />

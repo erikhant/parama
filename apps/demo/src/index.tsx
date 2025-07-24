@@ -1,8 +1,8 @@
 import './index.css';
 import '@parama-ui/react/styles';
 import { createRoot } from 'react-dom/client';
-import { FormEditor } from '@form-builder/editor';
-import { FormSchema } from '@form-builder/types';
+import { FormEditor } from '@parama-dev/form-builder-editor';
+import { FormSchema } from '@parama-dev/form-builder-types';
 
 // Demo schema with file field to test the validation editor
 const initialSchema: FormSchema = {
