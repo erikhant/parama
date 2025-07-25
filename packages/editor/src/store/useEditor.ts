@@ -159,9 +159,11 @@ interface FormEditorState {
 
 const defaultOptions: FormEditorOptions = {
   showJsonCode: true,
+  defaultFieldTab: 'fields',
   propertiesSettings: 'on',
   generalSettings: 'on',
   appearanceSettings: 'on',
+  dataSettings: 'on',
   validationSettings: 'on',
   conditionsSettings: 'on',
   eventsSettings: 'on'
@@ -170,7 +172,7 @@ const defaultOptions: FormEditorOptions = {
 export const useEditor = create<FormEditorState>((set, get) => ({
   initialize: (props) => {
     const { options: customOptions, ...editorProps } = props;
-    const mergedOptions = Object.assign({}, defaultOptions, customOptions);
+    const mergedOptions = Object.assign(defaultOptions, customOptions);
     set((state) => ({
       editor: {
         ...state.editor,

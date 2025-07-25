@@ -56,14 +56,13 @@ export function objectToQueryString(obj: Record<string, unknown>): string {
 export function interpolate(template: string, data: Record<string, unknown>): string {
   return template.replace(/\{\{(.*?)\}\}/g, (_, key) => {
     const value = data[key.trim()];
-
     // Handle undefined/null values
     if (value === undefined || value === null) {
       return 'null';
     }
 
     // For JavaScript expressions, we need to properly quote string values
-    if (typeof value === 'string') {
+    if (typeof value === 'string' || typeof value === 'object') {
       return JSON.stringify(value);
     }
 

@@ -5,3 +5,4 @@ export * from './SortableList';
 export * from './SortableItem';
 export * from './DragPreview';
 export * from './RepetableField';
+export * from './CodeEditor';

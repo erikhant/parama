@@ -1,17 +1,18 @@
 import type {
+  FieldGroupItem,
   FormBuilderProps,
   FormField,
   FormSchema,
-  FormTemplate,
   ValidationState,
   ValidationTrigger,
   ValidatorRegistry
 } from '@parama-dev/form-builder-types';
-import { debounce, DebouncedFunc } from 'lodash-es';
+import { debounce, DebouncedFunc, get as getObject } from 'lodash-es';
 import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';
 import { WorkflowEngine } from './workflow/engine';
 import { evaluateValidations } from './validations/evaluate';
+import { interceptExpressionTemplate, interpolate } from './utils';
 
 export interface FormBuilderState {
   // Core form state
@@ -19,7 +20,6 @@ export interface FormBuilderState {
   formData: Record<string, any>;
   validators: ValidatorRegistry;
   selectedFieldId: string | null;
-  // templates: FormTemplate[];
   mode: 'editor' | 'preview';
   screenSize: 'mobile' | 'tablet' | 'desktop';
 
@@ -54,6 +54,7 @@ export interface FormBuilderState {
 
     // Data management
     updateFieldValue: (id: string, value: any) => void;
+    refreshDynamicOptions: (field: FormField) => Promise<FieldGroupItem[]>;
     getFormData: () => Record<string, any>;
     getFormDataByNames: () => Record<string, any>;
     resetForm: () => void;
@@ -379,6 +380,47 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       },
 
       /**
+       * Refreshes dynamic options for a field
+       * @param field Form field to refresh
+       */
+      async refreshDynamicOptions(field: FormField): Promise<FieldGroupItem[]> {
+        const formData = get().formData;
+
+        if ((field.type !== 'select' && field.type !== 'multiselect') || !field.external) {
+          return [];
+        }
+        const { url, headers, mapper } = field.external;
+
+        if (!mapper || !mapper.dataSource || !mapper.dataMapper) {
+          return [];
+        }
+
+        const interceptedExpression = interceptExpressionTemplate(url, get());
+        const serializedUrl = interpolate(interceptedExpression, formData);
+
+        const response = await fetch(serializedUrl, {
+          headers: { ...headers }
+        });
+        if (!response.ok) {
+          get().actions.updateField(field.id, {
+            error: 'Failed to load options'
+          });
+          return [];
+        }
+        const data = await response.json();
+        const options = getObject(data, mapper.dataSource, data);
+        const mappedOptions: FieldGroupItem[] = options.map((item: any) => {
+          return {
+            id: getObject(item, mapper.dataMapper.id),
+            label: getObject(item, mapper.dataMapper.label),
+            value: getObject(item, mapper.dataMapper.value)
+          };
+        });
+
+        return mappedOptions;
+      },
+
+      /**
        * Sets an error message for a specific field
        * @param fieldId - Field ID to set error for
        * @param error - Error message to set
@@ -598,7 +640,13 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
                   console.warn(`Duplicate field name "${field.name}" found. Using "${fieldName}" instead.`);
                 }
                 usedNames.add(fieldName);
-                acc[fieldName] = fieldValue;
+                if ('transformer' in field && field.transformer) {
+                  const interceptedTemplate = interceptExpressionTemplate(field.transformer, get());
+                  const dataTransform = interpolate(interceptedTemplate, formData);
+                  acc[fieldName] = dataTransform;
+                } else {
+                  acc[fieldName] = fieldValue;
+                }
               }
             }
             return acc;

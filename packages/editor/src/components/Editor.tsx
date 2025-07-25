@@ -62,11 +62,13 @@ const defineDefaultValue = (type: string) => {
       ];
       return {
         ...(newField as CheckboxField),
-        items: checkbox
+        items: checkbox,
+        transformer: ''
       };
     case 'date':
       return {
         ...newField,
+        transformer: '',
         mode: 'single',
         options: {
           dateFormat: 'dd/MM/yyyy'
@@ -122,7 +124,7 @@ const defineDefaultValue = (type: string) => {
         content: ''
       } as BlockField;
     default:
-      return newField as FormFieldType;
+      return { ...newField, transformer: '' } as FormFieldType;
   }
 };
 
@@ -190,10 +192,7 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
       if (active.data.current.type === 'preset') {
         const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
         if (preset && preset.fields) {
-          const fieldsToAdd = preset.fields.map((field: FormFieldType) => ({
-            ...field,
-            id: `field-${Date.now()}-${Math.random()}`
-          })) as FormFieldType[];
+          const fieldsToAdd = preset.fields;
 
           // Insert all preset fields
           if (over.data.current?.fromCanvas) {

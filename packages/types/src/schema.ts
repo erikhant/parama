@@ -38,9 +38,11 @@ export interface FormBuilderProps {
 export interface FormEditorOptions {
   brand?: object | string; // Can be a React component or a string
   containerClassname?: string;
+  defaultFieldTab?: 'fields' | 'presets';
   showJsonCode?: boolean;
   generalSettings?: FieldSettings;
   propertiesSettings?: FieldSettings;
+  dataSettings?: FieldSettings;
   appearanceSettings?: FieldSettings;
   validationSettings?: FieldSettings;
   conditionsSettings?: FieldSettings;
@@ -149,7 +151,11 @@ export interface FieldGroupItem {
   };
 }
 
-export interface TextField extends BaseField {
+export interface DataCustomization {
+  transformer?: string;
+}
+
+export interface TextField extends BaseField, DataCustomization {
   type: 'text' | 'email' | 'textarea' | 'password' | 'number' | 'tel' | 'url' | 'hidden';
   placeholder?: string;
   rows?: number;
@@ -175,7 +181,7 @@ export interface TextField extends BaseField {
   };
 }
 
-export interface RadioField extends BaseField {
+export interface RadioField extends BaseField, DataCustomization {
   type: 'radio';
   items: FieldGroupItem[];
   appearance?: {
@@ -184,7 +190,7 @@ export interface RadioField extends BaseField {
   };
 }
 
-export interface CheckboxField extends BaseField {
+export interface CheckboxField extends BaseField, DataCustomization {
   type: 'checkbox';
   items: FieldGroupItem[];
   appearance?: {
@@ -203,7 +209,7 @@ export interface FileField extends BaseField {
   // options?: FileUploadOptions;
 }
 
-export interface DateField extends BaseField {
+export interface DateField extends BaseField, DataCustomization {
   type: 'date';
   placeholder?: string;
   mode: 'single' | 'multiple' | 'range';
@@ -219,7 +225,7 @@ export interface DateField extends BaseField {
   };
 }
 
-export interface SelectField extends BaseField {
+export interface SelectField extends BaseField, DataCustomization {
   type: 'select';
   multiple: boolean;
   placeholder?: string;
@@ -232,7 +238,7 @@ export interface SelectField extends BaseField {
   external?: ExternalDataSource<FieldGroupItem>;
 }
 
-export interface MultiSelectField extends BaseField {
+export interface MultiSelectField extends BaseField, DataCustomization {
   type: 'multiselect';
   multiple: boolean;
   placeholder?: string;

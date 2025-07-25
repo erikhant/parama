@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-editor",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Visual form builder editor with drag-and-drop interface",
   "private": false,
   "main": "./dist/index.umd.js",
@@ -42,7 +42,7 @@
     "@parama-dev/form-builder-renderer": "workspace:*",
     "@parama-dev/form-builder-types": "workspace:*",
     "@monaco-editor/react": "4.7.0",
-    "@parama-ui/react": "^1.0.2",
+    "@parama-ui/react": "^1.0.3",
     "framer-motion": "^12.12.1",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.510.0",

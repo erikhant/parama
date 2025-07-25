@@ -1,8 +1,8 @@
 {
 	"publishedPackages": [
 		{
-			"name": "@parama-dev/form-builder-editor",
-			"version": "0.2.3"
+			"name": "@parama-ui/react",
+			"version": "1.0.3"
 		}
 	]
 }

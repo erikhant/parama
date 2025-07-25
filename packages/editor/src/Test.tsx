@@ -2,7 +2,7 @@ import './index.css';
 import '../../parama-ui/dist/parama-ui.min.css';
 import { FormEditor } from '../src/components/FormEditor';
 import { createRoot } from 'react-dom/client';
-import type { FormSchema } from '@parama-dev/form-builder-types';
+import type { FormSchema, PresetTypeDef } from '@parama-dev/form-builder-types';
 
 // Example usage of the FormEditor component
 export function App() {
@@ -38,12 +38,41 @@ export function App() {
     ]
   };
 
+  const initialPresets: PresetTypeDef[] = [
+    {
+      id: 'preset-1',
+      label: 'Preset 1',
+      type: 'preset',
+      description: 'This is a preset for demonstration purposes',
+      group: 'presets',
+      fields: [
+        {
+          id: Date.now().toString(),
+          name: 'name',
+          type: 'text',
+          label: 'Name',
+          placeholder: 'Enter your name',
+          value: '',
+          width: 6,
+          validations: [
+            {
+              type: 'required',
+              message: 'Name is required'
+            }
+          ]
+        }
+      ]
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <FormEditor
         schema={initialSchema}
+        loadPreset={initialPresets}
         onSaveSchema={handleSave}
         options={{
+          defaultFieldTab: 'presets',
           brand: (
             <img
               src="https://www.pikpng.com/pngl/b/34-345940_download-in-png-format-png-format-clipart.png"

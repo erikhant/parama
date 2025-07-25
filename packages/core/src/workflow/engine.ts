@@ -128,7 +128,7 @@ export class WorkflowEngine {
     }
   }
 
-  private async executeEvents(events: Events[]) {
+  private executeEvents(events: Events[]) {
     const formData = this.getState().formData;
 
     for (const event of events) {
@@ -138,7 +138,10 @@ export class WorkflowEngine {
       }
       switch (event.type) {
         case 'fetch':
-          this.refreshDynamicOptions(targetField);
+          // this.refreshDynamicOptions(targetField);
+          this.getState().actions.updateField(targetField.id, {
+            options: []
+          });
           break;
 
         case 'reset':
@@ -189,11 +192,10 @@ export class WorkflowEngine {
       return;
     }
     const data = await response.json();
-    const options = _.get(data, mapper.dataSource, []);
+    const options = _.get(data, mapper.dataSource, data);
     const mappedOptions: FieldGroupItem[] = options.map((item: any) => {
       return {
         id: _.get(item, mapper.dataMapper.id),
-
         label: _.get(item, mapper.dataMapper.label),
         value: _.get(item, mapper.dataMapper.value)
       };
