@@ -30,7 +30,7 @@ export interface FormBuilderProps {
   schema: FormSchema;
   validators?: ValidatorRegistry;
   data?: Record<string, any>;
-  onSubmit?: (data: Record<string, any>) => void;
+  onSubmit?: (data: Record<string, any> | FormData, contentType: 'application/json' | 'multipart/form-data') => void;
   onChange?: (data: Record<string, any>) => void;
   onCancel?: () => void;
 }
@@ -119,6 +119,7 @@ export interface FileOptions {
   server: string;
   instantUpload?: boolean;
   bulkUpload?: boolean;
+  preferredUnit?: string; // e.g., 'MB', 'KB'
 }
 
 export interface BaseField {

@@ -144,7 +144,7 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:!max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-gray-700">API source</DialogTitle>
           <DialogDescription>Manage API source settings</DialogDescription>
@@ -154,7 +154,7 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
             <FormGroup prefix="GET" className="w-full">
               <Input
                 value={apiUrl}
-                className="rounded-tr-none rounded-br-none"
+                className="!rounded-tr-none !rounded-br-none"
                 placeholder="https://api.example.com/data"
                 onChange={(e) => {
                   setApiUrl(e.target.value);
@@ -167,14 +167,14 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
             </FormGroup>
             <Button
               color="success"
-              className="rounded-tl-none rounded-bl-none"
+              className="!rounded-tl-none !rounded-bl-none"
               disabled={loading || !isValidUrl(apiUrl)}
               onClick={sendRequest}>
               Send
             </Button>
           </div>
           <Tabs defaultValue={tab} className="w-full">
-            <TabsList className="grid w-full grid-cols-6 bg-gray-100">
+            <TabsList className="grid w-full !grid-cols-3 bg-gray-100">
               <TabsTrigger value="headers">Headers</TabsTrigger>
               <TabsTrigger value="result">
                 Result

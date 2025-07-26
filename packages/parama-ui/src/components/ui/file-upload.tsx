@@ -23,6 +23,7 @@ interface FileOptions {
   server?: string;
   instantUpload?: boolean;
   bulkUpload?: boolean;
+  preferredUnit?: string; // e.g., 'MB', 'KB'
 }
 
 type FilePreview = File & {

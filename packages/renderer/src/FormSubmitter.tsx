@@ -1,21 +1,22 @@
 import React from 'react';
 import { useFormBuilder } from '@parama-dev/form-builder-core';
 import { FormField } from './FormField';
+import { FormBuilderProps } from '@parama-dev/form-builder-types';
+import { cn } from '@parama-ui/react';
 
-export const FormSubmitter: React.FC<{
-  onSubmit?: (data: Record<string, any>) => void;
-  onChange?: (data: Record<string, any>) => void;
-  onCancel?: () => void;
-}> = ({ onSubmit, onChange, onCancel }) => {
+interface FormSubmitterProps extends Omit<FormBuilderProps, 'schema' | 'validators' | 'data'> {
+  className?: string;
+}
+
+export const FormSubmitter: React.FC<FormSubmitterProps> = ({ onSubmit, onChange, onCancel, className }) => {
   const { schema, actions } = useFormBuilder();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const { data, isValid } = await actions.submitForm();
-    console.log('Form validity:', isValid);
-    console.log('Form submitted:', data);
+    const { data, isValid, contentType } = await actions.submitForm();
+
     if (isValid) {
-      onSubmit?.(data);
+      onSubmit?.(data, contentType);
     }
   };
 
@@ -24,7 +25,9 @@ export const FormSubmitter: React.FC<{
   };
 
   return (
-    <form className={`grid column-${schema.layout.colSize} gap-size-${schema.layout.gap}`} onSubmit={handleSubmit}>
+    <form
+      className={cn(`grid column-${schema.layout.colSize} gap-size-${schema.layout.gap}`, className)}
+      onSubmit={handleSubmit}>
       {schema.fields.map((field) => (
         <FormField key={field.id} field={field} onChange={handleChange} onCancel={onCancel} />
       ))}

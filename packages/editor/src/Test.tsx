@@ -1,5 +1,5 @@
+import '@parama-ui/react/dist/parama-ui.min.css';
 import './index.css';
-import '../../parama-ui/dist/parama-ui.min.css';
 import { FormEditor } from '../src/components/FormEditor';
 import { createRoot } from 'react-dom/client';
 import type { FormSchema, PresetTypeDef } from '@parama-dev/form-builder-types';
@@ -11,29 +11,62 @@ export function App() {
   };
 
   const initialSchema: FormSchema = {
-    id: 'example-form',
-    version: '1.0',
-    title: 'Example Form',
-    description: 'A simple example form',
-    layout: {
-      colSize: 12,
-      gap: 4
-    },
+    id: 'enhanced-file-demo',
+    version: '1.0.0',
+    title: 'Enhanced File Handling Demo',
+    description: 'Demonstrates single and multiple file uploads',
+    layout: { colSize: 12, gap: 4 },
     fields: [
+      // Regular text field
       {
-        id: 'field-1',
-        name: 'name',
+        id: 'name',
         type: 'text',
-        label: 'Name',
-        placeholder: 'Enter your name',
-        value: '',
+        name: 'fullName',
+        label: 'Full Name',
         width: 6,
-        validations: [
-          {
-            type: 'required',
-            message: 'Name is required'
-          }
-        ]
+        placeholder: 'Enter your full name',
+        value: ''
+      },
+
+      // Single file field (Profile Picture)
+      {
+        id: 'avatar',
+        type: 'file',
+        name: 'profilePicture',
+        label: 'Profile Picture',
+        width: 6,
+        value: [],
+        options: {
+          accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.gif'] },
+          multiple: false, // Single file only
+          maxFiles: 1,
+          maxSize: 5000000, // 5MB
+          server: '/api/upload',
+          instantUpload: false
+        }
+      },
+
+      // Multiple file field (Documents)
+      {
+        id: 'documents',
+        type: 'file',
+        name: 'supportingDocs',
+        label: 'Supporting Documents',
+        width: 12,
+        helpText: 'Upload up to 3 PDF or Word documents',
+        value: [],
+        options: {
+          accept: {
+            'application/pdf': ['.pdf'],
+            'application/msword': ['.doc'],
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+          },
+          multiple: true, // Multiple files allowed
+          maxFiles: 3,
+          maxSize: 10000000, // 10MB per file
+          server: '/api/upload',
+          instantUpload: false
+        }
       }
     ]
   };

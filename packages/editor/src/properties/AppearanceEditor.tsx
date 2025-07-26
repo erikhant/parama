@@ -14,7 +14,6 @@ import {
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { IconPicker } from '../components/IconPicker';
-import { ManageOptions } from './select/ManageOptions';
 import { SectionPanel } from './SectionPanel';
 import { useEditor } from '../store/useEditor';
 
@@ -26,8 +25,6 @@ type AppearanceEditorProps = {
 export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => {
   const { editor } = useEditor();
 
-  // Always declare all state hooks at the top to maintain consistent hook order
-  // These are used by date fields but must be declared for all field types
   const [enableSelectionMonth, setEnableSelectionMonth] = useState(() => {
     if (field.type === 'date') {
       return field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years';

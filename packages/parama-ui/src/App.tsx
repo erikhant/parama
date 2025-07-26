@@ -33,7 +33,8 @@ import {
   SheetFooter,
   SheetClose,
   DateRange,
-  MultiSelect
+  MultiSelect,
+  ScrollArea
 } from './index';
 import { Eye, EyeClosed, Mail, User } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './components/ui/accordion';
@@ -159,6 +160,15 @@ function App() {
             <AccordionContent>Content 2</AccordionContent>
           </AccordionItem>
         </Accordion>
+      </div>
+      <div className="border p-4 rounded-md space-y-5">
+        <h5 className="font-semibold text-lg text-gray-700">Scroll Area</h5>
+        <ScrollArea className="h-[200px] w-[350px] rounded-md border p-4">
+          Jokester began sneaking into the castle in the middle of the night and leaving jokes all over the place: under
+          the king's pillow, in his soup, even in the royal toilet. The king was furious, but he couldn't seem to stop
+          Jokester. And then, one day, the people of the kingdom discovered that the jokes left by Jokester were so
+          funny that they couldn't help but laugh. And once they started laughing, they couldn't stop.
+        </ScrollArea>
       </div>
       <div className="border p-4 rounded-md space-y-5">
         <h5 className="font-semibold text-lg text-gray-700">Forms</h5>

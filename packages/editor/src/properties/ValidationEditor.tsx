@@ -125,7 +125,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
           ...fileOptions,
           maxSize: bytesValue,
           preferredUnit // Store the user's preferred unit
-        } as FileOptions & { preferredUnit: SizeUnit }
+        } as FileOptions
       });
     }
   };
@@ -137,7 +137,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         ...fileOptions,
         maxSize: currentMaxSize, // Keep the same bytes
         preferredUnit: newUnit // Update preferred unit
-      } as FileOptions & { preferredUnit: SizeUnit }
+      } as FileOptions
     });
   };
 

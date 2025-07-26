@@ -34,7 +34,7 @@ export const AppearanceButtonEditor = ({ field, onChange }: AppearanceButtonEdit
           </Button>
         </div>
       </FormItem>
-      <FormItem>
+      <FormItem className="!mt-5">
         <Label className="block text-sm font-medium">Button variant</Label>
         <div className="flex flex-wrap items-center gap-2">
           <Button color="primary" size="sm" variant="fill" onClick={() => handleVariantChange('fill')}>
@@ -55,7 +55,7 @@ export const AppearanceButtonEditor = ({ field, onChange }: AppearanceButtonEdit
           </Button>
         </div>
       </FormItem>
-      <FormItem>
+      <FormItem className="!mt-5">
         <Label className="block text-sm font-medium">Button size</Label>
         <div className="flex flex-wrap items-center gap-2">
           <Button color="secondary" size="xs" onClick={() => handleSizeChange('xs')}>
@@ -75,6 +75,9 @@ export const AppearanceButtonEditor = ({ field, onChange }: AppearanceButtonEdit
             {(field as ButtonField).appearance?.size === 'lg' && <CheckCircleIcon className="size-4" />}
           </Button>
         </div>
+      </FormItem>
+      <FormItem>
+        <Label className="block text-sm font-medium">Placement</Label>
       </FormItem>
     </SectionPanel>
   );

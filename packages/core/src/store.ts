@@ -18,6 +18,7 @@ export interface FormBuilderState {
   // Core form state
   schema: FormSchema;
   formData: Record<string, any>;
+  fileData: FormData; // File storage using FormData
   validators: ValidatorRegistry;
   selectedFieldId: string | null;
   mode: 'editor' | 'preview';
@@ -55,8 +56,12 @@ export interface FormBuilderState {
     // Data management
     updateFieldValue: (id: string, value: any) => void;
     refreshDynamicOptions: (field: FormField) => Promise<FieldGroupItem[]>;
-    getFormData: () => Record<string, any>;
-    getFormDataByNames: () => Record<string, any>;
+    getFormData: () => Record<string, any> | FormData;
+    getFormDataByNames: () => Record<string, any> | FormData;
+    getFieldFiles: (fieldId: string) => File[];
+    getFormDataWithFiles: () => { data: Record<string, any>; files: FormData };
+    addFileToField: (fieldId: string, file: File) => boolean;
+    removeFileFromField: (fieldId: string, fileIndex: number) => boolean;
     resetForm: () => void;
 
     // Validation system
@@ -72,7 +77,11 @@ export interface FormBuilderState {
     refreshFieldOptions: (fieldId: string) => Promise<void>;
 
     // applyTemplate: (templateId: string) => void;
-    submitForm: () => Promise<{ isValid: boolean; data: Record<string, any> }>;
+    submitForm: () => Promise<{
+      isValid: boolean;
+      data: Record<string, any> | FormData;
+      contentType: 'application/json' | 'multipart/form-data';
+    }>;
   };
 }
 
@@ -103,6 +112,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
     // Initial state
     schema: defaultSchema,
     formData: {},
+    fileData: new FormData(),
     validators: {},
     templates: [],
     selectedFieldId: null,
@@ -131,6 +141,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         set({
           schema: schema || defaultSchema,
           formData: data,
+          fileData: new FormData(), // Reset file data on initialization
           validators,
           visibleFields: new Set(schema?.fields.map((f) => f.id) || []),
           validation:
@@ -323,7 +334,31 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const field = get().actions.getField(id);
         if (!field) return undefined;
 
-        return get().formData[field.id] ?? ('defaultValue' in field ? field.defaultValue : undefined);
+        if (field.type === 'file') {
+          // Get files from FormData
+          const fieldName = field.name || field.id;
+          const isMultiple = field.options?.multiple || false;
+          const files: File[] = [];
+
+          for (const [key, value] of get().fileData.entries()) {
+            if (key === fieldName && value instanceof File) {
+              files.push(value);
+            }
+          }
+
+          if (files.length === 0) {
+            return undefined;
+          } else if (isMultiple) {
+            // Return array for multiple files
+            return files;
+          } else {
+            // Return single file for non-multiple fields
+            return files[0];
+          }
+        } else {
+          // Get regular field value
+          return get().formData[field.id] ?? ('defaultValue' in field ? field.defaultValue : undefined);
+        }
       },
 
       /**
@@ -359,22 +394,63 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @param value - New field value
        */
       updateFieldValue: (fieldId, value) => {
-        // Initialize debounced validator if not exists
-        if (!get().debouncedValidators[fieldId]) {
-          set((state) => ({
-            debouncedValidators: {
-              ...state.debouncedValidators,
-              [fieldId]: debounce(() => get().actions.validateField(fieldId, 'change'), 300, {
-                leading: false,
-                trailing: true
-              })
+        const field = get().actions.getField(fieldId);
+
+        if (field?.type === 'file') {
+          // Handle file fields - store in FormData
+          const currentFileData = get().fileData;
+          const fieldName = field.name || fieldId;
+          const isMultiple = field.options?.multiple || false;
+
+          // Create new FormData and copy existing entries except current field
+          const newFileData = new FormData();
+          for (const [key, val] of currentFileData.entries()) {
+            if (key !== fieldName) {
+              newFileData.append(key, val);
             }
+          }
+
+          // Add new files based on multiple option
+          if (Array.isArray(value)) {
+            if (isMultiple) {
+              // Multiple files allowed - append all files with same field name
+              value.forEach((file) => {
+                if (file instanceof File) {
+                  newFileData.append(fieldName, file);
+                }
+              });
+            } else {
+              // Single file only - take the first file
+              const firstFile = value.find((file) => file instanceof File);
+              if (firstFile) {
+                newFileData.append(fieldName, firstFile);
+              }
+            }
+          } else if (value instanceof File) {
+            // Single file provided
+            newFileData.append(fieldName, value);
+          }
+
+          set({ fileData: newFileData });
+        } else {
+          // Handle regular fields - store in formData
+          // Initialize debounced validator if not exists
+          if (!get().debouncedValidators[fieldId]) {
+            set((state) => ({
+              debouncedValidators: {
+                ...state.debouncedValidators,
+                [fieldId]: debounce(() => get().actions.validateField(fieldId, 'change'), 300, {
+                  leading: false,
+                  trailing: true
+                })
+              }
+            }));
+          }
+
+          set((state) => ({
+            formData: { ...state.formData, [fieldId]: value }
           }));
         }
-
-        set((state) => ({
-          formData: { ...state.formData, [fieldId]: value }
-        }));
 
         workflowEngine.processFieldChange(fieldId);
       },
@@ -574,35 +650,13 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       },
 
       /**
-       * Applies a template to the form
-       * @param templateId - Template ID to apply
-       */
-      // applyTemplate: (templateId) => {
-      //   const { templates } = get();
-      //   const template = templates.find((t) => t.id === templateId);
-      //   if (template) {
-      //     set({
-      //       schema: template.schema,
-      //       formData: {},
-      //       // Reset all enhanced state
-      //       validation: {},
-      //       visibleFields: new Set(template.schema.fields.map((f) => f.id)),
-      //       disabledFields: new Set(),
-      //       optionsCache: {}
-      //     });
-      //     template.schema.fields.forEach((field) => {
-      //       workflowEngine.registerDependencies(field);
-      //     });
-      //   }
-      // },
-
-      /**
        * Resets form data while keeping schema
        */
       resetForm: () => {
         set((state) => ({
           ...state,
-          formData: {}
+          formData: {},
+          fileData: new FormData() // Clear file data
         }));
         // Clear all validation states and errors
         get().actions.clearValidation();
@@ -611,48 +665,119 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
 
       /**
        * Gets current form data
-       * @returns Current form data with field IDs as keys
+       * @returns Current form data with field IDs as keys - FormData if files exist, otherwise JSON
        */
       getFormData: () => {
-        return get().formData;
+        const formData = get().formData;
+        const fileData = get().fileData;
+
+        // Check if FormData has any entries
+        const hasFiles = Array.from(fileData.keys()).length > 0;
+
+        if (hasFiles) {
+          // Create new FormData and merge both
+          const mergedData = new FormData();
+
+          // Add regular form data
+          Object.entries(formData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              mergedData.append(key, String(value));
+            }
+          });
+
+          // Add file data (files are already in FormData)
+          for (const [key, value] of fileData.entries()) {
+            mergedData.append(key, value);
+          }
+
+          return mergedData;
+        } else {
+          // Return JSON object for non-file forms
+          return formData;
+        }
       },
 
       /**
        * Gets current form data with field names as keys
-       * @returns Current form data remapped to use field names instead of IDs
+       * @returns Current form data remapped to use field names instead of IDs - FormData if files exist, otherwise JSON
        */
       getFormDataByNames: () => {
         const formData = get().formData;
+        const fileData = get().fileData;
+        const schema = get().schema;
         const usedNames = new Set<string>();
 
-        // Remap form data keys from field IDs to field names
-        // Only include fields that have both name and data value
-        return get().schema.fields.reduce(
-          (acc, field) => {
-            // Only process fields that have a name property (excluding ButtonField and BlockField)
+        // Check if we have files
+        const hasFiles = Array.from(fileData.keys()).length > 0;
+
+        if (hasFiles) {
+          const mergedData = new FormData();
+
+          // Process each field in schema order
+          schema.fields.forEach((field) => {
             if ('name' in field && field.name) {
-              const fieldValue = formData[field.id];
-              if (fieldValue !== undefined) {
-                // Handle duplicate field names by appending the field ID
-                let fieldName = field.name;
-                if (usedNames.has(fieldName)) {
-                  fieldName = `${field.name}_${field.id}`;
-                  console.warn(`Duplicate field name "${field.name}" found. Using "${fieldName}" instead.`);
+              let fieldName = field.name;
+
+              // Handle duplicate names
+              if (usedNames.has(fieldName)) {
+                fieldName = `${field.name}_${field.id}`;
+                console.warn(`Duplicate field name "${field.name}" found. Using "${fieldName}" instead.`);
+              }
+              usedNames.add(fieldName);
+
+              if (field.type === 'file') {
+                // Copy files for this field from fileData
+                for (const [key, value] of fileData.entries()) {
+                  if (key === field.name) {
+                    mergedData.append(fieldName, value);
+                  }
                 }
-                usedNames.add(fieldName);
-                if ('transformer' in field && field.transformer) {
-                  const interceptedTemplate = interceptExpressionTemplate(field.transformer, get());
-                  const dataTransform = interpolate(interceptedTemplate, formData);
-                  acc[fieldName] = dataTransform;
-                } else {
-                  acc[fieldName] = fieldValue;
+              } else {
+                const fieldValue = formData[field.id];
+                if (fieldValue !== undefined) {
+                  // Apply transformer if exists
+                  if ('transformer' in field && field.transformer) {
+                    const interceptedTemplate = interceptExpressionTemplate(field.transformer, get());
+                    const transformedValue = interpolate(interceptedTemplate, formData);
+                    mergedData.append(fieldName, JSON.stringify(transformedValue));
+                  } else {
+                    mergedData.append(fieldName, JSON.stringify(fieldValue));
+                  }
                 }
               }
             }
-            return acc;
-          },
-          {} as Record<string, any>
-        );
+          });
+
+          return mergedData;
+        } else {
+          // Return JSON object using existing logic for non-file forms
+          return schema.fields.reduce(
+            (acc, field) => {
+              // Only process fields that have a name property (excluding ButtonField and BlockField)
+              if ('name' in field && field.name) {
+                const fieldValue = formData[field.id];
+                if (fieldValue !== undefined) {
+                  // Handle duplicate field names by appending the field ID
+                  let fieldName = field.name;
+                  if (usedNames.has(fieldName)) {
+                    fieldName = `${field.name}_${field.id}`;
+                    console.warn(`Duplicate field name "${field.name}" found. Using "${fieldName}" instead.`);
+                  }
+                  usedNames.add(fieldName);
+                  if ('transformer' in field && field.transformer) {
+                    const interceptedTemplate = interceptExpressionTemplate(field.transformer, get());
+                    const dataTransform = interpolate(interceptedTemplate, formData);
+                    acc[fieldName] = dataTransform;
+                  } else {
+                    acc[fieldName] = fieldValue;
+                  }
+                }
+              }
+              return acc;
+            },
+            {} as Record<string, any>
+          );
+        }
       },
 
       /**
@@ -661,13 +786,106 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        */
       submitForm: async () => {
         const isValid = await get().actions.validateForm();
-        const remappedData = get().actions.getFormDataByNames();
+        const data = get().actions.getFormDataByNames();
+
+        // Determine content type based on data type
+        const contentType = data instanceof FormData ? 'multipart/form-data' : 'application/json';
 
         return {
           isValid,
-          data: remappedData
+          data,
+          contentType
         };
-      }
+      },
+
+      /**
+       * Gets files for a specific field
+       * @param fieldId - Field ID to get files for
+       * @returns Array of File objects for the field
+       */
+      getFieldFiles: (fieldId: string) => {
+        const field = get().actions.getField(fieldId);
+        if (!field || field.type !== 'file') return [];
+
+        const fieldName = field.name || fieldId;
+        const files: File[] = [];
+
+        for (const [key, value] of get().fileData.entries()) {
+          if (key === fieldName && value instanceof File) {
+            files.push(value);
+          }
+        }
+
+        return files;
+      },
+
+      /**
+       * Adds a file to a file field (respects multiple option)
+       * @param fieldId - Field ID to add file to
+       * @param file - File to add
+       * @returns Whether the file was added successfully
+       */
+      addFileToField: (fieldId: string, file: File) => {
+        const field = get().actions.getField(fieldId);
+        if (!field || field.type !== 'file') return false;
+
+        const currentFiles = get().actions.getFieldFiles(fieldId);
+        const isMultiple = field.options?.multiple || false;
+        const maxFiles = field.options?.maxFiles;
+
+        if (!isMultiple && currentFiles.length > 0) {
+          // Replace existing file for single file fields
+          get().actions.updateFieldValue(fieldId, [file]);
+        } else if (isMultiple) {
+          // Add to existing files for multiple file fields
+          const newFiles = [...currentFiles, file];
+
+          // Respect maxFiles limit
+          if (maxFiles && newFiles.length > maxFiles) {
+            console.warn(`Maximum files limit (${maxFiles}) exceeded for field ${fieldId}`);
+            return false;
+          }
+
+          get().actions.updateFieldValue(fieldId, newFiles);
+        } else {
+          // Set as first file
+          get().actions.updateFieldValue(fieldId, [file]);
+        }
+
+        return true;
+      },
+
+      /**
+       * Removes a file from a file field
+       * @param fieldId - Field ID to remove file from
+       * @param fileIndex - Index of file to remove
+       * @returns Whether the file was removed successfully
+       */
+      removeFileFromField: (fieldId: string, fileIndex: number) => {
+        const field = get().actions.getField(fieldId);
+        if (!field || field.type !== 'file') return false;
+
+        const currentFiles = get().actions.getFieldFiles(fieldId);
+
+        if (fileIndex < 0 || fileIndex >= currentFiles.length) {
+          console.warn(`Invalid file index ${fileIndex} for field ${fieldId}`);
+          return false;
+        }
+
+        const newFiles = currentFiles.filter((_, index) => index !== fileIndex);
+        get().actions.updateFieldValue(fieldId, newFiles);
+
+        return true;
+      },
+
+      /**
+       * Gets form data with files separated
+       * @returns Object with separate data and files properties
+       */
+      getFormDataWithFiles: () => ({
+        data: get().formData,
+        files: get().fileData
+      })
     }
   };
 });

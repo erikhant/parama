@@ -1,25 +1,23 @@
 import { useFormBuilder } from '@parama-dev/form-builder-core';
 import { FormField } from '@parama-dev/form-builder-types';
-import { FormItem, Label } from '@parama-ui/react';
+import { FormItem } from '@parama-ui/react';
 import { useMemo } from 'react';
 import { CodeEditor } from '../../components/CodeEditor';
 import { HelperTooltip } from '../../components/HelperTooltip';
 import { useEditor } from '../../store/useEditor';
 import { SectionPanel } from '../SectionPanel';
 
-interface DataCustomizationProps {
-  value: string;
+interface CustomizationProps {
+  field: FormField;
   onChange: (updates: Partial<FormField>) => void;
 }
 
-export const DataCustomization = ({ value, onChange }: DataCustomizationProps) => {
+export const Customization = ({ field, onChange }: CustomizationProps) => {
   const { editor } = useEditor();
   const { schema } = useFormBuilder();
 
-  const handleChange = (newValue: string) => {
-    onChange({
-      transformer: newValue
-    });
+  const handleChange = (value: string) => {
+    onChange({ transformer: value });
   };
 
   // Generate autocomplete suggestions from form field names
@@ -35,7 +33,7 @@ export const DataCustomization = ({ value, onChange }: DataCustomizationProps) =
   }, [schema.fields]);
 
   return (
-    <SectionPanel title="Data Customization" className="relative">
+    <SectionPanel title="Customization" className="relative">
       <FormItem>
         <div className="absolute top-4 right-2 z-[2]">
           <HelperTooltip>
@@ -61,10 +59,10 @@ export const DataCustomization = ({ value, onChange }: DataCustomizationProps) =
         </div>
         <CodeEditor
           defaultLang="plaintext"
-          label="Transformer"
+          label="Data transformation"
           languages={['json', 'plaintext']}
           modalWidth="768px"
-          value={value}
+          value={'transformer' in field ? field.transformer : ''}
           onChange={handleChange}
           readOnly={editor.options?.dataSettings === 'readonly'}
           height="120px"

@@ -26,41 +26,10 @@ import { GeneralButtonEditor } from './button/GeneralButtonEditor';
 import { AppearanceButtonEditor } from './button/AppearanceButtonEditor';
 import { GeneralBlockEditor } from './block/GeneralBlockEditor';
 import { BlockContentEditor } from './block/BlockContentEditor';
-import { DataCustomization } from './common/DataCustomization';
+import { Customization } from './common/Customization';
 
 // Type guard to check if a field supports data customization
 type FieldWithDataCustomization = TextField | RadioField | CheckboxField | DateField | SelectField | MultiSelectField;
-
-const supportsDataCustomization = (field: FormField): field is FieldWithDataCustomization => {
-  return [
-    'text',
-    'email',
-    'textarea',
-    'password',
-    'number',
-    'tel',
-    'url',
-    'hidden',
-    'radio',
-    'checkbox',
-    'date',
-    'select',
-    'multiselect'
-  ].includes(field.type);
-};
-
-// Helper function to get transformer value safely
-const getTransformerValue = (field: FormField): string => {
-  return supportsDataCustomization(field) ? field.transformer || '' : '';
-};
-
-// Helper function to set transformer value safely
-const setTransformerValue = (field: FormField, transformer: string): Partial<FormField> => {
-  if (supportsDataCustomization(field)) {
-    return { transformer };
-  }
-  return {};
-};
 
 // Types for editor configuration
 interface EditorConfig {
@@ -94,6 +63,24 @@ const getEditorConfig = (field: FormField, editorOptions: any): EditorConfig => 
   };
 };
 
+const supportsDataCustomization = (field: FormField): field is FieldWithDataCustomization => {
+  return [
+    'text',
+    'email',
+    'textarea',
+    'password',
+    'number',
+    'tel',
+    'url',
+    'hidden',
+    'radio',
+    'checkbox',
+    'date',
+    'select',
+    'multiselect'
+  ].includes(field.type);
+};
+
 // Component for rendering field editors based on configuration
 interface FieldEditorsProps {
   field: FormField;
@@ -124,7 +111,7 @@ const FieldEditors: React.FC<FieldEditorsProps> = ({ field, editorConfig, onChan
       {editorConfig.showConditions && <ConditionEditor field={field} onChange={onChange} />}
       {editorConfig.showEvents && <EventsEditor field={field} onChange={onChange} />}
       {editorConfig.showDataCustomization && supportsDataCustomization(field) && (
-        <DataCustomization value={getTransformerValue(field)} onChange={onChange} />
+        <Customization field={field} onChange={onChange} />
       )}
     </>
   );

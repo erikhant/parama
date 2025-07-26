@@ -222,7 +222,8 @@ ButtonField.displayName = 'ButtonField';
 const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
   const { formData, actions, visibleFields, disabledFields, readOnlyFields, mode } = useFormBuilder();
 
-  const value = formData[field.id] ?? field.defaultValue;
+  // Use getFieldValue for intelligent value retrieval (handles both regular and file fields)
+  const value = actions.getFieldValue(field.id) ?? field.defaultValue;
   const validationState = actions.getFieldValidation(field.id);
 
   const [textValue, setTextValue] = useState<string>(value || '');
@@ -511,7 +512,9 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
         };
         getOptions();
       } else {
-        setMultiselectOptions(field.options);
+        if (field.options && Array.isArray(field.options)) {
+          setMultiselectOptions(field.options);
+        }
       }
     }
   }, [
@@ -685,6 +688,8 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
             maxFiles={field.options.maxFiles}
             maxSize={field.options.maxSize}
             instantUpload={field.options.instantUpload}
+            bulkUpload={field.options.bulkUpload}
+            preferredUnit={field.options.preferredUnit}
             onFilesChange={handleFileChange}
             onError={(error) => {
               actions.setFieldError(field.id, (error as Error).message || 'File upload failed');

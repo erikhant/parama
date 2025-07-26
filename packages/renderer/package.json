@@ -60,7 +60,7 @@
     "react-dom": "^18.2.0",
     "@parama-dev/form-builder-core": "workspace:*",
     "@parama-dev/form-builder-types": "workspace:*",
-    "@parama-ui/react": "^1.0.2",
+    "@parama-ui/react": "workspace:*",
     "ajv": "^8.17.1"
   },
   "peerDependenciesMeta": {
