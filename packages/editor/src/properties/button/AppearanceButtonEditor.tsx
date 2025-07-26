@@ -1,5 +1,5 @@
 import { ButtonField, FormField } from '@parama-dev/form-builder-types';
-import { Button, FormItem, Label } from '@parama-ui/react';
+import { Button, FormItem, Label, Switch } from '@parama-ui/react';
 import { SectionPanel } from '../SectionPanel';
 import { CheckCircleIcon } from 'lucide-react';
 
@@ -17,6 +17,9 @@ export const AppearanceButtonEditor = ({ field, onChange }: AppearanceButtonEdit
   };
   const handleSizeChange = (size: string) => {
     onChange({ appearance: { ...(field as ButtonField).appearance, size } });
+  };
+  const handleStickyChange = (sticky: boolean) => {
+    onChange({ appearance: { ...(field as ButtonField).appearance, stickyAtBottom: sticky } });
   };
 
   return (
@@ -76,8 +79,20 @@ export const AppearanceButtonEditor = ({ field, onChange }: AppearanceButtonEdit
           </Button>
         </div>
       </FormItem>
-      <FormItem>
-        <Label className="block text-sm font-medium">Placement</Label>
+      <FormItem orientation="horizontal" className="!mt-5">
+        <div className="col-span-4 space-y-1.5">
+          <Label htmlFor="sticky-at-bottom" className="block text-sm font-medium">
+            Sticky to the bottom
+          </Label>
+          <p className="form-description">Make it stick to the bottom when scrolling form.</p>
+        </div>
+        <div className="col-span-1 flex justify-end">
+          <Switch
+            id="sticky-at-bottom"
+            checked={(field as ButtonField).appearance?.stickyAtBottom || false}
+            onCheckedChange={handleStickyChange}
+          />
+        </div>
       </FormItem>
     </SectionPanel>
   );

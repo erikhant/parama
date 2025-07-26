@@ -43,7 +43,7 @@ interface FileUploadProps extends FileOptions {
   formExtension?: Record<string, unknown>;
   onFilesChange?: (files: File[]) => void;
   onFileUploaded?: <T>(response: T) => void;
-  onFileRemove?: (id: string) => void;
+  onFileRemove?: (id: string, index: number) => void;
   onError?: (error: unknown) => void;
 }
 
@@ -206,7 +206,8 @@ export function FileUpload({
     onDropRejected: (rejectedFiles) => {
       if (onError) {
         const errorMessages = rejectedFiles.map((file) => file.errors.map((e) => e.message)).flat();
-        onError(new Error(errorMessages.join(', ')));
+        const removedDuplicateMessages = Array.from(new Set(errorMessages));
+        onError(new Error(removedDuplicateMessages.join(', ')));
       }
     },
     accept,
@@ -219,11 +220,11 @@ export function FileUpload({
 
   // Remove file handler
   const removeFile = useCallback(
-    (id: string) => {
+    (id: string, index: number) => {
       setFiles((prevFiles) => {
         const newFiles = prevFiles.filter((file) => file.id !== id);
         onFilesChange?.(newFiles);
-        onFileRemove?.(id);
+        onFileRemove?.(id, index);
         return newFiles;
       });
     },
@@ -284,7 +285,7 @@ export function FileUpload({
           </div>
 
           <ul className="file-upload-list">
-            {files.map((file) => (
+            {files.map((file, index) => (
               <li key={file.id} className={cn('file-upload-list-item', file.hasError && 'file-upload-list-item-error')}>
                 <div className="file-upload-list-item-content">
                   {file.type && file.type.startsWith('image/') ? (
@@ -353,15 +354,18 @@ export function FileUpload({
                     )}
                     <button
                       type="button"
-                      disabled={file.uploading || !file.uploaded}
-                      onClick={() => removeFile(file.id)}
+                      disabled={file.uploading}
+                      onClick={() => removeFile(file.id, index)}
                       className="file-upload-remove-button">
                       <XIcon className="file-upload-action-icon" />
                     </button>
                   </div>
                 )}
                 {storeAsForm && (
-                  <button type="button" onClick={() => removeFile(file.id)} className="file-upload-remove-button">
+                  <button
+                    type="button"
+                    onClick={() => removeFile(file.id, index)}
+                    className="file-upload-remove-button">
                     <XIcon className="file-upload-action-icon" />
                   </button>
                 )}

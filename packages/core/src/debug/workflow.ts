@@ -98,7 +98,7 @@ export function setupWorkflowDebugger(options: DebugOptions = {}) {
 
   // 5. Options Loading Debugging
   if (logOptionsLoading) {
-    const originalRefreshOptions = workflowEngine.refreshDynamicOptions.bind(workflowEngine);
+    const originalRefreshOptions = useFormBuilder.getState().actions.refreshDynamicOptions.bind(workflowEngine);
     const store = useFormBuilder.getState();
     workflowEngine.refreshDynamicOptions = async (field: FormField) => {
       if (!field || (field.type !== 'select' && field.type !== 'multiselect') || !field.external) {

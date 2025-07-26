@@ -236,7 +236,7 @@ export interface SelectField extends BaseField, DataCustomization {
     label: string;
     items: FieldGroupItem[];
   }[];
-  external?: ExternalDataSource<FieldGroupItem>;
+  external?: ExternalDataSource<FieldGroupItem> & { _refreshTimestamp?: number };
 }
 
 export interface MultiSelectField extends BaseField, DataCustomization {
@@ -244,7 +244,7 @@ export interface MultiSelectField extends BaseField, DataCustomization {
   multiple: boolean;
   placeholder?: string;
   options: FieldGroupItem[];
-  external?: ExternalDataSource<FieldGroupItem>;
+  external?: ExternalDataSource<FieldGroupItem> & { _refreshTimestamp?: number };
 }
 
 export interface ButtonField extends Pick<BaseField, 'id' | 'label' | 'disabled' | 'width' | 'conditions'> {
@@ -254,6 +254,7 @@ export interface ButtonField extends Pick<BaseField, 'id' | 'label' | 'disabled'
     color?: 'primary' | 'secondary';
     variant?: 'fill' | 'outline' | 'ghost' | 'shadow';
     size?: 'xs' | 'sm' | 'lg' | 'default';
+    stickyAtBottom?: boolean; // Whether the button should stick to the bottom of the form
   };
 }
 

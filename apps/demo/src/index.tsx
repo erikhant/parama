@@ -64,6 +64,103 @@ function TestFormDataButton() {
   );
 }
 
+// Test Dynamic Select functionality
+function testDynamicSelectMapping() {
+  console.log('=== Testing Dynamic Select Mapping ===');
+
+  // Test cases
+  const testCases = [
+    {
+      name: 'Simple String Array',
+      data: ['Product A', 'Product B', 'Product C'],
+      mapper: null
+    },
+    {
+      name: 'Object Array',
+      data: [
+        { id: '123', name: 'Product A', price: '2.5' },
+        { id: '223', name: 'Product B', price: '3.0' }
+      ],
+      mapper: null
+    },
+    {
+      name: 'Nested Object',
+      data: {
+        products: [
+          { id: '123', name: 'Product A', price: '2.5' },
+          { id: '223', name: 'Product B', price: '3.0' }
+        ]
+      },
+      mapper: {
+        dataSource: 'products',
+        dataMapper: {
+          id: 'id',
+          label: 'name',
+          value: 'id'
+        }
+      }
+    }
+  ];
+
+  // Simple mapping function to test (mimics the actual implementation)
+  const mapResponseToOptions = (data: any, mapper: any) => {
+    let sourceData = data;
+
+    if (mapper?.dataSource) {
+      // Simple nested property access
+      sourceData = data[mapper.dataSource] || data;
+    }
+
+    if (!Array.isArray(sourceData)) {
+      sourceData = [sourceData];
+    }
+
+    return sourceData.map((item: any, index: number) => {
+      if (typeof item === 'string') {
+        return {
+          id: `option-${index}`,
+          label: item,
+          value: item
+        };
+      } else if (typeof item === 'object' && item !== null) {
+        if (mapper?.dataMapper) {
+          return {
+            id: item[mapper.dataMapper.id] || `option-${index}`,
+            label: item[mapper.dataMapper.label] || `Option ${index + 1}`,
+            value: item[mapper.dataMapper.value] || `option-${index}`
+          };
+        } else {
+          // Auto-detect
+          const id = item.id || item.key || item.value || index;
+          const label = item.label || item.name || item.title || item.text || item.id || `Option ${index + 1}`;
+          const value = item.value || item.id || item.key || item.name || index;
+
+          return {
+            id: String(id),
+            label: String(label),
+            value: String(value)
+          };
+        }
+      } else {
+        return {
+          id: `option-${index}`,
+          label: String(item),
+          value: String(item)
+        };
+      }
+    });
+  };
+
+  // Run tests
+  testCases.forEach(({ name, data, mapper }) => {
+    console.log(`\n--- Testing: ${name} ---`);
+    console.log('Input:', data);
+    console.log('Mapper:', mapper);
+    const result = mapResponseToOptions(data, mapper);
+    console.log('Result:', result);
+  });
+}
+
 // Demo schema with file field to test the validation editor
 const initialSchema: FormSchema = {
   id: 'demo-file-upload-form',
@@ -178,3 +275,6 @@ if (container) {
     </>
   );
 }
+
+// Run the dynamic select mapping test
+testDynamicSelectMapping();

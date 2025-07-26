@@ -67,6 +67,18 @@ export function App() {
           server: '/api/upload',
           instantUpload: false
         }
+      },
+      {
+        id: 'field-1753541773412',
+        label: 'Submit',
+        type: 'submit',
+        width: 2,
+        action: 'submit',
+        appearance: {
+          color: 'primary',
+          variant: 'fill',
+          size: 'default'
+        }
       }
     ]
   };

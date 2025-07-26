@@ -48,23 +48,9 @@ const MemoizedIcon = memo(({ iconName, size = 15 }: { iconName: string; size?: n
 });
 
 const MemoizedSelectOptions = memo(({ field, options }: { field: FormFieldType; options: FieldGroupItem[] }) => {
-  const { actions } = useFormBuilder();
-  const [optionsData, setOptions] = useState(options);
-
-  useEffect(() => {
-    const getOptions = async () => {
-      const options = await actions.refreshDynamicOptions(field);
-      setOptions(options);
-    };
-
-    if ((field as SelectField | MultiSelectField).external) {
-      getOptions();
-    }
-  }, [options]);
-
   return (
     <>
-      {optionsData
+      {options
         .filter((opt) => opt.id && opt.value && opt.label)
         .map((opt) => (
           <SelectItem key={opt.id} value={opt.value}>
@@ -194,24 +180,29 @@ BlockField.displayName = 'BlockField';
 // Separate component for button fields
 const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps['onCancel'] }> = memo(
   ({ field, onCancel }) => {
-    const { actions } = useFormBuilder();
+    const { actions, mode } = useFormBuilder();
 
     const handleReset = () => {
       actions.resetForm();
     };
 
     return (
-      <div className={`column-span-${field.width}`}>
-        <Button
-          type={field.type}
-          color={field.appearance?.color}
-          size={field.appearance?.size}
-          variant={field.appearance?.variant}
-          className="w-full"
-          onClick={field.action === 'cancel' ? onCancel : field.action === 'reset' ? handleReset : undefined}>
-          {field.label}
-        </Button>
-      </div>
+      <>
+        {mode === 'render' && field.appearance?.stickyAtBottom && (
+          <div className="h-24 sticky bottom-0 bg-gradient-to-t from-white from-50% column-span-12 " />
+        )}
+        <div className={`column-span-${field.width} ${field.appearance?.stickyAtBottom ? 'sticky bottom-0' : ''}`}>
+          <Button
+            type={field.type}
+            color={field.appearance?.color}
+            size={field.appearance?.size}
+            variant={field.appearance?.variant}
+            className="w-full"
+            onClick={field.action === 'cancel' ? onCancel : field.action === 'reset' ? handleReset : undefined}>
+            {field.label}
+          </Button>
+        </div>
+      </>
     );
   }
 );
@@ -402,11 +393,10 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
 
   const handleFileChange = useCallback(
     (files: File[]) => {
-      console.log('Selected files:', files);
-      // setFiles(files);
+      actions.clearFieldError(field.id);
       handleChange(files);
     },
-    [handleChange]
+    [handleChange, actions, field.id, field.name]
   );
 
   // Memoized disabled dates (same as before)
@@ -481,31 +471,38 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     return null;
   }, [field.appearance, renderAppearance]);
 
-  const [multiSelectOptions, setMultiselectOptions] = useState<FieldGroupItem[]>([]);
+  const [multiSelectOptions, setMultiselectOptions] = useState((field as MultiSelectField).options ?? []);
+  const [selectOptions, setSelectOptions] = useState((field as SelectField).options ?? []);
 
-  // const multiselectOptions = useMemo(() => {
-  //   if (field.type === 'multiselect') {
-  //     if (field.external) {
-  //       const getOptions = async () => {
-  //         const options = await actions.refreshDynamicOptions(field);
-  //         setMultiselectOptions(options);
-  //       };
-  //       getOptions();
-  //       return;
-  //     }
-  //     const options = field.options.map((option: FieldGroupItem) => ({
-  //       value: option.value,
-  //       label: option.label
-  //     }));
-  //     setMultiselectOptions(options as FieldGroupItem[]);
-  //   }
-  //   return [];
-  // }, [field.type === 'multiselect' ? (field as MultiSelectField).options : null, field.type === 'multiselect' ? (field as MultiSelectField).external : null]);
+  // Effect to handle dynamic options loading for select
+  useEffect(() => {
+    if (field.type === 'select') {
+      if (field.external) {
+        // Always fetch options when external is configured
+        const getOptions = async () => {
+          const options = await actions.refreshDynamicOptions(field);
+          setSelectOptions(options);
+        };
+        getOptions();
+      } else {
+        if (field.options && Array.isArray(field.options)) {
+          setSelectOptions(field.options);
+        }
+      }
+    }
+  }, [
+    actions,
+    field.type === 'select' ? field.options : null,
+    field.type === 'select' ? field.external : null,
+    // Watch for refresh trigger changes
+    field.type === 'select' ? field.external?._refreshTimestamp : null
+  ]);
 
-  // Effect to handle dynamic options loading
+  // Effect to handle dynamic options loading for multiselect
   useEffect(() => {
     if (field.type === 'multiselect') {
       if (field.external) {
+        // Always fetch options when external is configured
         const getOptions = async () => {
           const options = await actions.refreshDynamicOptions(field);
           setMultiselectOptions(options);
@@ -518,8 +515,11 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
       }
     }
   }, [
-    field.type === 'multiselect' ? (field as MultiSelectField).options : null,
-    field.type === 'multiselect' ? (field as MultiSelectField).external : null
+    actions,
+    field.type === 'multiselect' ? field.options : null,
+    field.type === 'multiselect' ? field.external : null,
+    // Watch for refresh trigger changes
+    field.type === 'multiselect' ? field.external?._refreshTimestamp : null
   ]);
 
   const renderInput = useMemo(() => {
@@ -637,6 +637,9 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
         );
 
       case 'select':
+        const selectField = field as SelectField;
+        const optionsToUse = selectField.external ? selectOptions : selectField.options || [];
+
         return (
           <Select
             name={field.name}
@@ -648,11 +651,11 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
               <SelectValue className="text-slate-400" placeholder={field.placeholder || 'Select an option'} />
             </SelectTrigger>
             <SelectContent>
-              {Array.isArray(field.options) && field.options.length > 0 && (
-                <MemoizedSelectOptions field={field} options={field.options} />
+              {Array.isArray(optionsToUse) && optionsToUse.length > 0 && (
+                <MemoizedSelectOptions field={field} options={optionsToUse} />
               )}
-              {field.optionGroups && field.optionGroups.length > 0 && (
-                <MemoizedSelectGroupsOptions optionGroups={field.optionGroups} />
+              {selectField.optionGroups && selectField.optionGroups.length > 0 && (
+                <MemoizedSelectGroupsOptions optionGroups={selectField.optionGroups} />
               )}
             </SelectContent>
           </Select>
@@ -668,7 +671,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
             modalPopover={true}
             color="primary"
             variant="shadow"
-            options={multiSelectOptions.map((option) => ({
+            options={multiSelectOptions?.map((option) => ({
               value: option.value,
               label: option.label
             }))}
@@ -723,7 +726,9 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     handleRadioChange,
     handleSelectChange,
     handleMultiSelectChange,
-    createCheckboxHandler
+    createCheckboxHandler,
+    selectOptions,
+    multiSelectOptions
   ]);
 
   if (!isVisible) return null;

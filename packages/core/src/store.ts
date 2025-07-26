@@ -1,4 +1,5 @@
 import type {
+  ExternalDataSource,
   FieldGroupItem,
   FormBuilderProps,
   FormField,
@@ -21,7 +22,7 @@ export interface FormBuilderState {
   fileData: FormData; // File storage using FormData
   validators: ValidatorRegistry;
   selectedFieldId: string | null;
-  mode: 'editor' | 'preview';
+  mode: 'editor' | 'render';
   screenSize: 'mobile' | 'tablet' | 'desktop';
 
   // Enhanced state properties
@@ -50,18 +51,19 @@ export interface FormBuilderState {
     insertField: (index: number, field: FormField) => void;
     removeField: (id: string) => void;
     selectField: (id: string | null) => void;
-    changeMode: (mode: 'editor' | 'preview') => void;
+    changeMode: (mode: 'editor' | 'render') => void;
     changeScreenSize: (size: 'mobile' | 'tablet' | 'desktop') => void;
 
     // Data management
     updateFieldValue: (id: string, value: any) => void;
     refreshDynamicOptions: (field: FormField) => Promise<FieldGroupItem[]>;
+    mapResponseToOptions: (data: any, mapper: any) => FieldGroupItem[];
     getFormData: () => Record<string, any> | FormData;
     getFormDataByNames: () => Record<string, any> | FormData;
     getFieldFiles: (fieldId: string) => File[];
     getFormDataWithFiles: () => { data: Record<string, any>; files: FormData };
-    addFileToField: (fieldId: string, file: File) => boolean;
-    removeFileFromField: (fieldId: string, fileIndex: number) => boolean;
+    addFileField: (fieldId: string, file: File) => boolean;
+    removeFileField: (fieldId: string, fileIndex: number) => boolean;
     resetForm: () => void;
 
     // Validation system
@@ -116,7 +118,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
     validators: {},
     templates: [],
     selectedFieldId: null,
-    mode: 'editor',
+    mode: 'render',
     screenSize: 'desktop',
 
     // Enhanced state
@@ -141,7 +143,6 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         set({
           schema: schema || defaultSchema,
           formData: data,
-          fileData: new FormData(), // Reset file data on initialization
           validators,
           visibleFields: new Set(schema?.fields.map((f) => f.id) || []),
           validation:
@@ -296,16 +297,33 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * related to the removed field are also cleaned up in the workflow engine.
        */
       removeField: (id) => {
+        const field = get().actions.getField(id);
+        const newFileData = new FormData();
+
+        if (field && field.type === 'file') {
+          // Remove file data for file fields
+          const currentFileData = get().fileData;
+          const fieldName = field.name || field.id;
+
+          // Create new FormData and copy existing entries except current field
+          for (const [key, value] of currentFileData.entries()) {
+            if (key !== fieldName) {
+              newFileData.append(key, value);
+            }
+          }
+        }
         set((state) => ({
           schema: {
             ...state.schema,
             fields: state.schema.fields.filter((f) => f.id !== id)
           },
+          fileData: field?.type === 'file' ? newFileData : state.fileData,
           // Clean up related state
           validation: Object.fromEntries(Object.entries(state.validation).filter(([key]) => key !== id)),
           visibleFields: new Set(Array.from(state.visibleFields).filter((fieldId) => fieldId !== id)),
           disabledFields: new Set(Array.from(state.disabledFields).filter((fieldId) => fieldId !== id))
         }));
+
         workflowEngine.removeField(id);
         workflowEngine.evaluateConditions();
       },
@@ -370,13 +388,13 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       },
 
       /**
-       * Changes the form mode (editor/preview)
+       * Changes the form mode (editor/render)
        * @param mode - New mode to set
        */
       changeMode: (mode) => {
         set({ mode });
-        // Reset selected field when switching to preview mode
-        if (mode === 'preview') {
+        // Reset selected field when switching to render mode
+        if (mode === 'render') {
           set({ selectedFieldId: null });
         }
       },
@@ -397,41 +415,30 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const field = get().actions.getField(fieldId);
 
         if (field?.type === 'file') {
-          // Handle file fields - store in FormData
           const currentFileData = get().fileData;
-          const fieldName = field.name || fieldId;
+          const fieldName = field.name;
           const isMultiple = field.options?.multiple || false;
-
-          // Create new FormData and copy existing entries except current field
-          const newFileData = new FormData();
-          for (const [key, val] of currentFileData.entries()) {
-            if (key !== fieldName) {
-              newFileData.append(key, val);
-            }
-          }
 
           // Add new files based on multiple option
           if (Array.isArray(value)) {
             if (isMultiple) {
-              // Multiple files allowed - append all files with same field name
-              value.forEach((file) => {
-                if (file instanceof File) {
-                  newFileData.append(fieldName, file);
-                }
+              currentFileData.delete(fieldName); // Clear existing files
+              value.forEach((file: File) => {
+                currentFileData.append(fieldName, file);
               });
             } else {
               // Single file only - take the first file
-              const firstFile = value.find((file) => file instanceof File);
+              const firstFile = value[0];
               if (firstFile) {
-                newFileData.append(fieldName, firstFile);
+                currentFileData.set(fieldName, firstFile);
               }
             }
           } else if (value instanceof File) {
             // Single file provided
-            newFileData.append(fieldName, value);
+            currentFileData.set(fieldName, value);
           }
 
-          set({ fileData: newFileData });
+          set((state) => ({ ...state, fileData: currentFileData }));
         } else {
           // Handle regular fields - store in formData
           // Initialize debounced validator if not exists
@@ -467,33 +474,118 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         }
         const { url, headers, mapper } = field.external;
 
-        if (!mapper || !mapper.dataSource || !mapper.dataMapper) {
-          return [];
-        }
+        try {
+          const interceptedExpression = interceptExpressionTemplate(url, get());
+          const serializedUrl = interpolate(interceptedExpression, formData);
 
-        const interceptedExpression = interceptExpressionTemplate(url, get());
-        const serializedUrl = interpolate(interceptedExpression, formData);
-
-        const response = await fetch(serializedUrl, {
-          headers: { ...headers }
-        });
-        if (!response.ok) {
-          get().actions.updateField(field.id, {
-            error: 'Failed to load options'
+          const response = await fetch(serializedUrl, {
+            headers: { ...headers }
           });
+
+          if (!response.ok) {
+            get().actions.setFieldError(field.id, `Failed to load options: ${response.statusText}`);
+            return [];
+          }
+
+          const data = await response.json();
+          const mappedOptions = get().actions.mapResponseToOptions(data, mapper);
+
+          // Clear any previous errors
+          get().actions.clearFieldError(field.id);
+
+          return mappedOptions;
+        } catch (error) {
+          get().actions.setFieldError(
+            field.id,
+            `Error loading options: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
           return [];
         }
-        const data = await response.json();
-        const options = getObject(data, mapper.dataSource, data);
-        const mappedOptions: FieldGroupItem[] = options.map((item: any) => {
-          return {
-            id: getObject(item, mapper.dataMapper.id),
-            label: getObject(item, mapper.dataMapper.label),
-            value: getObject(item, mapper.dataMapper.value)
-          };
-        });
+      },
 
-        return mappedOptions;
+      /**
+       * Maps API response to FieldGroupItem format with flexible structure handling
+       * @param data API response data
+       * @param mapper Mapping configuration
+       * @returns Array of mapped options
+       */
+      mapResponseToOptions: (data: any, mapper: ExternalDataSource<FieldGroupItem>['mapper']): FieldGroupItem[] => {
+        try {
+          // Extract the data source based on mapper configuration
+          let sourceData = data;
+
+          // If dataSource is provided, try to extract nested data
+          if (mapper?.dataSource) {
+            sourceData = getObject(data, mapper?.dataSource, data);
+          }
+
+          // Ensure we have an array to work with
+          if (!Array.isArray(sourceData)) {
+            console.warn('Response data is not an array, wrapping in array');
+            sourceData = [sourceData];
+          }
+
+          return sourceData.map((item: any, index: number): FieldGroupItem => {
+            // Handle different response structures
+            if (typeof item === 'string') {
+              return {
+                id: uuid(),
+                label: item,
+                value: item
+              } as FieldGroupItem;
+            } else if (typeof item === 'object' && item !== null) {
+              // Case: Object with properties
+              const mappedItem: FieldGroupItem = {
+                id: uuid(),
+                label: '',
+                value: ''
+              };
+
+              // Use mapper configuration if available
+              if (mapper?.dataMapper) {
+                mappedItem.id = getObject(item, mapper!.dataMapper.id) || uuid();
+                mappedItem.label =
+                  getObject(item, mapper!.dataMapper.label) ||
+                  getObject(item, mapper!.dataMapper.value) ||
+                  `Option ${index + 1}`;
+                mappedItem.value =
+                  getObject(item, mapper!.dataMapper.value) ||
+                  getObject(item, mapper!.dataMapper.id) ||
+                  `option-${index}`;
+              } else {
+                // Auto-detect common property names
+                const id = item.id || item.key || item.value || index;
+                const label =
+                  item.label ||
+                  item.name ||
+                  item.title ||
+                  item.text ||
+                  item.display ||
+                  item.id ||
+                  item.key ||
+                  item.value ||
+                  `Option ${index + 1}`;
+                const value = item.value || item.id || item.key || item.name || index;
+
+                mappedItem.id = String(id);
+                mappedItem.label = String(label);
+                mappedItem.value = String(value);
+              }
+
+              return mappedItem;
+            } else {
+              // Fallback for primitive values (numbers, booleans, etc.)
+              return {
+                id: uuid(),
+                label: String(item),
+                value: String(item)
+              };
+            }
+          });
+        } catch (error) {
+          console.error('Error mapping response to options:', error);
+          return [];
+        }
       },
 
       /**
@@ -646,7 +738,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const field = get().actions.getField(fieldId);
         if (!field) return;
 
-        await workflowEngine.refreshDynamicOptions(field);
+        await get().actions.refreshDynamicOptions(field);
       },
 
       /**
@@ -708,7 +800,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const usedNames = new Set<string>();
 
         // Check if we have files
-        const hasFiles = Array.from(fileData.keys()).length > 0;
+        const hasFiles = Array.from(fileData.entries()).length > 0;
 
         if (hasFiles) {
           const mergedData = new FormData();
@@ -727,9 +819,12 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
 
               if (field.type === 'file') {
                 // Copy files for this field from fileData
+                const storedFieldName = field.name;
+                let filesFound = 0;
                 for (const [key, value] of fileData.entries()) {
-                  if (key === field.name) {
+                  if (key === storedFieldName) {
                     mergedData.append(fieldName, value);
+                    filesFound++;
                   }
                 }
               } else {
@@ -787,7 +882,6 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       submitForm: async () => {
         const isValid = await get().actions.validateForm();
         const data = get().actions.getFormDataByNames();
-
         // Determine content type based on data type
         const contentType = data instanceof FormData ? 'multipart/form-data' : 'application/json';
 
@@ -807,7 +901,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const field = get().actions.getField(fieldId);
         if (!field || field.type !== 'file') return [];
 
-        const fieldName = field.name || fieldId;
+        const fieldName = field.name;
         const files: File[] = [];
 
         for (const [key, value] of get().fileData.entries()) {
@@ -825,7 +919,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @param file - File to add
        * @returns Whether the file was added successfully
        */
-      addFileToField: (fieldId: string, file: File) => {
+      addFileField: (fieldId: string, file: File) => {
         const field = get().actions.getField(fieldId);
         if (!field || field.type !== 'file') return false;
 
@@ -861,7 +955,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @param fileIndex - Index of file to remove
        * @returns Whether the file was removed successfully
        */
-      removeFileFromField: (fieldId: string, fileIndex: number) => {
+      removeFileField: (fieldId: string, fileIndex: number) => {
         const field = get().actions.getField(fieldId);
         if (!field || field.type !== 'file') return false;
 

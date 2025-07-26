@@ -21,13 +21,11 @@ export class WorkflowEngine {
   public graph: DependencyGraph;
   private getState: () => FormBuilderState;
   private setState: (updater: (state: FormBuilderState) => FormBuilderState) => void;
-  private debounceWait: number;
 
   constructor(options: WorkflowEngineOptions) {
     this.graph = new DependencyGraph();
     this.getState = options.getState;
     this.setState = options.setState;
-    this.debounceWait = options.debounceWait || 100;
   }
 
   /**
@@ -138,10 +136,16 @@ export class WorkflowEngine {
       }
       switch (event.type) {
         case 'fetch':
-          // this.refreshDynamicOptions(targetField);
-          this.getState().actions.updateField(targetField.id, {
-            options: []
-          });
+          // Trigger dynamic options refresh by updating a refresh timestamp
+          // This will cause the useEffect in FormField to re-run
+          if ((targetField.type === 'select' || targetField.type === 'multiselect') && targetField.external) {
+            this.getState().actions.updateField(targetField.id, {
+              external: {
+                ...targetField.external,
+                _refreshTimestamp: Date.now() // Use current timestamp to trigger refresh
+              }
+            } as any);
+          }
           break;
 
         case 'reset':
@@ -168,42 +172,7 @@ export class WorkflowEngine {
    * @param field Form field to refresh
    */
   public async refreshDynamicOptions(field: FormField): Promise<void> {
-    const formData = this.getState().formData;
-
-    if ((field.type !== 'select' && field.type !== 'multiselect') || !field.external) {
-      return;
-    }
-    const { url, headers, mapper } = field.external;
-
-    if (!mapper || !mapper.dataSource || !mapper.dataMapper) {
-      return;
-    }
-
-    const interceptedExpression = interceptExpressionTemplate(url, this.getState());
-    const serializedUrl = interpolate(interceptedExpression, formData);
-
-    const response = await fetch(serializedUrl, {
-      headers: { ...headers }
-    });
-    if (!response.ok) {
-      this.getState().actions.updateField(field.id, {
-        error: 'Failed to load options'
-      });
-      return;
-    }
-    const data = await response.json();
-    const options = _.get(data, mapper.dataSource, data);
-    const mappedOptions: FieldGroupItem[] = options.map((item: any) => {
-      return {
-        id: _.get(item, mapper.dataMapper.id),
-        label: _.get(item, mapper.dataMapper.label),
-        value: _.get(item, mapper.dataMapper.value)
-      };
-    });
-    // Update field options in state
-    this.getState().actions.updateField(field.id, {
-      options: mappedOptions
-    });
+    return;
   }
 
   /**

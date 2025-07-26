@@ -141,14 +141,15 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
   );
 
   useEffect(() => {
+    actions.changeMode('editor');
     if (process.env.NODE_ENV !== 'development') return;
 
     // Enable all debug features
-    const cleanupDebugger = setupWorkflowDebugger();
+    // const cleanupDebugger = setupWorkflowDebugger();
 
     return () => {
       // Cleanup debugger on unmount
-      cleanupDebugger?.();
+      // cleanupDebugger?.();
     };
   }, []);
 

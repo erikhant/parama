@@ -39,7 +39,8 @@ const packages = [
   { name: '@parama-dev/form-builder-types', path: 'packages/types' },
   { name: '@parama-dev/form-builder-core', path: 'packages/core' },
   { name: '@parama-dev/form-builder-renderer', path: 'packages/renderer' },
-  { name: '@parama-dev/form-builder-editor', path: 'packages/editor' }
+  { name: '@parama-dev/form-builder-editor', path: 'packages/editor' },
+  { name: '@parama-ui/react', path: 'packages/parama-ui' }
 ];
 
 // Helper functions
@@ -204,15 +205,14 @@ try {
 
     if (command === 'prepare') {
       log('📋', 'Summary of changes:', 'blue');
-      log('  ', '- Replaced workspace:* with ^VERSION for all @parama-dev packages');
+      log('  ', '- Replaced workspace:* with ^VERSION for all internal packages');
       log('  ', '- Updated dependencies, devDependencies, and peerDependencies');
-      log('  ', '- Kept workspace:* for @parama-ui/react (internal only)');
       console.log('');
       log('🔍', 'Review changes with: git diff packages/*/package.json', 'cyan');
       log('📦', 'Ready to publish with: pnpm publish -r', 'cyan');
     } else {
       log('📋', 'Summary of changes:', 'blue');
-      log('  ', '- Replaced semantic versions with workspace:* for all @parama-dev packages');
+      log('  ', '- Replaced semantic versions with workspace:* for all internal packages');
       log('  ', '- Updated dependencies, devDependencies, and peerDependencies');
       console.log('');
       log('🔄', 'Run "pnpm install" to update the workspace links', 'cyan');

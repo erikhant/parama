@@ -530,7 +530,7 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
               setOpen(false);
               onChange(externalData);
             }}
-            disabled={loading || externalData.url === '' || !externalData.mapper}>
+            disabled={loading || externalData.url === '' || !isValidUrl(externalData.url) || !result}>
             Save
           </Button>
         </DialogFooter>
