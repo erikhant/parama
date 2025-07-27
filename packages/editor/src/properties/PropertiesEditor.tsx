@@ -114,20 +114,23 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
   const handleOptionDelete = useCallback(
     (index: number) => {
       const newOptions = (field as SelectField | MultiSelectField).options?.filter((_, i) => i !== index) || [];
+      const deletedOptionValue = (field as SelectField | MultiSelectField).options?.[index].value;
 
-      if ((field as SelectField).defaultValue === (field as SelectField).options?.[index].value) {
+      if ((field as SelectField).defaultValue === deletedOptionValue) {
         onChange({ defaultValue: undefined, options: newOptions });
         updateFieldValue(field.id, undefined);
-      } else if (
-        (field as MultiSelectField).defaultValue?.includes((field as MultiSelectField).options?.[index].value)
-      ) {
+      } else if ((field as MultiSelectField).defaultValue?.includes(deletedOptionValue)) {
         const newDefaultValue = (field as MultiSelectField).defaultValue?.filter(
-          (value: string) => value !== (field as MultiSelectField).options?.[index].value
+          (value: string) => value !== deletedOptionValue
         );
         onChange({ defaultValue: newDefaultValue.length > 0 ? newDefaultValue : undefined, options: newOptions });
+        updateFieldValue(field.id, newDefaultValue.length > 0 ? newDefaultValue : undefined);
+      } else {
+        // If the deleted option wasn't the default value, just update the options array
+        onChange({ options: newOptions });
       }
     },
-    [(field as SelectField).options, onChange]
+    [(field as SelectField).options, onChange, updateFieldValue]
   );
 
   const handleGroupUpdate = useCallback(
