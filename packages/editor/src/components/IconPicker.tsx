@@ -92,18 +92,18 @@ export const IconPicker = memo(({ value, onChange, iconClassName, className }: I
           color="secondary"
           disabled={editor.options?.propertiesSettings === 'readonly'}
           size={value ? 'lg' : 'xs'}
-          className={cn('w-full', className)}>
+          className={cn('tw-w-full', className)}>
           {value ? (
-            <>{SelectedIcon && <SelectedIcon size={15} className={cn('!size-5', iconClassName)} />}</>
+            <>{SelectedIcon && <SelectedIcon size={15} className={cn('!tw-size-5', iconClassName)} />}</>
           ) : (
             <span>Pick an icon</span>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
-        <div className="p-2">
-          <Input placeholder="Search icons..." value={search} onChange={handleSearchChange} className="mb-2" />
-          <div className="grid grid-cols-6 gap-2 max-h-[300px] overflow-y-auto">
+      <PopoverContent className="tw-w-[300px] tw-p-0">
+        <div className="tw-p-2">
+          <Input placeholder="Search icons..." value={search} onChange={handleSearchChange} className="tw-mb-2" />
+          <div className="tw-grid tw-grid-cols-6 tw-gap-2 tw-max-h-[300px] tw-overflow-y-auto">
             {filteredIcons.map((iconName: string) => (
               <IconButton
                 key={iconName}

@@ -293,9 +293,9 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
   const renderRequiredValidation = useMemo(
     () => (
       <FormItem orientation="horizontal">
-        <Label className="!col-span-4">Required field</Label>
+        <Label className="!tw-col-span-4">Required field</Label>
         <Switch
-          className="!col-span-1"
+          className="!tw-col-span-1"
           checked={!!getValidationByType('required')}
           disabled={editor.options?.validationSettings === 'readonly'}
           onCheckedChange={(checked) => {
@@ -319,9 +319,9 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
       <SectionPanel title="Validation">
         {renderRequiredValidation}
         <FormItem orientation="horizontal">
-          <Label className="!col-span-4">Enable strength password</Label>
+          <Label className="!tw-col-span-4">Enable strength password</Label>
           <Switch
-            className="!col-span-1"
+            className="!tw-col-span-1"
             checked={!!getValidationByType('pattern')}
             disabled={editor.options?.validationSettings === 'readonly'}
             onCheckedChange={(checked) => {
@@ -343,15 +343,15 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
 
   const renderTextValidatorTemplate = useMemo(
     () => (
-      <FormItem className="py-2">
-        <div className="flex items-center justify-between h-7">
+      <FormItem className="tw-py-2">
+        <div className="tw-flex tw-items-center tw-justify-between tw-h-7">
           <Label>Validation template</Label>
           {getValidationByType('pattern') && (
             <Button
               color="secondary"
               variant="ghost"
               size="xs"
-              className="text-xs text-gray-500"
+              className="tw-text-xs tw-text-gray-500"
               disabled={editor.options?.validationSettings === 'readonly'}
               onClick={() => removeValidation('pattern')}>
               Remove
@@ -366,12 +366,12 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             if (!rule) return;
             handleValidationChange({ ...rule, value: getFieldValue(field.id) });
           }}>
-          <SelectTrigger className="whitespace-nowrap capitalize">
+          <SelectTrigger className="tw-whitespace-nowrap tw-capitalize">
             <SelectValue placeholder="No selected" />
           </SelectTrigger>
           <SelectContent>
             {builtInTextValidatorTemplate.map((option) => (
-              <SelectItem key={option.name} value={option.name as string} className="capitalize">
+              <SelectItem key={option.name} value={option.name as string} className="tw-capitalize">
                 {option.name}
               </SelectItem>
             ))}
@@ -389,7 +389,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         {renderRequiredValidation}
         {renderTextValidatorTemplate}
         <FormItem orientation="horizontal">
-          <Label className="!col-span-3">Min length</Label>
+          <Label className="!tw-col-span-3">Min length</Label>
           <Input
             type="number"
             min={0}
@@ -397,7 +397,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             value={getValidationByType('minLength')?.value ?? ''}
             disabled={editor.options?.validationSettings === 'readonly'}
             placeholder="Minimum character length"
-            className="!col-span-2"
+            className="!tw-col-span-2"
             onChange={(e) => {
               const val = e.target.value;
               if (val === '') {
@@ -417,7 +417,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
           />
         </FormItem>
         <FormItem orientation="horizontal">
-          <Label className="!col-span-3">Max length</Label>
+          <Label className="!tw-col-span-3">Max length</Label>
           <Input
             type="number"
             min={0}
@@ -425,7 +425,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             value={getValidationByType('maxLength')?.value ?? ''}
             disabled={editor.options?.validationSettings === 'readonly'}
             placeholder="Maximum character length"
-            className="!col-span-2"
+            className="!tw-col-span-2"
             onChange={(e) => {
               const val = e.target.value;
               if (val === '') {
@@ -454,7 +454,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
       <SectionPanel title="Validation">
         {renderRequiredValidation}
         <FormItem orientation="horizontal">
-          <Label className="!col-span-3">Max length</Label>
+          <Label className="!tw-col-span-3">Max length</Label>
           <Input
             type="number"
             min={0}
@@ -462,7 +462,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             value={getValidationByType('maxLength')?.value ?? ''}
             disabled={editor.options?.validationSettings === 'readonly'}
             placeholder="Maximum character length"
-            className="!col-span-2"
+            className="!tw-col-span-2"
             onChange={(e) => {
               const val = e.target.value;
               if (val === '') {
@@ -491,7 +491,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
       <SectionPanel title="Validation">
         {renderRequiredValidation}
         <FormItem orientation="horizontal">
-          <Label className="!col-span-3">Min</Label>
+          <Label className="!tw-col-span-3">Min</Label>
           <Input
             type="number"
             min={0}
@@ -499,7 +499,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             value={getValidationByType('min')?.value ?? ''}
             disabled={editor.options?.validationSettings === 'readonly'}
             placeholder="Minimum value"
-            className="!col-span-2"
+            className="!tw-col-span-2"
             onChange={(e) => {
               const val = e.target.value;
               if (val === '') {
@@ -519,7 +519,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
           />
         </FormItem>
         <FormItem orientation="horizontal">
-          <Label className="!col-span-3">Max</Label>
+          <Label className="!tw-col-span-3">Max</Label>
           <Input
             type="number"
             min={0}
@@ -527,7 +527,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             value={getValidationByType('max')?.value ?? ''}
             disabled={editor.options?.validationSettings === 'readonly'}
             placeholder="Maximum value"
-            className="!col-span-2"
+            className="!tw-col-span-2"
             onChange={(e) => {
               const val = e.target.value;
               if (val === '') {
@@ -584,11 +584,11 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         </FormItem>
 
         <FormItem orientation="horizontal">
-          <div className="col-span-4 space-y-1">
+          <div className="tw-col-span-4 tw-space-y-1">
             <Label htmlFor="multiple-files">Multiple files</Label>
             <p className="form-description">Upload multiple files at once</p>
           </div>
-          <div className="flex items-center justify-end">
+          <div className="tw-flex tw-items-center tw-justify-end">
             <Switch
               id="multiple-files"
               disabled={editor.options?.validationSettings === 'readonly'}
@@ -599,7 +599,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         </FormItem>
 
         <FormItem orientation="horizontal">
-          <Label className="!col-span-3">Max files</Label>
+          <Label className="!tw-col-span-3">Max files</Label>
           <Input
             type="number"
             min={1}
@@ -607,14 +607,14 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
             value={fileOptions.maxFiles?.toString() || '5'}
             disabled={editor.options?.validationSettings === 'readonly' || !fileOptions.multiple}
             placeholder="Max files"
-            className="!col-span-2"
+            className="!tw-col-span-2"
             onChange={(e) => handleMaxFilesChange(e.target.value)}
           />
         </FormItem>
 
         <FormItem>
           <Label>Maximum File Size</Label>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="tw-grid tw-grid-cols-5 tw-gap-2">
             <Input
               type="number"
               min={0.1}
@@ -622,14 +622,14 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
               value={displayValue.toString()}
               disabled={editor.options?.validationSettings === 'readonly'}
               placeholder="Size"
-              className="col-span-3"
+              className="tw-col-span-3"
               onChange={(e) => handleFileSizeChange(e.target.value)}
             />
             <Select
               value={preferredUnit}
               disabled={editor.options?.validationSettings === 'readonly'}
               onValueChange={handleUnitChange}>
-              <SelectTrigger className="col-span-2">
+              <SelectTrigger className="tw-col-span-2">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

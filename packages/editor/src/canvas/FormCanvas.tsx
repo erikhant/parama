@@ -22,19 +22,21 @@ export const FormCanvas = () => {
   };
 
   return (
-    <div className="grow flex-1 max-h-screen relative overflow-y-auto" onClick={() => actions.selectField(null)}>
+    <div
+      className="tw-grow tw-flex-1 tw-max-h-screen tw-relative tw-overflow-y-auto"
+      onClick={() => actions.selectField(null)}>
       {/* Viewport indicator */}
       {screenSize !== 'desktop' && (
-        <div className="absolute top-2 right-2 z-10 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium capitalize">
+        <div className="tw-absolute tw-top-2 tw-right-2 tw-z-10 tw-bg-blue-100 tw-text-blue-800 tw-px-2 tw-py-1 tw-rounded-full tw-text-xs tw-font-medium tw-capitalize">
           {screenSize} view
         </div>
       )}
-      <div className={cn('transition-all duration-300', getCanvasStyles())}>
+      <div className={cn('tw-transition-all tw-duration-300', getCanvasStyles())}>
         <SortableList
           id="canvas"
           items={schema.fields.map((f) => f.id)}
-          className={`grid column-${schema.layout.colSize} gap-size-${schema.layout.gap} ${schema.fields.length > 0 ? 'pb-16 my-5 p-8' : 'py-12 px-8 h-full'} overflow-auto`}
-          classNameIndicator="column-span-12 h-14 ml-4"
+          className={`tw-grid column-${schema.layout.colSize} gap-size-${schema.layout.gap} ${schema.fields.length > 0 ? 'tw-pb-16 tw-my-5 tw-p-8' : 'tw-py-12 tw-px-8 tw-h-full'} tw-overflow-auto`}
+          classNameIndicator="column-span-12 tw-h-14 tw-ml-4"
           useDynamicIndicator>
           {schema.fields.map((field, index) => (
             <EditableField key={field.id} field={field} index={index} />
@@ -42,7 +44,7 @@ export const FormCanvas = () => {
         </SortableList>
         {/* Empty state drop zone */}
         {canvas.currentInsertionIndex == null && schema.fields.length === 0 && (
-          <div className="absolute inset-0 text-gray-200/80 flex items-center justify-center text-4xl font-bold">
+          <div className="tw-absolute tw-inset-0 tw-text-gray-200/80 tw-flex tw-items-center tw-justify-center tw-text-4xl tw-font-bold">
             Drag field here
           </div>
         )}

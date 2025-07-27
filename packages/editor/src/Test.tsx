@@ -111,7 +111,7 @@ export function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="tw-min-h-screen tw-bg-gray-50">
       <FormEditor
         schema={initialSchema}
         loadPreset={initialPresets}
@@ -122,7 +122,7 @@ export function App() {
             <img
               src="https://www.pikpng.com/pngl/b/34-345940_download-in-png-format-png-format-clipart.png"
               alt="Brand Logo"
-              className="h-6"
+              className="tw-h-6"
             />
           )
         }}

@@ -144,17 +144,17 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:!max-w-3xl">
+      <DialogContent className="sm:!tw-max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-gray-700">API source</DialogTitle>
+          <DialogTitle className="tw-text-gray-700">API source</DialogTitle>
           <DialogDescription>Manage API source settings</DialogDescription>
         </DialogHeader>
-        <div className="space-y-5">
-          <div className="flex items-center justify-between mb-2">
-            <FormGroup prefix="GET" className="w-full">
+        <div className="tw-space-y-5">
+          <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
+            <FormGroup prefix="GET" className="tw-w-full">
               <Input
                 value={apiUrl}
-                className="!rounded-tr-none !rounded-br-none"
+                className="!tw-rounded-tr-none !tw-rounded-br-none"
                 placeholder="https://api.example.com/data"
                 onChange={(e) => {
                   setApiUrl(e.target.value);
@@ -167,18 +167,18 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
             </FormGroup>
             <Button
               color="success"
-              className="!rounded-tl-none !rounded-bl-none"
+              className="!tw-rounded-tl-none !tw-rounded-bl-none"
               disabled={loading || !isValidUrl(apiUrl)}
               onClick={sendRequest}>
               Send
             </Button>
           </div>
-          <Tabs defaultValue={tab} className="w-full">
-            <TabsList className="grid w-full !grid-cols-3 bg-gray-100">
+          <Tabs defaultValue={tab} className="tw-w-full">
+            <TabsList className="tw-grid tw-w-full !tw-grid-cols-3 tw-bg-gray-100">
               <TabsTrigger value="headers">Headers</TabsTrigger>
               <TabsTrigger value="result">
                 Result
-                {error && <CircleAlertIcon className="ml-1 text-red-500" size={16} />}
+                {error && <CircleAlertIcon className="tw-ml-1 tw-text-red-500" size={16} />}
                 {!error && result && (
                   <Badge size="xs" color="success" className="ml-1">
                     OK
@@ -188,39 +188,39 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
               <TabsTrigger value="mapper">Data mapper</TabsTrigger>
             </TabsList>
             <TabsContent value="headers">
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
+              <div className="tw-overflow-x-auto">
+                <table className="tw-min-w-full">
                   <thead>
                     <tr>
-                      <th className="border text-sm text-gray-700 p-2">Key</th>
-                      <th className="border text-sm text-gray-700 p-2">Value</th>
-                      <th className="border text-sm text-gray-700 p-2"></th>
+                      <th className="tw-border tw-text-sm tw-text-gray-700 tw-p-2">Key</th>
+                      <th className="tw-border tw-text-sm tw-text-gray-700 tw-p-2">Value</th>
+                      <th className="tw-border tw-text-sm tw-text-gray-700 tw-p-2"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {headers.map((header) => (
                       <tr key={header.id}>
-                        <td className="border">
+                        <td className="tw-border">
                           <Input
-                            className="rounded-none shadow-none border-none focus-visible:ring-0"
+                            className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                             value={header.key}
                             onChange={(e) => updateHeader(header.id, 'key', e.target.value)}
                             placeholder="Header name"
                           />
                         </td>
-                        <td className="border">
+                        <td className="tw-border">
                           <Input
-                            className="rounded-none shadow-none border-none focus-visible:ring-0"
+                            className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                             value={header.value}
                             onChange={(e) => updateHeader(header.id, 'value', e.target.value)}
                             placeholder="Header value"
                           />
                         </td>
-                        <td className="border text-center">
+                        <td className="tw-border tw-text-center">
                           <Button
                             variant="ghost"
                             color="secondary"
-                            className="text-gray-500"
+                            className="tw-text-gray-500"
                             size="xs"
                             onClick={() => removeHeader(header.id)}>
                             <Trash2Icon size={16} />
@@ -230,8 +230,8 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                     ))}
                   </tbody>
                 </table>
-                <div className="flex justify-end mt-2">
-                  <Button variant="ghost" color="secondary" className="text-gray-700" size="xs" onClick={addHeader}>
+                <div className="tw-flex tw-justify-end tw-mt-2">
+                  <Button variant="ghost" color="secondary" className="tw-text-gray-700" size="xs" onClick={addHeader}>
                     <PlusIcon size={16} />
                     Add row
                   </Button>
@@ -239,12 +239,12 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
               </div>
             </TabsContent>
             <TabsContent value="result">
-              <div className="overflow-y-auto max-h-[calc(100vh_-_300px)]">
+              <div className="tw-overflow-y-auto tw-max-h-[calc(100vh_-_300px)]">
                 {result ? (
                   <Editor
                     height={600}
                     theme="vs-light"
-                    className="border border-gray-300"
+                    className="tw-border tw-border-gray-300"
                     language="json"
                     value={JSON.stringify(result, null, 2)}
                     onMount={(editor) => {
@@ -260,11 +260,11 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                   />
                 ) : (
                   <p
-                    className={`${error ? 'text-red-600' : 'text-gray-500'} text-center text-sm  bg-gray-50 border p-5 rounded`}>
+                    className={`${error ? 'tw-text-red-600' : 'tw-text-gray-500'} tw-text-center tw-text-sm  tw-bg-gray-50 tw-border tw-p-5 tw-rounded`}>
                     {error ? error.message : 'No result yet. Send a request to see the response.'}
                     {loading && (
                       <>
-                        <Loader2Icon className="animate-spin ml-2 inline-block" size={16} />
+                        <Loader2Icon className="tw-animate-spin tw-ml-2 tw-inline-block" size={16} />
                         Loading..
                       </>
                     )}
@@ -273,26 +273,26 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
               </div>
             </TabsContent>
             <TabsContent value="mapper">
-              <div className="overflow-x-auto">
+              <div className="tw-overflow-x-auto">
                 {result || externalData.mapper ? (
                   <>
-                    <p className="text-blue-700 leading-relaxed text-sm my-2 p-3 bg-blue-100 rounded border border-blue-200">
+                    <p className="tw-text-blue-700 tw-leading-relaxed tw-text-sm tw-my-2 tw-p-3 tw-bg-blue-100 tw-rounded tw-border tw-border-blue-200">
                       <strong>Note:</strong> The mapper is used to transform the response data into a format suitable
                       for use in the select options. <br />
                     </p>
-                    <table className="min-w-full">
+                    <table className="tw-min-w-full">
                       <thead>
                         <tr>
-                          <th className="border text-sm text-gray-700 p-2">Property</th>
-                          <th className="border text-sm text-gray-700 p-2">Target source</th>
+                          <th className="tw-border tw-text-sm tw-text-gray-700 tw-p-2">Property</th>
+                          <th className="tw-border tw-text-sm tw-text-gray-700 tw-p-2">Target source</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
+                          <td className="tw-border">
+                            <div className="tw-flex tw-items-center tw-gap-2 tw-pr-2">
                               <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
+                                className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                                 value="Source"
                                 placeholder="Source"
                                 readOnly
@@ -300,12 +300,12 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
+                                    <span className="tw-text-gray-600">
                                       <HelpCircleIcon size={15} />
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
+                                  <TooltipContent className="tw-max-w-64 tw-mr-2" side="top">
+                                    <p className="form-description tw-text-gray-700 tw-leading-relaxed">
                                       The key in the response object that contains the array of items you want to map.
                                     </p>
                                   </TooltipContent>
@@ -313,9 +313,9 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               </TooltipProvider>
                             </div>
                           </td>
-                          <td className="border">
+                          <td className="tw-border">
                             <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
+                              className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                               value={externalData.mapper?.dataSource || ''}
                               onChange={(e) =>
                                 setExternal({
@@ -331,10 +331,10 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                           </td>
                         </tr>
                         <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
+                          <td className="tw-border">
+                            <div className="tw-flex tw-items-center tw-gap-2 tw-pr-2">
                               <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
+                                className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                                 value="ID"
                                 placeholder="ID"
                                 readOnly
@@ -342,12 +342,12 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
+                                    <span className="tw-text-gray-600">
                                       <HelpCircleIcon size={15} />
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
+                                  <TooltipContent className="tw-max-w-64 tw-mr-2" side="top">
+                                    <p className="form-description tw-text-gray-700 tw-leading-relaxed">
                                       The unique identifier for each item in the array.
                                     </p>
                                   </TooltipContent>
@@ -355,9 +355,9 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               </TooltipProvider>
                             </div>
                           </td>
-                          <td className="border">
+                          <td className="tw-border">
                             <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
+                              className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                               value={externalData.mapper?.dataMapper?.id || ''}
                               onChange={(e) =>
                                 setExternal({
@@ -376,10 +376,10 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                           </td>
                         </tr>
                         <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
+                          <td className="tw-border">
+                            <div className="tw-flex tw-items-center tw-gap-2 tw-pr-2">
                               <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
+                                className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                                 value="Label"
                                 placeholder="Label"
                                 readOnly
@@ -387,12 +387,12 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
+                                    <span className="tw-text-gray-600">
                                       <HelpCircleIcon size={15} />
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
+                                  <TooltipContent className="tw-max-w-64 tw-mr-2" side="top">
+                                    <p className="form-description tw-text-gray-700 tw-leading-relaxed">
                                       The text that will be displayed in the option list.
                                     </p>
                                   </TooltipContent>
@@ -400,9 +400,9 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               </TooltipProvider>
                             </div>
                           </td>
-                          <td className="border">
+                          <td className="tw-border">
                             <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
+                              className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                               value={externalData.mapper?.dataMapper?.label || ''}
                               onChange={(e) =>
                                 setExternal({
@@ -421,10 +421,10 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                           </td>
                         </tr>
                         <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
+                          <td className="tw-border">
+                            <div className="tw-flex tw-items-center tw-gap-2 tw-pr-2">
                               <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
+                                className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                                 value="Value"
                                 placeholder="Value"
                                 readOnly
@@ -432,12 +432,12 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
+                                    <span className="tw-text-gray-600">
                                       <HelpCircleIcon size={15} />
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
+                                  <TooltipContent className="tw-max-w-64 tw-mr-2" side="top">
+                                    <p className="form-description tw-text-gray-700 tw-leading-relaxed">
                                       The value that will be submitted when the option is selected.
                                     </p>
                                   </TooltipContent>
@@ -445,9 +445,9 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               </TooltipProvider>
                             </div>
                           </td>
-                          <td className="border">
+                          <td className="tw-border">
                             <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
+                              className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                               value={externalData.mapper?.dataMapper?.value || ''}
                               onChange={(e) =>
                                 setExternal({
@@ -466,10 +466,10 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                           </td>
                         </tr>
                         <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
+                          <td className="tw-border">
+                            <div className="tw-flex tw-items-center tw-gap-2 tw-pr-2">
                               <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
+                                className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                                 value="Description (optional)"
                                 placeholder="Description (optional)"
                                 readOnly
@@ -477,12 +477,12 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
+                                    <span className="tw-text-gray-600">
                                       <HelpCircleIcon size={15} />
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
+                                  <TooltipContent className="tw-max-w-64 tw-mr-2" side="top">
+                                    <p className="form-description tw-text-gray-700 tw-leading-relaxed">
                                       An optional field that can be used to provide additional information about the
                                       option.
                                     </p>
@@ -491,9 +491,9 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                               </TooltipProvider>
                             </div>
                           </td>
-                          <td className="border">
+                          <td className="tw-border">
                             <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
+                              className="tw-rounded-none tw-shadow-none tw-border-none focus-visible:tw-ring-0"
                               value={externalData.mapper?.dataMapper?.description || ''}
                               onChange={(e) =>
                                 setExternal({
@@ -515,13 +515,15 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                     </table>
                   </>
                 ) : (
-                  <p className="bg-gray-50 border p-5 rounded text-gray-500 text-center text-sm">No mapping yet.</p>
+                  <p className="tw-bg-gray-50 tw-border tw-p-5 tw-rounded tw-text-gray-500 tw-text-center tw-text-sm">
+                    No mapping yet.
+                  </p>
                 )}
               </div>
             </TabsContent>
           </Tabs>
         </div>
-        <DialogFooter className="mt-5">
+        <DialogFooter className="tw-mt-5">
           <Button
             onClick={() => {
               setTab('mapper'); // Reset to headers tab after saving

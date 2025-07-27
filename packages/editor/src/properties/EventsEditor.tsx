@@ -83,7 +83,7 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
   }, [field.id]);
 
   const EventTooltip = () => (
-    <HelperTooltip className="max-w-xs">
+    <HelperTooltip className="tw-max-w-xs">
       Events are triggered when a field's value changes and validation is successful.
       <br />
       <br />
@@ -98,14 +98,14 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
   );
 
   return (
-    <SectionPanel title="Events" description="Trigger actions based on events" className="space-y-2">
+    <SectionPanel title="Events" description="Trigger actions based on events" className="tw-space-y-2">
       {(('events' in field ? field.events?.length : 0) || 0) > 0 && (
         <Accordion type="multiple" className="mb-2">
           {('events' in field ? field.events : [])?.map((event: Events, index: number) => (
             <AccordionItem key={index} value={`event-${index}`}>
-              <AccordionTrigger className="text-sm py-2">
+              <AccordionTrigger className="tw-text-sm tw-py-2">
                 {event.type === 'setValue' ? 'Set Value' : event.type === 'reset' ? 'Reset Field' : 'Fetch Options'}
-                <span className="ml-2 text-xs opacity-70">
+                <span className="tw-ml-2 tw-text-xs tw-opacity-70">
                   →{' '}
                   {(() => {
                     const targetField = availableFields.find((f) => f.id === event.target);
@@ -113,8 +113,8 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
                   })()}
                 </span>
               </AccordionTrigger>
-              <AccordionContent className="!px-2 pb-4 ">
-                <div className="space-y-3 pt-2">
+              <AccordionContent className="!tw-px-2 tw-pb-4 ">
+                <div className="tw-space-y-3 tw-pt-2">
                   <FormItem>
                     <Label>Action</Label>
                     <Select
@@ -168,7 +168,7 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
                           placeholder="Enter value or expression {{fieldName}}"
                         />
                       </FormGroup>
-                      <div className="flex items-center gap-1">
+                      <div className="tw-flex tw-items-center tw-gap-1">
                         <p className="form-description">Use expression.</p>
                         <EventTooltip />
                       </div>
@@ -179,10 +179,10 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
                     variant="outline"
                     color="secondary"
                     size="xs"
-                    className="w-full mt-2 text-xs"
+                    className="tw-w-full tw-mt-2 tw-text-xs"
                     disabled={editor.options?.eventsSettings === 'readonly'}
                     onClick={() => handleRemoveEvent(index)}>
-                    <Trash2Icon className="size-4" /> Remove
+                    <Trash2Icon className="tw-size-4" /> Remove
                   </Button>
                 </div>
               </AccordionContent>
@@ -192,7 +192,7 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
       )}
 
       {isAddingEvent ? (
-        <div className="rounded-md space-y-3 pt-2">
+        <div className="tw-rounded-md tw-space-y-3 tw-pt-2">
           <FormItem>
             <Label>Action</Label>
             <Select
@@ -239,19 +239,19 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
                   }
                 />
               </FormGroup>
-              <div className="flex items-center gap-1">
+              <div className="tw-flex tw-items-center tw-gap-1">
                 <p className="form-description">Use expression.</p>
                 <EventTooltip />
               </div>
             </FormItem>
           )}
 
-          <div className="flex gap-1 justify-end !mt-5">
+          <div className="tw-flex tw-gap-1 tw-justify-end !tw-mt-5">
             <Button
               variant="fill"
               color="secondary"
               size="sm"
-              className="text-xs"
+              className="tw-text-xs"
               onClick={handleAddEvent}
               disabled={!newEvent.target || (newEvent.type === 'setValue' && !newEvent.params?.value)}>
               Save
@@ -260,22 +260,22 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
               variant="ghost"
               color="secondary"
               size="sm"
-              className="text-xs"
+              className="tw-text-xs"
               onClick={() => setIsAddingEvent(false)}>
               Cancel
             </Button>
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-end">
+        <div className="tw-flex tw-items-center tw-justify-end">
           <Button
             variant="ghost"
             color="secondary"
             size="xs"
-            className="text-xs"
+            className="tw-text-xs"
             disabled={editor.options?.eventsSettings === 'readonly'}
             onClick={() => setIsAddingEvent(true)}>
-            <PlusIcon className="size-4" />
+            <PlusIcon className="tw-size-4" />
             Add
           </Button>
         </div>

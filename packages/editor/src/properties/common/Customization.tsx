@@ -33,24 +33,24 @@ export const Customization = ({ field, onChange }: CustomizationProps) => {
   }, [schema.fields]);
 
   return (
-    <SectionPanel title="Customization" className="relative">
+    <SectionPanel title="Customization" className="tw-relative">
       <FormItem>
-        <div className="absolute top-4 right-2 z-[2]">
+        <div className="tw-absolute tw-top-4 tw-right-2 tw-z-[2]">
           <HelperTooltip>
-            <div className="space-y-2 pb-1">
-              <p className="text-[13px] font-medium text-gray-700">
+            <div className="tw-space-y-2 tw-pb-1">
+              <p className="tw-text-[13px] tw-font-medium tw-text-gray-700">
                 <strong>Transform field data before submission</strong>
               </p>
               <p>Use placeholders with double curly braces to reference other form fields:</p>
-              <div className="bg-gray-100 text-gray-600 p-2 rounded text-xs font-mono">
+              <div className="tw-bg-gray-100 tw-text-gray-600 tw-p-2 tw-rounded tw-text-xs tw-font-mono">
                 <div>JSON object:</div>
                 <div>{`{"id": "{{user_id}}", "name": "{{username}}"}`}</div>
               </div>
-              <div className="bg-gray-100 text-gray-600 p-2 rounded text-xs font-mono">
+              <div className="tw-bg-gray-100 tw-text-gray-600 tw-p-2 tw-rounded tw-text-xs tw-font-mono">
                 <div>String template:</div>
                 <div>{`prefix_{{field_name}}_{{other_field}}`}</div>
               </div>
-              <p className="text-xs text-gray-600 mt-2">
+              <p className="tw-text-xs tw-text-gray-600 tw-mt-2">
                 💡 Switch between <strong>JSON</strong> and <strong>Text</strong> modes using the language toggle
                 button.
               </p>

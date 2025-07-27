@@ -19,8 +19,8 @@ export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSav
   };
 
   return (
-    <div className="w-full inline-flex justify-between items-center h-12 p-2 bg-white border-b border-gray-100">
-      <div className="text-lg bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent font-semibold ml-3">
+    <div className="tw-w-full tw-inline-flex tw-justify-between tw-items-center tw-h-12 tw-p-2 tw-bg-white tw-border-b tw-border-gray-100">
+      <div className="tw-text-lg tw-bg-gradient-to-r tw-from-blue-500 tw-to-violet-500 tw-bg-clip-text tw-text-transparent tw-font-semibold tw-ml-3">
         {typeof editor.options?.brand === 'string' ? (
           editor.options.brand
         ) : React.isValidElement(editor.options?.brand) ? (
@@ -28,12 +28,12 @@ export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSav
         ) : typeof editor.options?.brand === 'function' ? (
           React.createElement(editor.options?.brand as React.ComponentType)
         ) : (
-          <div className="w-5" />
+          <div className="tw-w-5" />
         )}
       </div>
       <div>
         {/* Responsive view aspect ratio */}
-        <div className="flex items-center space-x-5">
+        <div className="tw-flex tw-items-center tw-space-x-5">
           <Button
             size="xs"
             variant={screenSize === 'mobile' ? 'fill' : 'ghost'}
@@ -57,13 +57,13 @@ export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSav
           </Button>
         </div>
       </div>
-      <div className="flex space-x-2">
+      <div className="tw-flex tw-space-x-2">
         <Preview
           schema={schema}
           disabled={fieldLength === 0}
           onOpenChange={(isOpen) => actions.changeMode(isOpen ? 'render' : 'editor')}
         />
-        <Button size="sm" className="rounded-md" disabled={fieldLength === 0} onClick={handleSaveSchema}>
+        <Button size="sm" className="tw-rounded-md" disabled={fieldLength === 0} onClick={handleSaveSchema}>
           <SaveIcon size={16} />
           Save
         </Button>

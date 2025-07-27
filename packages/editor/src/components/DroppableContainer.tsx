@@ -10,19 +10,14 @@ type DroppableContainerProps = {
   };
 };
 
-export const DroppableContainer = ({
-  id,
-  children,
-  className = '',
-  data
-}: DroppableContainerProps) => {
+export const DroppableContainer = ({ id, children, className = '', data }: DroppableContainerProps) => {
   const { setNodeRef } = useDroppable({
     id,
     data
   });
 
   return (
-    <div ref={setNodeRef} data-id="droppable-area" className={`relative ${className}`}>
+    <div ref={setNodeRef} data-id="droppable-area" className={`tw-relative ${className}`}>
       {children}
     </div>
   );

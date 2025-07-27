@@ -8,12 +8,12 @@ export function HelperTooltip({ children, className }: HelperTooltipProps) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="text-gray-600">
+          <span className="tw-text-gray-600">
             <HelpCircleIcon size={15} />
           </span>
         </TooltipTrigger>
-        <TooltipContent className={cn('max-w-72 mr-2', className)} side="top">
-          <p className="form-description text-gray-700 leading-relaxed">
+        <TooltipContent className={cn('tw-max-w-72 tw-mr-2', className)} side="top">
+          <p className="form-description tw-text-gray-700 tw-leading-relaxed">
             {children || 'This field has no content.'}
           </p>
         </TooltipContent>

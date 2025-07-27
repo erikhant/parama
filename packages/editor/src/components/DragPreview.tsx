@@ -6,7 +6,7 @@ type DragPreviewProps = {
 
 export const DragPreview: React.FC<DragPreviewProps> = ({ children }) => {
   return (
-    <DragOverlay className="border-2 border-blue-500 bg-white rounded-lg shadow-xl overflow-hidden">
+    <DragOverlay className="tw-border-2 tw-border-blue-500 tw-bg-white tw-rounded-lg tw-shadow-xl tw-overflow-hidden">
       {children}
     </DragOverlay>
   );

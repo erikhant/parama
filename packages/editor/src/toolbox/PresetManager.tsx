@@ -92,26 +92,26 @@ export const PresetManager: React.FC<PresetManagerProps> = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="tw-space-y-3">
       {/* Search Bar */}
-      <div className="relative p-4 pb-0">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+      <div className="tw-relative tw-p-4 tw-pb-0">
+        <div className="tw-relative">
+          <Search className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-gray-400 tw-w-4 tw-h-4 tw-pointer-events-none" />
           <Input
             type="text"
             value={searchTerm}
             onChange={handleSearchChange}
             placeholder="Search presets..."
-            className="pl-9 pr-9 h-9 text-sm bg-white border border-gray-200 rounded-md focus:border-blue-300 focus:ring-1 focus:ring-blue-300 transition-colors"
+            className="tw-pl-9 tw-pr-9 tw-h-9 tw-text-sm tw-bg-white tw-border tw-border-gray-200 tw-rounded-md focus:tw-border-blue-300 focus:tw-ring-1 focus:tw-ring-blue-300 tw-transition-colors"
             autoComplete="off"
           />
           {searchTerm && (
             <button
               onClick={handleClearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-0.5 rounded-sm hover:bg-gray-100"
+              className="tw-absolute tw-right-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-gray-400 hover:tw-text-gray-600 tw-transition-colors tw-p-0.5 tw-rounded-sm hover:tw-bg-gray-100"
               aria-label="Clear search"
               type="button">
-              <X className="w-3 h-3" />
+              <X className="tw-w-3 tw-h-3" />
             </button>
           )}
         </div>
@@ -119,21 +119,21 @@ export const PresetManager: React.FC<PresetManagerProps> = ({
 
       {/* Category Filters */}
       {categories.length > 1 && (
-        <div className="px-4">
-          <div className="flex flex-wrap gap-1">
+        <div className="tw-px-4">
+          <div className="tw-flex tw-flex-wrap tw-gap-1">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => handleCategoryChange(category)}
                 className={`
-                  inline-flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors
+                  tw-inline-flex tw-items-center tw-px-2 tw-py-1 tw-rounded-md tw-text-xs tw-font-medium tw-transition-colors
                   ${
                     selectedCategory === category
-                      ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                      : 'bg-gray-100 text-gray-700 border border-transparent hover:bg-gray-200'
+                      ? 'tw-bg-blue-100 tw-text-blue-800 tw-border tw-border-blue-200'
+                      : 'tw-bg-gray-100 tw-text-gray-700 tw-border tw-border-transparent hover:tw-bg-gray-200'
                   }
                 `}>
-                <Tag className="w-3 h-3 mr-1" />
+                <Tag className="tw-w-3 tw-h-3 tw-mr-1" />
                 {category === 'all' ? 'All' : category}
               </button>
             ))}
@@ -143,17 +143,17 @@ export const PresetManager: React.FC<PresetManagerProps> = ({
 
       {/* Action Buttons */}
       {showActions && (onCreatePreset || onImportPresets) && (
-        <div className="px-4">
-          <div className="flex gap-2">
+        <div className="tw-px-4">
+          <div className="tw-flex tw-gap-2">
             {onCreatePreset && (
-              <Button onClick={onCreatePreset} size="sm" variant="outline" className="flex-1 text-xs h-8">
-                <Plus className="w-3 h-3 mr-1" />
+              <Button onClick={onCreatePreset} size="sm" variant="outline" className="tw-flex-1 tw-text-xs tw-h-8">
+                <Plus className="tw-w-3 tw-h-3 tw-mr-1" />
                 Create Preset
               </Button>
             )}
             {onImportPresets && (
-              <Button onClick={onImportPresets} size="sm" variant="outline" className="flex-1 text-xs h-8">
-                <FolderPlus className="w-3 h-3 mr-1" />
+              <Button onClick={onImportPresets} size="sm" variant="outline" className="tw-flex-1 tw-text-xs tw-h-8">
+                <FolderPlus className="tw-w-3 tw-h-3 tw-mr-1" />
                 Import
               </Button>
             )}
@@ -162,7 +162,7 @@ export const PresetManager: React.FC<PresetManagerProps> = ({
       )}
 
       {/* Statistics */}
-      <div className="px-4">
+      <div className="tw-px-4">
         <div className="text-xs text-gray-500">
           {presets.length === 0
             ? 'No presets available'

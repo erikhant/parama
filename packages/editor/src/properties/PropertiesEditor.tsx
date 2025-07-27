@@ -335,7 +335,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               />
             </FormItem>
             <NameField value={field.name || ''} onChange={handleNameChange} hasValidation />
-            <div className="flex justify-between items-center">
+            <div className="tw-flex tw-justify-between tw-items-center">
               <Label>Options</Label>
               {editor.options?.propertiesSettings !== 'readonly' ? (
                 hasNoOptionsConfigured ? (
@@ -345,21 +345,21 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                         <Plus size={15} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-32" align="end">
+                    <DropdownMenuContent className="tw-w-32" align="end">
                       <DropdownMenuItem onSelect={handleAddOption}>List</DropdownMenuItem>
                       <DropdownMenuItem onSelect={handleAddGroup}>Group list</DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <ExternalDataOptions
                           external={field.external}
                           onChange={(value) => onChange({ external: value })}>
-                          <button className="dropdown-item w-full hover:bg-slate-100">API source</button>
+                          <button className="dropdown-item tw-w-full hover:tw-bg-slate-100">API source</button>
                         </ExternalDataOptions>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
                   <Button
-                    className="text-xs text-gray-500"
+                    className="tw-text-xs tw-text-gray-500"
                     variant="ghost"
                     size="xs"
                     color="secondary"
@@ -376,13 +376,13 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                 <Accordion
                   type="multiple"
                   defaultValue={field.options?.map((option) => String(option.id))}
-                  className="w-auto !-mt-0">
+                  className="tw-w-auto !-tw-mt-0">
                   {field.options?.map((option, index) => (
                     <AccordionItem key={String(option.id)} value={String(option.id)}>
-                      <AccordionTrigger className="text-gray-700 text-sm">
+                      <AccordionTrigger className="tw-text-gray-700 tw-text-sm tw-text-start">
                         {option.label || 'Option name'}
                       </AccordionTrigger>
-                      <AccordionContent className="pt-1">
+                      <AccordionContent className="tw-pt-1">
                         <OptionItem
                           key={option.id}
                           option={option}
@@ -391,8 +391,8 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                           onDelete={handleOptionDelete}
                         />
                         {editor.options?.propertiesSettings !== 'readonly' && (
-                          <div className="flex items-center ml-4 gap-2 mt-2">
-                            <Label htmlFor={option.id as string} className="text-xs text-gray-600">
+                          <div className="tw-flex tw-items-center tw-ml-4 tw-gap-2 tw-mt-2">
+                            <Label htmlFor={option.id as string} className="tw-text-xs tw-text-gray-600">
                               Set as default
                             </Label>
                             <Switch
@@ -441,15 +441,15 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
 
             {field.external?.url && (
               <div>
-                <Label className="text-xs text-gray-600">API Source</Label>
-                <div className="flex items-center space-x-2">
+                <Label className="tw-text-xs tw-text-gray-600">API Source</Label>
+                <div className="tw-flex tw-items-center tw-space-x-2">
                   <Badge size="sm">
-                    <p className="max-w-48 truncate">{field.external.url}</p>
+                    <p className="tw-max-w-48 tw-truncate">{field.external.url}</p>
                   </Badge>
                   {editor.options?.propertiesSettings !== 'readonly' && (
                     <ExternalDataOptions external={field.external} onChange={(value) => onChange({ external: value })}>
-                      <Button variant="ghost" size="xs" color="secondary" className="text-gray-600">
-                        <span className="sr-only">Edit API source</span>
+                      <Button variant="ghost" size="xs" color="secondary" className="tw-text-gray-600">
+                        <span className="tw-sr-only">Edit API source</span>
                         <PencilLineIcon size={15} />
                       </Button>
                     </ExternalDataOptions>
@@ -472,7 +472,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               />
             </FormItem>
             <NameField value={field.name || ''} onChange={handleNameChange} hasValidation />
-            <div className="flex justify-between items-center">
+            <div className="tw-flex tw-justify-between tw-items-center">
               <Label>Options</Label>
               {editor.options?.propertiesSettings !== 'readonly' ? (
                 hasNoOptionsConfigured ? (
@@ -482,20 +482,20 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                         <Plus size={15} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-32" align="end">
+                    <DropdownMenuContent className="tw-w-32" align="end">
                       <DropdownMenuItem onSelect={handleAddOption}>List</DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <ExternalDataOptions
                           external={field.external}
                           onChange={(value) => onChange({ external: value })}>
-                          <button className="dropdown-item w-full hover:bg-slate-100">API source</button>
+                          <button className="dropdown-item tw-w-full hover:tw-bg-slate-100">API source</button>
                         </ExternalDataOptions>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
                   <Button
-                    className="text-xs text-gray-500"
+                    className="tw-text-xs tw-text-gray-500"
                     variant="ghost"
                     size="xs"
                     color="secondary"
@@ -512,13 +512,13 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                 <Accordion
                   type="multiple"
                   defaultValue={field.options?.map((option) => String(option.id))}
-                  className="w-auto !-mt-0">
+                  className="tw-w-auto !-tw-mt-0">
                   {field.options?.map((option, index) => (
                     <AccordionItem key={String(option.id)} value={String(option.id)}>
-                      <AccordionTrigger className="text-gray-700 text-sm">
+                      <AccordionTrigger className="tw-text-gray-700 tw-text-sm tw-text-start">
                         {option.label || 'Option name'}
                       </AccordionTrigger>
-                      <AccordionContent className="pt-1">
+                      <AccordionContent className="tw-pt-1">
                         <OptionItem
                           key={option.id}
                           option={option}
@@ -527,8 +527,8 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                           onDelete={handleOptionDelete}
                         />
                         {editor.options?.propertiesSettings !== 'readonly' && (
-                          <div className="flex items-center ml-4 gap-2 mt-2">
-                            <Label htmlFor={option.id as string} className="text-xs text-gray-600">
+                          <div className="tw-flex tw-items-center tw-ml-4 tw-gap-2 tw-mt-2">
+                            <Label htmlFor={option.id as string} className="tw-text-xs tw-text-gray-600">
                               Set as default
                             </Label>
                             <Switch
@@ -563,15 +563,15 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
             {/* EXTERNAL DATA OPTIONS */}
             {field.external?.url && (
               <div>
-                <Label className="text-xs text-gray-600">API Source</Label>
-                <div className="flex items-center space-x-2">
+                <Label className="tw-text-xs tw-text-gray-600">API Source</Label>
+                <div className="tw-flex tw-items-center tw-space-x-2">
                   <Badge size="sm">
-                    <p className="max-w-48 truncate">{field.external.url}</p>
+                    <p className="tw-max-w-48 tw-truncate">{field.external.url}</p>
                   </Badge>
                   {editor.options?.propertiesSettings !== 'readonly' && (
                     <ExternalDataOptions external={field.external} onChange={(value) => onChange({ external: value })}>
-                      <Button variant="ghost" size="xs" color="secondary" className="text-gray-600">
-                        <span className="sr-only">Edit API source</span>
+                      <Button variant="ghost" size="xs" color="secondary" className="tw-text-gray-600">
+                        <span className="tw-sr-only">Edit API source</span>
                         <PencilLineIcon size={15} />
                       </Button>
                     </ExternalDataOptions>
@@ -586,12 +586,12 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
         return (
           <SectionPanel title="Properties">
             <NameField value={field.name || ''} onChange={handleNameChange} />
-            <div className="flex justify-between items-center">
+            <div className="tw-flex tw-justify-between tw-items-center">
               <Label>{field.type === 'checkbox' ? 'Checkbox' : 'Radio'} items</Label>
               {editor.options?.propertiesSettings !== 'readonly' ? (
                 (field.items?.length || 0) > 0 ? (
                   <Button
-                    className="text-xs text-gray-500"
+                    className="tw-text-xs tw-text-gray-500"
                     variant="ghost"
                     size="xs"
                     color="secondary"
@@ -608,13 +608,13 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
             <Accordion
               type="multiple"
               defaultValue={field.items?.map((item) => String(item.id))}
-              className="w-auto !-mt-0">
+              className="tw-w-auto !-tw-mt-0">
               {field.items?.map((item, index) => (
                 <AccordionItem key={String(item.id)} value={String(item.id)}>
-                  <AccordionTrigger className="text-gray-700 text-sm py-3">
+                  <AccordionTrigger className="tw-text-gray-700 tw-text-sm tw-py-3 tw-text-start">
                     {item.label || 'Item name'}
                   </AccordionTrigger>
-                  <AccordionContent className="pt-1">
+                  <AccordionContent className="tw-pt-1">
                     <OptionItem
                       key={item.id || item.value}
                       option={item}
@@ -623,8 +623,8 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                       onDelete={handleItemDelete}
                     />
                     {editor.options?.propertiesSettings !== 'readonly' && (
-                      <div className="flex items-center ml-4 gap-2 mt-2">
-                        <Label htmlFor={item.id as string} className="text-xs text-gray-600">
+                      <div className="tw-flex tw-items-center tw-ml-4 tw-gap-2 tw-mt-2">
+                        <Label htmlFor={item.id as string} className="tw-text-xs tw-text-gray-600">
                           Set as default
                         </Label>
                         <Switch
@@ -662,7 +662,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               ))}
             </Accordion>
             {editor.options?.propertiesSettings !== 'readonly' && (field.items?.length || 0) > 0 && (
-              <Button onClick={handleAddItem} size="xs" color="secondary" variant="ghost" className="mt-2">
+              <Button onClick={handleAddItem} size="xs" color="secondary" variant="ghost" className="tw-mt-2">
                 <Plus size={15} /> Add item
               </Button>
             )}
@@ -693,15 +693,15 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="single">
-                    <Calendar1Icon className="inline mr-2 size-4" />
+                    <Calendar1Icon className="tw-inline tw-mr-2 tw-size-4" />
                     Single
                   </SelectItem>
                   <SelectItem value="multiple">
-                    <CalendarDaysIcon className="inline mr-2 size-4" />
+                    <CalendarDaysIcon className="tw-inline tw-mr-2 tw-size-4" />
                     Multiple
                   </SelectItem>
                   <SelectItem value="range">
-                    <CalendarRangeIcon className="inline mr-2 size-4" />
+                    <CalendarRangeIcon className="tw-inline tw-mr-2 tw-size-4" />
                     Range
                   </SelectItem>
                 </SelectContent>
@@ -743,8 +743,8 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               </Select>
             </FormItem>
             {(field.mode === 'range' || field.mode === 'multiple') && (
-              <div className="flex space-x-4">
-                <FormItem className="flex-1">
+              <div className="tw-flex tw-space-x-4">
+                <FormItem className="tw-flex-1">
                   <Label>Min selected</Label>
                   <Input
                     type="number"
@@ -772,7 +772,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                     }}
                   />
                 </FormItem>
-                <FormItem className="flex-1">
+                <FormItem className="tw-flex-1">
                   <Label>Max selected</Label>
                   <Input
                     type="number"
@@ -802,13 +802,13 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               </div>
             )}
             <FormItem>
-              <div className={`flex items-center justify-between ${!restrictedDates ? 'py-1.5' : ''}`}>
+              <div className={`tw-flex tw-items-center tw-justify-between ${!restrictedDates ? 'tw-py-1.5' : ''}`}>
                 <Label>Restricted months</Label>
                 {restrictedDates && (
                   <Button
                     variant="ghost"
                     size="xs"
-                    className="text-xs text-gray-600"
+                    className="tw-text-xs tw-text-gray-600"
                     color="secondary"
                     onClick={() => {
                       setRestrictedDates(undefined);
@@ -846,11 +846,11 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               </p>
             </FormItem>
             <FormItem orientation="horizontal">
-              <div className="form-captions !col-span-4">
+              <div className="form-captions !tw-col-span-4">
                 <Label htmlFor="past-dates">Disable past</Label>
                 <p className="form-description">Prevent selection of past dates</p>
               </div>
-              <div className="col-span-1 flex items-center justify-end">
+              <div className="tw-col-span-1 tw-flex tw-items-center tw-justify-end">
                 <Switch
                   id="past-dates"
                   disabled={editor.options?.propertiesSettings === 'readonly'}
@@ -867,11 +867,11 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               </div>
             </FormItem>
             <FormItem orientation="horizontal">
-              <div className="form-captions !col-span-4">
+              <div className="form-captions !tw-col-span-4">
                 <Label htmlFor="future-dates">Disable future</Label>
                 <p className="form-description">Prevent selection of future dates</p>
               </div>
-              <div className="col-span-1 flex items-center justify-end">
+              <div className="tw-col-span-1 tw-flex tw-items-center tw-justify-end">
                 <Switch
                   id="future-dates"
                   disabled={editor.options?.propertiesSettings === 'readonly'}
@@ -888,17 +888,17 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               </div>
             </FormItem>
             <FormItem orientation="horizontal">
-              <div className="form-captions !col-span-4">
+              <div className="form-captions !tw-col-span-4">
                 <Label htmlFor="future-dates">Disable weekdays</Label>
                 <p className="form-description">Prevent selection of weekdays</p>
                 {field.options?.disabledWeekdays?.length ? (
-                  <div className="flex items-center gap-0.5 mt-2">
+                  <div className="tw-flex tw-items-center tw-gap-0.5 tw-mt-2">
                     {weekdays.map((day) =>
                       field.options?.disabledWeekdays?.includes(day.value) ? (
-                        <Badge key={day.value} size="xs" className="pr-0.5">
+                        <Badge key={day.value} size="xs" className="tw-pr-0.5">
                           {day.label.substring(0, 3)}
                           <button
-                            className="ml-1"
+                            className="tw-ml-1"
                             onClick={() => {
                               const newDisabledWeekdays = (field.options?.disabledWeekdays || []).filter(
                                 (d) => d !== day.value
@@ -910,7 +910,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                                 }
                               });
                             }}>
-                            <XIcon className="size-3" />
+                            <XIcon className="tw-size-3" />
                           </button>
                         </Badge>
                       ) : null
@@ -918,7 +918,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                   </div>
                 ) : null}
               </div>
-              <div className="col-span-1 flex items-center justify-end">
+              <div className="tw-col-span-1 tw-flex tw-items-center tw-justify-end">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -929,7 +929,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                       <Plus size={15} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56">
+                  <DropdownMenuContent className="tw-w-56">
                     {weekdays.map((day) => (
                       <DropdownMenuCheckboxItem
                         key={day.value}
@@ -980,11 +980,11 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
             </FormItem>
 
             <FormItem orientation="horizontal">
-              <div className="col-span-4 space-y-1">
+              <div className="tw-col-span-4 tw-space-y-1">
                 <Label htmlFor="instant-upload">Instant upload</Label>
                 <p className="form-description">Upload file instantly after selection or dropped</p>
               </div>
-              <div className="col-span-1 flex items-center justify-end">
+              <div className="tw-col-span-1 tw-flex tw-items-center tw-justify-end">
                 <Switch
                   id="instant-upload"
                   disabled={editor.options?.propertiesSettings === 'readonly'}
@@ -996,11 +996,11 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               </div>
             </FormItem>
             <FormItem orientation="horizontal">
-              <div className="col-span-4 space-y-1">
+              <div className="tw-col-span-4 tw-space-y-1">
                 <Label htmlFor="bulk-upload">Bulk upload</Label>
                 <p className="form-description">Upload files in bulk mode</p>
               </div>
-              <div className="col-span-1 flex items-center justify-end">
+              <div className="tw-col-span-1 tw-flex tw-items-center tw-justify-end">
                 <Switch
                   id="bulk-upload"
                   disabled={editor.options?.propertiesSettings === 'readonly'}

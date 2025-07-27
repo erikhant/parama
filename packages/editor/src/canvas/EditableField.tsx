@@ -19,8 +19,8 @@ export const EditableField: React.FC<EditableFieldProps> = ({ field, index }) =>
       useHandle
       removable
       onRemove={(id) => actions.removeField(id as string)}
-      className={`column-span-${field.width} h-min`}
-      classNameIndicator={`column-span-${field.width} h-14 ml-6`}>
+      className={`column-span-${field.width} tw-h-min`}
+      classNameIndicator={`column-span-${field.width} tw-h-14 tw-ml-6`}>
       <FieldHighligter id={field.id}>
         <FormField field={field} />
       </FieldHighligter>

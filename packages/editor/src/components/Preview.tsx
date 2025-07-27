@@ -32,29 +32,31 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
         }
       }}>
       <SheetTrigger asChild>
-        <Button color="secondary" size="sm" variant="ghost" disabled={disabled} className="rounded-md">
+        <Button color="secondary" size="sm" variant="ghost" disabled={disabled} className="tw-rounded-md">
           <PlayIcon size={16} />
           Preview
         </Button>
       </SheetTrigger>
       <SheetContent
-        className={`w-full !px-0 ${screenSize === 'mobile' ? '!max-w-sm' : screenSize === 'tablet' ? '!max-w-2xl' : '!max-w-4xl'}`}>
-        <SheetHeader className="px-8">
+        className={`tw-w-full !tw-px-0 ${screenSize === 'mobile' ? '!tw-max-w-sm' : screenSize === 'tablet' ? '!tw-max-w-2xl' : '!tw-max-w-4xl'}`}>
+        <SheetHeader className="tw-px-8">
           <SheetTitle>{schema.title || 'Preview'}</SheetTitle>
           <SheetDescription>{schema.description || ''}</SheetDescription>
         </SheetHeader>
-        <ScrollArea className="p-8 h-[90vh] relative">
+        <ScrollArea className="tw-p-8 tw-h-[90vh] tw-relative">
           <FormRenderer
             schema={schema}
-            className="px-1"
+            className="tw-px-1"
             onSubmit={(data, contentType) => {
               if (contentType === 'application/json') {
                 toast.success('Form submitted successfully!', {
                   description: () => {
                     return (
                       <>
-                        <p className="text-xs">Content type : {contentType}</p>
-                        <pre className="whitespace-pre-wrap break-words text-xs">{JSON.stringify(data, null, 2)}</pre>
+                        <p className="tw-text-xs">Content type : {contentType}</p>
+                        <pre className="tw-whitespace-pre-wrap tw-break-words tw-text-xs">
+                          {JSON.stringify(data, null, 2)}
+                        </pre>
                       </>
                     );
                   },
@@ -65,19 +67,19 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
                   description: () => {
                     const formEntries = Array.from((data as FormData).entries());
                     return (
-                      <div className="space-y-1">
-                        <p className="text-xs">Content type : {contentType}</p>
-                        <p className="text-xs">Entries : {formEntries.length}</p>
+                      <div className="tw-space-y-1">
+                        <p className="tw-text-xs">Content type : {contentType}</p>
+                        <p className="tw-text-xs">Entries : {formEntries.length}</p>
                         {formEntries.map(([key, value], index) => {
                           if (value instanceof File) {
                             return (
-                              <p key={`${key}_${index}`} className="text-xs">
+                              <p key={`${key}_${index}`} className="tw-text-xs">
                                 📁 {key}: {value.name} ({value.size} bytes)
                               </p>
                             );
                           } else {
                             return (
-                              <p key={`${key}_${index}`} className="text-xs">
+                              <p key={`${key}_${index}`} className="tw-text-xs">
                                 📝 {key}: {String(value)}
                               </p>
                             );

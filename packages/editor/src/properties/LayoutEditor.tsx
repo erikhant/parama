@@ -22,53 +22,55 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({ schema, onChange }) 
 
   return (
     <div className="">
-      <h3 className="font-semibold uppercase text-xs text-gray-400 border-b border-gray-200 p-4">Layout settings</h3>
-      <div className="space-y-3 p-4">
+      <h3 className="tw-font-semibold tw-uppercase tw-text-xs tw-text-gray-400 tw-border-b tw-border-gray-200 tw-p-4">
+        Layout settings
+      </h3>
+      <div className="tw-space-y-3 tw-p-4">
         {/* <FormItem>
           <Label>Grid size</Label>
-          <div className="grid grid-cols-4 gap-x-3">
+          <div className="tw-grid tw-grid-cols-4 tw-gap-x-3">
             <Slider
               value={[colValue]}
               onValueChange={(value) => handleColChange(value[0])}
               min={1}
               max={12}
               step={1}
-              className="col-span-3"
+              className="tw-col-span-3"
             />
             <Input
               type="number"
               value={colValue}
               max={12}
               min={1}
-              className="pr-0"
+              className="tw-pr-0"
               onChange={(e) => handleColChange(Number(e.target.value))}
             />
           </div>
         </FormItem> */}
         <FormItem>
           <Label>Gap size</Label>
-          <div className="grid grid-cols-4 gap-x-3">
+          <div className="tw-grid tw-grid-cols-4 tw-gap-x-3">
             <Slider
               value={[gapValue]}
               onValueChange={(value) => handleGapChange(value[0])}
               min={1}
               max={12}
               step={1}
-              className="col-span-3"
+              className="tw-col-span-3"
             />
             <Input
               type="number"
               value={gapValue}
               max={12}
               min={1}
-              className="pr-0"
+              className="tw-pr-0"
               onChange={(e) => handleGapChange(Number(e.target.value))}
             />
           </div>
         </FormItem>
-        {/* <FormItem className="flex items-center space-y-0 space-x-2">
+        {/* <FormItem className="tw-flex tw-items-center tw-space-y-0 tw-space-x-2">
           <Checkbox id="show-grid-lines" />
-          <Label htmlFor="show-grid-lines" className="text-gray-700">
+          <Label htmlFor="show-grid-lines" className="tw-text-gray-700">
             Show grid lines
           </Label>
         </FormItem> */}

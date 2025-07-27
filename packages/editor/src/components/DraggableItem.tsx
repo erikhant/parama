@@ -11,13 +11,7 @@ type DraggableItemProps = {
   };
 };
 
-export const DraggableItem: React.FC<DraggableItemProps> = ({
-  id,
-  children,
-  className = '',
-  useHandle,
-  data
-}) => {
+export const DraggableItem: React.FC<DraggableItemProps> = ({ id, children, className = '', useHandle, data }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id,
     data
@@ -30,12 +24,7 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={`relative ${className}`}>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`tw-relative ${className}`}>
       {children}
     </div>
   );

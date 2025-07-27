@@ -28,19 +28,19 @@
   }
 
   .canvas-sm {
-    @apply max-w-sm mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
+    @apply tw-max-w-sm tw-mx-auto tw-border-2 tw-border-gray-200 tw-border-dashed tw-rounded-lg tw-bg-gray-50/30;
   }
 
   .canvas-md {
-    @apply max-w-2xl mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
+    @apply tw-max-w-2xl tw-mx-auto tw-border-2 tw-border-gray-200 tw-border-dashed tw-rounded-lg tw-bg-gray-50/30;
   }
 
   .canvas-xl {
-    @apply w-full;
+    @apply tw-w-full;
   }
 
   .toolbox-search-x {
-    @apply absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1;
+    @apply tw-absolute tw-right-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-flex tw-items-center tw-gap-1;
   }
 
   @keyframes fadeInScale {
@@ -56,116 +56,116 @@
 }
 
 .column-1 {
-  @apply grid-cols-1;
+  @apply tw-grid-cols-1;
 }
 .column-2 {
-  @apply grid-cols-2;
+  @apply tw-grid-cols-2;
 }
 .column-3 {
-  @apply grid-cols-3;
+  @apply tw-grid-cols-3;
 }
 .column-4 {
-  @apply grid-cols-4;
+  @apply tw-grid-cols-4;
 }
 .column-5 {
-  @apply grid-cols-5;
+  @apply tw-grid-cols-5;
 }
 .column-6 {
-  @apply grid-cols-6;
+  @apply tw-grid-cols-6;
 }
 .column-7 {
-  @apply grid-cols-7;
+  @apply tw-grid-cols-7;
 }
 .column-8 {
-  @apply grid-cols-8;
+  @apply tw-grid-cols-8;
 }
 .column-9 {
-  @apply grid-cols-9;
+  @apply tw-grid-cols-9;
 }
 .column-10 {
-  @apply grid-cols-10;
+  @apply tw-grid-cols-10;
 }
 .column-11 {
-  @apply grid-cols-11;
+  @apply tw-grid-cols-11;
 }
 .column-12 {
-  @apply grid-cols-12;
+  @apply tw-grid-cols-12;
 }
 
 /* Column size */
 .column-span-1 {
-  @apply col-span-1;
+  @apply tw-col-span-1;
 }
 .column-span-2 {
-  @apply col-span-2;
+  @apply tw-col-span-2;
 }
 .column-span-3 {
-  @apply col-span-3;
+  @apply tw-col-span-3;
 }
 .column-span-4 {
-  @apply col-span-4;
+  @apply tw-col-span-4;
 }
 .column-span-5 {
-  @apply col-span-5;
+  @apply tw-col-span-5;
 }
 .column-span-6 {
-  @apply col-span-6;
+  @apply tw-col-span-6;
 }
 .column-span-7 {
-  @apply col-span-7;
+  @apply tw-col-span-7;
 }
 .column-span-8 {
-  @apply col-span-8;
+  @apply tw-col-span-8;
 }
 .column-span-9 {
-  @apply col-span-9;
+  @apply tw-col-span-9;
 }
 .column-span-10 {
-  @apply col-span-10;
+  @apply tw-col-span-10;
 }
 .column-span-11 {
-  @apply col-span-11;
+  @apply tw-col-span-11;
 }
 .column-span-12 {
-  @apply col-span-12;
+  @apply tw-col-span-12;
 }
 
 /* Gap */
 .gap-size-1 {
-  @apply gap-1;
+  @apply tw-gap-1;
 }
 .gap-size-2 {
-  @apply gap-2;
+  @apply tw-gap-2;
 }
 .gap-size-3 {
-  @apply gap-3;
+  @apply tw-gap-3;
 }
 .gap-size-4 {
-  @apply gap-4;
+  @apply tw-gap-4;
 }
 .gap-size-5 {
-  @apply gap-5;
+  @apply tw-gap-5;
 }
 .gap-size-6 {
-  @apply gap-6;
+  @apply tw-gap-6;
 }
 .gap-size-7 {
-  @apply gap-7;
+  @apply tw-gap-7;
 }
 .gap-size-8 {
-  @apply gap-8;
+  @apply tw-gap-8;
 }
 .gap-size-9 {
-  @apply gap-9;
+  @apply tw-gap-9;
 }
 .gap-size-10 {
-  @apply gap-10;
+  @apply tw-gap-10;
 }
 .gap-size-11 {
-  @apply gap-11;
+  @apply tw-gap-11;
 }
 .gap-size-12 {
-  @apply gap-12;
+  @apply tw-gap-12;
 }
 
 /* Height utilities for blocks */

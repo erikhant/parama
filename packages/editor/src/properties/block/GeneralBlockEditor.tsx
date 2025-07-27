@@ -38,8 +38,8 @@ export const GeneralBlockEditor = ({ field, onChange }: GeneralBlockEditorProps)
   return (
     <SectionPanel title="General">
       <FormItem>
-        <Label className="block text-sm font-medium">Width</Label>
-        <div className="grid grid-cols-4 gap-x-3">
+        <Label className="tw-block tw-text-sm tw-font-medium">Width</Label>
+        <div className="tw-grid tw-grid-cols-4 tw-gap-x-3">
           <Slider
             value={[widthValue]}
             disabled={editor.options?.generalSettings === 'readonly'}
@@ -47,7 +47,7 @@ export const GeneralBlockEditor = ({ field, onChange }: GeneralBlockEditorProps)
             min={1}
             max={12}
             step={1}
-            className="col-span-3"
+            className="tw-col-span-3"
           />
           <Input
             type="number"
@@ -62,13 +62,13 @@ export const GeneralBlockEditor = ({ field, onChange }: GeneralBlockEditorProps)
                 handleWidthChange(width);
               }
             }}
-            className="col-span-1 pr-0"
+            className="tw-col-span-1 tw-pr-0"
           />
         </div>
       </FormItem>
       <FormItem>
-        <Label className="block text-sm font-medium">Height</Label>
-        <div className="grid grid-cols-4 gap-x-3">
+        <Label className="tw-block tw-text-sm tw-font-medium">Height</Label>
+        <div className="tw-grid tw-grid-cols-4 tw-gap-x-3">
           <Slider
             value={[heightValue]}
             disabled={editor.options?.generalSettings === 'readonly'}
@@ -76,7 +76,7 @@ export const GeneralBlockEditor = ({ field, onChange }: GeneralBlockEditorProps)
             min={1}
             max={12}
             step={1}
-            className="col-span-3"
+            className="tw-col-span-3"
           />
           <Input
             type="number"
@@ -91,7 +91,7 @@ export const GeneralBlockEditor = ({ field, onChange }: GeneralBlockEditorProps)
                 handleHeightChange(height);
               }
             }}
-            className="col-span-1 pr-0"
+            className="tw-col-span-1 tw-pr-0"
           />
         </div>
       </FormItem>

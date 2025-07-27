@@ -54,29 +54,31 @@ export const SortableItem: React.FC<SortableItemProps> = ({
     <React.Fragment>
       {isUseDynamic && canvas.currentInsertionIndex === index && (
         <div className={classNameIndicator}>
-          <DroppableIndicator className="h-full w-full" />
+          <DroppableIndicator className="tw-h-full tw-w-full" />
         </div>
       )}
       <div
         ref={setNodeRef}
         style={style}
         {...attrs}
-        className={`relative group ${!useHandle ? ' cursor-grab ' : ' '}${className}`}>
+        className={`tw-relative tw-group ${!useHandle ? ' tw-cursor-grab ' : ' '}${className}`}>
         <div
           className={cn(
-            'absolute top-1 right-1 z-10 flex items-center justify-end w-auto gap-1 transition-opacity duration-200 bg-gray-50/50',
+            'tw-absolute tw-top-1 tw-right-1 tw-z-10 tw-flex tw-items-center tw-justify-end tw-w-auto tw-gap-1 tw-transition-opacity tw-duration-200 tw-bg-gray-50/50',
             !useHandle
-              ? 'w-0 opacity-0'
-              : 'border-none ring-1 ring-gray-200 opacity-0 group-hover:opacity-100 shrink-0',
+              ? 'tw-w-0 tw-opacity-0'
+              : 'tw-border-none tw-ring-1 tw-ring-gray-200 tw-opacity-0 group-hover:tw-opacity-100 tw-shrink-0',
             handleClassName
           )}>
           {useHandle && (
-            <button {...listeners} {...attributes} className="p-1 text-gray-500 cursor-grab">
+            <button {...listeners} {...attributes} className="tw-p-1 tw-text-gray-500 tw-cursor-grab">
               <MoveIcon size={16} />
             </button>
           )}
           {removable && (
-            <button className="p-1 text-gray-500 cursor-pointer" onClick={onRemove ? () => onRemove(id) : undefined}>
+            <button
+              className="tw-p-1 tw-text-gray-500 tw-cursor-pointer"
+              onClick={onRemove ? () => onRemove(id) : undefined}>
               <Trash2 size={16} />
             </button>
           )}

@@ -27,23 +27,17 @@ export const ManageOptions = ({ onChange, values, children }: ManageOptionsProps
   };
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        {children || <Button variant="outline">Manage options</Button>}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogTrigger asChild>{children || <Button variant="outline">Manage options</Button>}</DialogTrigger>
+      <DialogContent className="sm:tw-max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-gray-700">Options</DialogTitle>
+          <DialogTitle className="tw-text-gray-700">Options</DialogTitle>
           <DialogDescription>Manage your options here</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 mt-2 mb-5">
-          <RepetableField
-            values={values}
-            name="options"
-            defaultValue={defaultValue}
-            onChange={onChange}>
+        <div className="tw-grid tw-gap-4 tw-mt-2 tw-mb-5">
+          <RepetableField values={values} name="options" defaultValue={defaultValue} onChange={onChange}>
             {({ value, onChange, name, key }) => (
-              <div className="flex items-start gap-2" key={key}>
-                <FormItem className="w-full">
+              <div className="tw-flex tw-items-start tw-gap-2" key={key}>
+                <FormItem className="tw-w-full">
                   <Label htmlFor={name}>Option label</Label>
                   <Input
                     id={name}
@@ -53,7 +47,7 @@ export const ManageOptions = ({ onChange, values, children }: ManageOptionsProps
                     placeholder="Option"
                   />
                 </FormItem>
-                <FormItem className="w-full">
+                <FormItem className="tw-w-full">
                   <Label htmlFor={name}>Option value</Label>
                   <Input
                     id={name}

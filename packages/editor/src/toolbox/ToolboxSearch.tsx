@@ -98,31 +98,31 @@ export const ToolboxSearch: React.FC<ToolboxSearchProps> = ({ items, onFilteredI
   };
 
   return (
-    <div className="relative p-4 pb-2">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+    <div className="tw-relative tw-p-4 tw-pb-2">
+      <div className="tw-relative">
+        <Search className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-gray-400 tw-w-4 tw-h-4 tw-pointer-events-none" />
         <Input
           type="text"
           value={searchTerm}
           onChange={handleSearchChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="pl-9 pr-9 h-9 text-sm bg-white border border-gray-200 rounded-md focus:border-blue-300 focus:ring-1 focus:ring-blue-300 transition-colors"
+          className="tw-pl-9 tw-pr-9 tw-h-9 tw-text-sm tw-bg-white tw-border tw-border-gray-200 tw-rounded-md focus:tw-border-blue-300 focus:tw-ring-1 focus:tw-ring-blue-300 tw-transition-colors"
           autoComplete="off"
         />
         {searchTerm && (
           <button
             onClick={handleClearSearch}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-0.5 rounded-sm hover:bg-gray-100"
+            className="tw-absolute tw-right-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-gray-400 hover:tw-text-gray-600 tw-transition-colors tw-p-0.5 tw-rounded-sm hover:tw-bg-gray-100"
             aria-label="Clear search"
             type="button">
-            <X className="w-3 h-3" />
+            <X className="tw-w-3 tw-h-3" />
           </button>
         )}
       </div>
       {searchTerm && (
-        <div className="text-xs text-gray-500 mt-1 px-1">
-          Press <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Esc</kbd> to clear search
+        <div className="tw-text-xs tw-text-gray-500 tw-mt-1 tw-px-1">
+          Press <kbd className="tw-px-1 tw-py-0.5 tw-bg-gray-100 tw-rounded tw-text-xs">Esc</kbd> to clear search
         </div>
       )}
     </div>
