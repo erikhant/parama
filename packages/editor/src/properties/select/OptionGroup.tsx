@@ -78,21 +78,21 @@ export const OptionGroup = memo<OptionGroupProps>(({ field, group, groupIndex, o
   );
 
   return (
-    <Accordion key={group.id} type="multiple" defaultValue={[group.id]} className="!-tw-mt-0">
+    <Accordion key={group.id} type="multiple" defaultValue={[group.id]} className="!-mt-0">
       <AccordionItem value={group.id}>
-        <AccordionTrigger className="tw-text-gray-700 tw-text-sm tw-py-2.5">
+        <AccordionTrigger className="text-gray-700 text-sm py-2.5">
           {group.label || 'Group name'}
           <div
             role="button"
             tabIndex={0}
             aria-label="Delete group"
-            className="btn btn-secondary btn-secondary-ghost btn-xs tw-ml-auto tw-mr-1"
+            className="btn btn-secondary btn-secondary-ghost btn-xs ml-auto mr-1"
             onClick={handleDeleteGroup}>
             <Trash2 size={15} />
           </div>
         </AccordionTrigger>
-        <AccordionContent className="tw-space-y-2">
-          <FormItem className="tw-p-0.5 tw-pb-0">
+        <AccordionContent className="space-y-2">
+          <FormItem className="p-0.5 pb-0">
             <Input type="text" value={group.label || ''} onChange={handleGroupLabelChange} />
           </FormItem>
           {group.items.map((item: FieldGroupItem) => (
@@ -100,8 +100,8 @@ export const OptionGroup = memo<OptionGroupProps>(({ field, group, groupIndex, o
               <FormItem
                 key={item.id}
                 orientation="horizontal"
-                className="tw-space-x-0 tw-items-center tw-pl-3 tw-border-l-4 tw-border-gray-200">
-                <div className="tw-col-span-4 tw-space-y-2">
+                className="space-x-0 items-center pl-3 border-l-4 border-gray-200">
+                <div className="col-span-4 space-y-2">
                   <Input
                     type="text"
                     placeholder="Option label"
@@ -115,7 +115,7 @@ export const OptionGroup = memo<OptionGroupProps>(({ field, group, groupIndex, o
                     onChange={(e) => handleItemUpdate(item.id as string, 'value', e.target.value)}
                   />
                 </div>
-                <div className="tw-col-span-1 tw-shrink-0">
+                <div className="col-span-1 shrink-0">
                   <Button
                     className="self-center"
                     variant="ghost"
@@ -126,8 +126,8 @@ export const OptionGroup = memo<OptionGroupProps>(({ field, group, groupIndex, o
                   </Button>
                 </div>
               </FormItem>
-              <div className="tw-flex tw-items-center tw-ml-4 tw-gap-2 tw-mt-2">
-                <Label htmlFor={item.id as string} className="tw-text-xs tw-text-gray-600">
+              <div className="flex items-center ml-4 gap-2 mt-2">
+                <Label htmlFor={item.id as string} className="text-xs text-gray-600">
                   Set as default
                 </Label>
                 <Switch

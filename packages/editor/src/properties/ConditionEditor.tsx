@@ -13,7 +13,7 @@ export const ConditionEditor = ({ field, onChange }: ConditionEditorProps) => {
   const { editor } = useEditor();
 
   const ConditionTooltip = () => (
-    <HelperTooltip className="tw-max-w-xs">
+    <HelperTooltip className="max-w-xs">
       You can use any field's value in the expression. <br />
       Examples: <br />• <code>{`{{name_text}} === "john"`}</code> <br />• <code>{`{{age_number}} > 18`}</code> <br />•{' '}
       <code>{`{{email_text}}.includes("@gmail.com")`}</code> <br />• <code>{`{{isActive}} === true`}</code> <br />
@@ -24,7 +24,7 @@ export const ConditionEditor = ({ field, onChange }: ConditionEditorProps) => {
   return (
     <SectionPanel title="Conditions">
       <FormItem>
-        <Label className="tw-block tw-text-sm tw-font-medium">Hidden</Label>
+        <Label className="block text-sm font-medium">Hidden</Label>
         <FormGroup prefix="If">
           <Input
             type="text"
@@ -40,14 +40,14 @@ export const ConditionEditor = ({ field, onChange }: ConditionEditorProps) => {
             }
           />
         </FormGroup>
-        <div className="tw-flex tw-items-center tw-gap-1">
+        <div className="flex items-center gap-1">
           <p className="form-description">Use expression.</p>
           <ConditionTooltip />
         </div>
       </FormItem>
       {field.type !== 'block' && field.type !== 'spacer' && (
         <FormItem>
-          <Label className="tw-block tw-text-sm tw-font-medium">Disabled</Label>
+          <Label className="block text-sm font-medium">Disabled</Label>
           <FormGroup prefix="If">
             <Input
               type="text"
@@ -63,7 +63,7 @@ export const ConditionEditor = ({ field, onChange }: ConditionEditorProps) => {
               }
             />
           </FormGroup>
-          <div className="tw-flex tw-items-center tw-gap-1">
+          <div className="flex items-center gap-1">
             <p className="form-description">Use expression.</p>
             <ConditionTooltip />
           </div>

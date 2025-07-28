@@ -31,7 +31,7 @@ export const NameField = memo<NameFieldProps>(({ value, onChange, hasValidation 
 
   return (
     <FormItem>
-      <div className="tw-flex tw-items-center tw-justify-between">
+      <div className="flex items-center justify-between">
         <Label>Name</Label>
         <HelperTooltip>
           <b>How it works?</b>

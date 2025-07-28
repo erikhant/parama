@@ -41,8 +41,8 @@ export const OptionItem = memo<OptionItemProps>(({ option, index, onUpdate, onDe
     <FormItem
       key={option.id || option.value}
       orientation="horizontal"
-      className="tw-space-x-0 tw-items-center tw-pl-3 tw-border-l-4 tw-border-gray-200">
-      <div className="tw-col-span-4 tw-space-y-2">
+      className="space-x-0 items-center pl-3 border-l-4 border-gray-200">
+      <div className="col-span-4 space-y-2">
         <Input
           type="text"
           placeholder="Option label"
@@ -59,7 +59,7 @@ export const OptionItem = memo<OptionItemProps>(({ option, index, onUpdate, onDe
         />
       </div>
       {editor.options?.propertiesSettings !== 'readonly' && (
-        <div className="tw-col-span-1 tw-shrink-0">
+        <div className="col-span-1 shrink-0">
           <Button className="self-center" variant="ghost" size="xs" color="secondary" onClick={handleDelete}>
             <Trash2 size={15} />
           </Button>

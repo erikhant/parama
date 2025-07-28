@@ -26,11 +26,18 @@ export const SortableList: React.FC<SortableListProps> = ({
 
   return (
     <div id={id} className={className}>
-      <SortableContext id={id} items={items} strategy={verticalListSortingStrategy} disabled={disabled}>
+      <SortableContext
+        id={id}
+        items={items}
+        strategy={verticalListSortingStrategy}
+        disabled={disabled}>
         {children}
         {isUseDynamic && canvas.currentInsertionIndex === items.length && (
-          <DroppableContainer id="indicator" data={{ indicator: true }} className={classNameIndicator}>
-            <DroppableIndicator className="tw-h-full tw-w-full" />
+          <DroppableContainer
+            id="indicator"
+            data={{ indicator: true }}
+            className={classNameIndicator}>
+            <DroppableIndicator className="h-full w-full" />
           </DroppableContainer>
         )}
       </SortableContext>

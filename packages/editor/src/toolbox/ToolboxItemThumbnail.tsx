@@ -12,7 +12,7 @@ interface ToolboxItemThumbnailProps {
 export const ToolboxItemThumbnail: React.FC<ToolboxItemThumbnailProps> = ({ item, size = 24, className = '' }) => {
   if (item.image) {
     return (
-      <div className={cn('tw-bg-slate-100 tw-rounded-md tw-p-2', className)}>
+      <div className={cn('bg-slate-100 rounded-md p-2', className)}>
         <img src={item.image} alt="thumbnail" width={size} height={size} />;
       </div>
     );
@@ -20,9 +20,9 @@ export const ToolboxItemThumbnail: React.FC<ToolboxItemThumbnailProps> = ({ item
 
   if (item.icon) {
     return (
-      <div className={cn('tw-bg-slate-100 tw-rounded-md tw-p-3', className)}>
+      <div className={cn('bg-slate-100 rounded-md p-3', className)}>
         {React.createElement(item.icon as LucideIcon, {
-          className: 'tw-text-gray-600',
+          className: 'text-gray-600',
           size
         })}
       </div>

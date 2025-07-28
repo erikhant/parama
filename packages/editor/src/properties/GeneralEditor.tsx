@@ -30,7 +30,7 @@ export const GeneralEditor = ({ field, onChange }: GeneralEditorProps) => {
   return (
     <SectionPanel title="General">
       <FormItem>
-        <Label className="tw-block tw-text-sm tw-font-medium">Label</Label>
+        <Label className="block text-sm font-medium">Label</Label>
         <Input
           type="text"
           placeholder="Field label"
@@ -40,7 +40,7 @@ export const GeneralEditor = ({ field, onChange }: GeneralEditorProps) => {
         />
       </FormItem>
       <FormItem>
-        <Label className="tw-block tw-text-sm tw-font-medium">Description</Label>
+        <Label className="block text-sm font-medium">Description</Label>
         <Input
           type="text"
           placeholder="e.g. This field is required"
@@ -51,8 +51,8 @@ export const GeneralEditor = ({ field, onChange }: GeneralEditorProps) => {
         <p className="form-description">Give a hint to the user</p>
       </FormItem>
       <FormItem>
-        <Label className="tw-block tw-text-sm tw-font-medium">Width</Label>
-        <div className="tw-grid tw-grid-cols-4 tw-gap-x-3">
+        <Label className="block text-sm font-medium">Width</Label>
+        <div className="grid grid-cols-4 gap-x-3">
           <Slider
             value={[widthValue]}
             disabled={editor.options?.generalSettings === 'readonly'}
@@ -60,7 +60,7 @@ export const GeneralEditor = ({ field, onChange }: GeneralEditorProps) => {
             min={1}
             max={12}
             step={1}
-            className="tw-col-span-3"
+            className="col-span-3"
           />
           <Input
             type="number"
@@ -75,7 +75,7 @@ export const GeneralEditor = ({ field, onChange }: GeneralEditorProps) => {
                 handleWidthChange(width);
               }
             }}
-            className="tw-col-span-1 tw-pr-0"
+            className="col-span-1 pr-0"
           />
         </div>
       </FormItem>

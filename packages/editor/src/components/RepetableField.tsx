@@ -44,7 +44,9 @@ export function RepetableField<TValue>({
   renderAddButton,
   className = ''
 }: RepetableFieldProps<TValue>) {
-  const [items, setItems] = useState(values.map((value, index) => ({ id: `${name}-${Date.now()}-${index}`, value })));
+  const [items, setItems] = useState(
+    values.map((value, index) => ({ id: `${name}-${Date.now()}-${index}`, value }))
+  );
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -67,8 +69,13 @@ export function RepetableField<TValue>({
   const addItem = useCallback(() => {
     if (items.length < maxItems) {
       const newValue =
-        typeof defaultValue === 'object' && defaultValue !== null ? { ...(defaultValue as object) } : defaultValue;
-      const newItems = [...items, { id: `${name}-${Date.now()}-${items.length}`, value: newValue as TValue }];
+        typeof defaultValue === 'object' && defaultValue !== null
+          ? { ...(defaultValue as object) }
+          : defaultValue;
+      const newItems = [
+        ...items,
+        { id: `${name}-${Date.now()}-${items.length}`, value: newValue as TValue }
+      ];
       handleChange(newItems);
     }
   }, [items, maxItems, defaultValue, handleChange, name]);
@@ -113,7 +120,13 @@ export function RepetableField<TValue>({
   const canRemove = items.length > minItems;
 
   const defaultAddButton = (onAdd: () => void, canAddItem: boolean) => (
-    <Button size="xs" variant="ghost" color="secondary" type="button" onClick={onAdd} disabled={!canAddItem}>
+    <Button
+      size="xs"
+      variant="ghost"
+      color="secondary"
+      type="button"
+      onClick={onAdd}
+      disabled={!canAddItem}>
       <PlusIcon size={16} /> Add option
     </Button>
   );
@@ -122,8 +135,15 @@ export function RepetableField<TValue>({
 
   return (
     <>
-      <DndContext id={name} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableList items={itemIds} className={cn('tw-space-y-5', className)} useDynamicIndicator={false}>
+      <DndContext
+        id={name}
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}>
+        <SortableList
+          items={itemIds}
+          className={cn('space-y-5', className)}
+          useDynamicIndicator={false}>
           {items.map((item, index) => (
             <SortableItem
               key={item.id}
@@ -131,8 +151,8 @@ export function RepetableField<TValue>({
               index={index}
               onRemove={() => removeItem(index)}
               removable={canRemove}
-              className="tw-gap-x-2"
-              handleClassName="tw-opacity-100 tw-bg-transparent tw-ring-0 tw-border-none"
+              className="gap-x-2"
+              handleClassName="opacity-100 bg-transparent ring-0 border-none"
               useDynamicIndicator={false}
               useHandle={true}>
               {typeof children === 'function'
@@ -153,7 +173,9 @@ export function RepetableField<TValue>({
         </SortableList>
       </DndContext>
 
-      <div className="tw-flex tw-justify-end">{(renderAddButton || defaultAddButton)(addItem, canAdd)}</div>
+      <div className="flex justify-end">
+        {(renderAddButton || defaultAddButton)(addItem, canAdd)}
+      </div>
     </>
   );
 }

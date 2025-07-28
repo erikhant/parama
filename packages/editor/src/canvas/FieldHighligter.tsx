@@ -17,7 +17,7 @@ export const FieldHighligter: React.FC<FieldHighligterProps> = ({ id, children }
     <div
       role="button"
       tabIndex={0}
-      className={`tw-p-0.5 tw-pl-1 tw-w-full tw-outline-none tw-border-none focus:tw-ring-1 focus:tw-ring-blue-500 tw-ring-1 ${isActive ? 'tw-ring-blue-500 hover:tw-ring-blue-500' : 'tw-ring-transparent hover:tw-ring-blue-500/50'}`}
+      className={`p-0.5 pl-1 w-full outline-none border-none focus:ring-1 focus:ring-blue-500 ring-1 ${isActive ? 'ring-blue-500 hover:ring-blue-500' : 'ring-transparent hover:ring-blue-500/50'}`}
       data-id={id}
       onClick={activateField}>
       {children}

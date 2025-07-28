@@ -40,16 +40,16 @@ export const SchemaViewer: React.FC<SchemaViewerProps> = ({ schema }) => {
           Code
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:!tw-max-w-3xl">
+      <DialogContent className="sm:!max-w-3xl">
         <DialogHeader>
           <DialogTitle>JSON Schema</DialogTitle>
           <DialogDescription>Schema form generated</DialogDescription>
         </DialogHeader>
-        <div className="tw-grid tw-gap-4 tw-py-4">
+        <div className="grid gap-4 py-4">
           <Editor
             height={600}
             theme="light"
-            className="tw-border tw-border-gray-300"
+            className="border border-gray-300"
             language="json"
             value={JSON.stringify(schema, null, 2)}
             onMount={(editor) => {

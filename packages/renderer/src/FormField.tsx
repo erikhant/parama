@@ -93,7 +93,7 @@ const MemoizedRadioItems = memo(({ items, defaultValue }: { items: FieldGroupIte
     {items
       .filter((item) => item.id && item.value && item.label)
       .map((item) => (
-        <div key={item.id} className="tw-flex tw-items-center tw-space-x-2">
+        <div key={item.id} className="flex items-center space-x-2">
           <RadioGroupItem value={item.value} id={item.id as string} />
           <Label htmlFor={item.id as string}>{item.label}</Label>
         </div>
@@ -121,7 +121,7 @@ const MemoizedCheckboxItems = memo(
       {items
         .filter((item) => item.id && item.value && item.label)
         .map((item) => (
-          <div className="tw-flex tw-items-center tw-space-x-2" key={item.id}>
+          <div className="flex items-center space-x-2" key={item.id}>
             <Checkbox
               id={item.id as string}
               name={fieldName}
@@ -130,7 +130,7 @@ const MemoizedCheckboxItems = memo(
               value={item.value}
               defaultChecked={defaultValue?.includes(item.value)}
               onCheckedChange={onCheckedChange(item)}
-              className="tw-mr-2"
+              className="mr-2"
             />
             <Label htmlFor={item.id as string}>{item.label}</Label>
           </div>
@@ -154,8 +154,8 @@ const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
     return (
       <div className={`column-span-${field.width}`} style={{ height: `${spacerHeight}px` }}>
         {isEditor && (
-          <div className="tw-h-full tw-bg-void tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg tw-flex tw-items-center tw-justify-center">
-            <span className="tw-text-gray-500 tw-text-sm">Spacer ({height} units)</span>
+          <div className="h-full bg-void border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+            <span className="text-gray-500 text-sm">Spacer ({height} units)</span>
           </div>
         )}
       </div>
@@ -167,7 +167,7 @@ const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
       className={`column-span-${field.width}`}
       style={{ minHeight: field.height ? `${field.height * 24}px` : 'auto' }}>
       {typeof field.content === 'string' ? (
-        <div className="tw-min-h-full" dangerouslySetInnerHTML={{ __html: field.content }} />
+        <div className="min-h-full" dangerouslySetInnerHTML={{ __html: field.content }} />
       ) : (
         field.content
       )}
@@ -189,16 +189,15 @@ const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps
     return (
       <>
         {mode === 'render' && field.appearance?.stickyAtBottom && (
-          <div className="tw-h-24 tw-sticky tw-bottom-0 tw-bg-gradient-to-t tw-from-white tw-from-50% column-span-12 " />
+          <div className="h-24 sticky bottom-0 bg-gradient-to-t from-white from-50% column-span-12 " />
         )}
-        <div
-          className={`column-span-${field.width} ${field.appearance?.stickyAtBottom ? 'tw-sticky tw-bottom-0' : ''}`}>
+        <div className={`column-span-${field.width} ${field.appearance?.stickyAtBottom ? 'sticky bottom-0' : ''}`}>
           <Button
             type={field.type}
             color={field.appearance?.color}
             size={field.appearance?.size}
             variant={field.appearance?.variant}
-            className="tw-w-full"
+            className="w-full"
             onClick={field.action === 'cancel' ? onCancel : field.action === 'reset' ? handleReset : undefined}>
             {field.label}
           </Button>
@@ -437,7 +436,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
       disabled: isDisabled,
       placeholder: field.placeholder,
       required: isRequired,
-      className: !validationState.isValid || field.error ? 'tw-border-red-500' : ''
+      className: !validationState.isValid || field.error ? 'border-red-500' : ''
     }),
     [field.id, field.name, field.placeholder, field.error, isDisabled, isRequired, validationState.isValid]
   );
@@ -571,8 +570,8 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
           endMonth: field.options?.restrictedMonths?.[1] ? new Date(field.options.restrictedMonths[1]) : undefined,
           captionLayout: field.options?.dropdownType as DatePickerProps['captionLayout'],
           container: document.getElementById(`item__${field.id}`),
-          className: !validationState.isValid ? 'tw-border-red-500' : 'tw-border-gray-300',
-          popoverClassName: 'tw-z-[99]'
+          className: !validationState.isValid ? 'border-red-500' : 'border-gray-300',
+          popoverClassName: 'z-[99]'
         };
 
         if (field.mode === 'single') {
@@ -648,8 +647,8 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
             disabled={isDisabled}
             required={isRequired}
             onValueChange={handleSelectChange}>
-            <SelectTrigger className="tw-w-full">
-              <SelectValue className="tw-text-slate-400" placeholder={field.placeholder || 'Select an option'} />
+            <SelectTrigger className="w-full">
+              <SelectValue className="text-slate-400" placeholder={field.placeholder || 'Select an option'} />
             </SelectTrigger>
             <SelectContent>
               {Array.isArray(optionsToUse) && optionsToUse.length > 0 && (
@@ -698,7 +697,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
             onError={(error) => {
               actions.setFieldError(field.id, (error as Error).message || 'File upload failed');
             }}
-            className={cn(!validationState.isValid || field.error ? 'tw-border-red-500 tw-bg-red-50' : '')}
+            className={cn(!validationState.isValid || field.error ? 'border-red-500 bg-red-50' : '')}
           />
         );
 
@@ -742,12 +741,12 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
       {mode === 'editor' ? <Label>{field.label}</Label> : field.type !== 'hidden' ? <Label>{field.label}</Label> : null}
       {field.type === 'file' && field.helpText && <p className="form-description">{field.helpText}</p>}
       {field.type === 'file' && (!validationState.isValid || field.error) && (
-        <p className="tw-text-red-500 tw-text-sm tw-mt-1">{validationState.messages[0] || field.error}</p>
+        <p className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</p>
       )}
       {renderInput}
       {field.type !== 'file' ? (
         !validationState.isValid || field.error ? (
-          <span className="tw-text-red-500 tw-text-sm tw-mt-1">{validationState.messages[0] || field.error}</span>
+          <span className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</span>
         ) : (
           field.helpText && <span className="form-description">{field.helpText}</span>
         )

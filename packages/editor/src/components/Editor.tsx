@@ -254,7 +254,7 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
         onDragMove={handleDragMove}>
         <div
           className={cn(
-            'editor-container tw-flex tw-h-[calc(100vh_-_3rem)] tw-overflow-hidden',
+            'editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden',
             editor.options?.containerClassname
           )}>
           <ToolboxPanel />

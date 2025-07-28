@@ -49,18 +49,18 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
           <SectionPanel title="Appearance">
             <FormItem orientation="horizontal">
               {/* PREFIX PROPERTIES */}
-              <div className="form-captions !tw-col-span-4">
+              <div className="form-captions !col-span-4">
                 <Label>Prefix</Label>
                 <p className="form-description">Add text or icon on the left side</p>
               </div>
-              <div className="tw-flex tw-justify-end tw-col-span-1">
+              <div className="flex justify-end col-span-1">
                 {field.appearance?.prefix ? (
                   <Button
                     variant="ghost"
                     color="secondary"
                     size="xs"
                     disabled={editor.options?.appearanceSettings === 'readonly'}
-                    className="tw-text-xs tw-text-gray-500"
+                    className="text-xs text-gray-500"
                     onClick={() =>
                       onChange({
                         appearance: {
@@ -82,7 +82,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                         <PlusIcon size={16} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="tw-w-32" align="end">
+                    <DropdownMenuContent className="w-32" align="end">
                       <DropdownMenuItem
                         onSelect={() =>
                           onChange({
@@ -112,7 +112,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
               {field.appearance?.prefix &&
                 (field.appearance?.prefix.type === 'icon' ? (
                   <IconPicker
-                    className={`${field.appearance.prefix.content !== '' ? 'tw-col-span-1' : 'tw-col-span-2 tw-justify-start'}`}
+                    className={`${field.appearance.prefix.content !== '' ? 'col-span-1' : 'col-span-2 justify-start'}`}
                     value={field.appearance.prefix.content}
                     onChange={(value) =>
                       onChange({
@@ -128,7 +128,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                     type="text"
                     value={field.appearance?.prefix?.content || ''}
                     disabled={editor.options?.appearanceSettings === 'readonly'}
-                    className="!tw-col-span-5"
+                    className="!col-span-5"
                     onChange={(e) =>
                       onChange({
                         appearance: {
@@ -143,17 +143,17 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
 
             {/* SUFFIX PROPERTIES */}
             <FormItem orientation="horizontal">
-              <div className="form-captions !tw-col-span-4">
+              <div className="form-captions !col-span-4">
                 <Label>Suffix</Label>
                 <p className="form-description">Add text or icon on the right side</p>
               </div>
-              <div className="tw-flex tw-justify-end tw-col-span-1">
+              <div className="flex justify-end col-span-1">
                 {field.appearance?.suffix ? (
                   <Button
                     variant="ghost"
                     color="secondary"
                     size="xs"
-                    className="tw-text-xs tw-text-gray-500"
+                    className="text-xs text-gray-500"
                     disabled={editor.options?.appearanceSettings === 'readonly'}
                     onClick={() =>
                       onChange({
@@ -176,7 +176,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                         <PlusIcon size={16} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="tw-w-32" align="end">
+                    <DropdownMenuContent className="w-32" align="end">
                       <DropdownMenuItem
                         onSelect={() =>
                           onChange({
@@ -206,7 +206,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
               {field.appearance?.suffix &&
                 (field.appearance?.suffix.type === 'icon' ? (
                   <IconPicker
-                    className={`${field.appearance.suffix.content !== '' ? 'tw-col-span-1' : 'tw-col-span-2 tw-justify-start'}`}
+                    className={`${field.appearance.suffix.content !== '' ? 'col-span-1' : 'col-span-2 justify-start'}`}
                     value={field.appearance.suffix.content}
                     onChange={(value) =>
                       onChange({
@@ -222,7 +222,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                     type="text"
                     value={field.appearance?.suffix?.content || ''}
                     disabled={editor.options?.appearanceSettings === 'readonly'}
-                    className="!tw-col-span-5"
+                    className="!col-span-5"
                     onChange={(e) =>
                       onChange({
                         appearance: {
@@ -237,18 +237,18 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
 
             {/* ADD-ON START PROPERTIES (EXPERIMENTAL) */}
             {/* <FormItem orientation="horizontal">
-              <div className="form-captions !tw-col-span-4">
+              <div className="form-captions !col-span-4">
                 <Label>Add-on start</Label>
                 <p className="form-description">Prepend an element before input</p>
               </div>
 
-              <div className="tw-flex tw-justify-end tw-col-span-1">
+              <div className="flex justify-end col-span-1">
                 {field.appearance?.addOnStart ? (
                   <Button
                     variant="ghost"
                     color="secondary"
                     size="xs"
-                    className="tw-text-xs tw-text-gray-500"
+                    className="text-xs text-gray-500"
                     onClick={() =>
                       onChange({
                         appearance: {
@@ -266,7 +266,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                         <PlusIcon size={16} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="tw-w-32" align="end">
+                    <DropdownMenuContent className="w-32" align="end">
                       <DropdownMenuItem
                         onSelect={() => {
                           onChange({
@@ -300,7 +300,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 )}
               </div>
               {field.appearance?.addOnStart && (
-                <div className="tw-col-span-5 tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <div className="col-span-5 flex items-center justify-between gap-2">
                   {field.appearance.addOnStart.type === 'button' && (
                     <>
                       <Button variant="outline" color="secondary">
@@ -339,14 +339,15 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                         onChange={(values) =>
                           onChange({
                             appearance: {
-                              ...field.appearance,                          addOnStart: {
-                            ...field.appearance?.addOnStart,
-                            options: values
-                          }
-                        }
-                      })
-                    }>
-                    <Button variant="ghost" color="secondary" className="tw-text-xs" size="xs">
+                              ...field.appearance,
+                              addOnStart: {
+                                ...field.appearance?.addOnStart,
+                                options: values
+                              }
+                            }
+                          })
+                        }>
+                        <Button variant="ghost" color="secondary" className="text-xs" size="xs">
                           <PlusIcon size={16} />
                           Manage option
                         </Button>
@@ -359,18 +360,18 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
 
             {/* ADD-ON END PROPERTIES (EXPERIMENTAL) */}
             {/* <FormItem orientation="horizontal">
-              <div className="form-captions !tw-col-span-4">
+              <div className="form-captions !col-span-4">
                 <Label>Add-on end</Label>
                 <p className="form-description">Append an element after input</p>
               </div>
 
-              <div className="tw-flex tw-justify-end tw-col-span-1">
+              <div className="flex justify-end col-span-1">
                 {field.appearance?.addOnEnd ? (
                   <Button
                     variant="ghost"
                     color="secondary"
                     size="xs"
-                    className="tw-text-xs tw-text-gray-500"
+                    className="text-xs text-gray-500"
                     onClick={() =>
                       onChange({
                         appearance: {
@@ -388,7 +389,7 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                         <PlusIcon size={16} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="tw-w-32" align="end">
+                    <DropdownMenuContent className="w-32" align="end">
                       <DropdownMenuItem
                         onSelect={() => {
                           onChange({
@@ -422,10 +423,10 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                 )}
               </div>
               {field.appearance?.addOnEnd && (
-                <div className="tw-col-span-5 tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <div className="col-span-5 flex items-center justify-between gap-2">
                   {field.appearance.addOnEnd.type === 'button' && (
                     <>
-                      <Button variant="outline" color="secondary" className="tw-max-w-20 tw-truncate">
+                      <Button variant="outline" color="secondary" className="max-w-20 truncate">
                         {field.appearance.addOnEnd.label}
                       </Button>
                       <Input
@@ -460,14 +461,15 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
                         onChange={(values) =>
                           onChange({
                             appearance: {
-                              ...field.appearance,                          addOnEnd: {
-                            ...field.appearance?.addOnEnd,
-                            options: values
-                          }
-                        }
-                      })
-                    }>
-                    <Button variant="ghost" color="secondary" className="tw-text-xs" size="xs">
+                              ...field.appearance,
+                              addOnEnd: {
+                                ...field.appearance?.addOnEnd,
+                                options: values
+                              }
+                            }
+                          })
+                        }>
+                        <Button variant="ghost" color="secondary" className="text-xs" size="xs">
                           <PlusIcon size={16} />
                           Manage option
                         </Button>
@@ -506,11 +508,11 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
         return (
           <SectionPanel title="Appearance">
             <FormItem orientation="horizontal">
-              <div className="form-captions !tw-col-span-3">
+              <div className="form-captions !col-span-3">
                 <Label htmlFor="enable-selection-month">Selection month</Label>
                 <p className="form-description">Enable month selection</p>
               </div>
-              <div className="tw-col-span-2 tw-flex tw-items-center tw-justify-end">
+              <div className="col-span-2 flex items-center justify-end">
                 <Switch
                   id="enable-selection-month"
                   disabled={editor.options?.appearanceSettings === 'readonly'}
@@ -537,11 +539,11 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
               </div>
             </FormItem>
             <FormItem orientation="horizontal">
-              <div className="form-captions !tw-col-span-3">
+              <div className="form-captions !col-span-3">
                 <Label htmlFor="enable-selection-year">Selection year</Label>
                 <p className="form-description">Enable year selection</p>
               </div>
-              <div className="tw-col-span-2 tw-flex tw-items-center tw-justify-end">
+              <div className="col-span-2 flex items-center justify-end">
                 <Switch
                   id="enable-selection-year"
                   disabled={editor.options?.appearanceSettings === 'readonly'}

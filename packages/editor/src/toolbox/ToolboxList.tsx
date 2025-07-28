@@ -30,8 +30,8 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
   };
 
   return (
-    <div className="tw-overflow-x-hidden">
-      {section && <label className="tw-block tw-font-semibold tw-font-sm tw-p-4 tw-pb-0">{section}</label>}
+    <div className="overflow-x-hidden">
+      {section && <label className="block font-semibold font-sm p-4 pb-0">{section}</label>}
 
       {showSearch && (
         <ToolboxSearchWithHook
@@ -42,20 +42,20 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
         />
       )}
 
-      <div className="tw-space-y-2 tw-p-4 tw-pt-2">
+      <div className="space-y-2 p-4 pt-2">
         {filteredItems.length === 0 ? (
-          <div className="tw-text-center tw-text-gray-500 tw-text-sm tw-py-8">
+          <div className="text-center text-gray-500 text-sm py-8">
             {items.length === 0 ? (
               <div>
-                {!section && <div className="tw-text-gray-400 tw-mb-2">No items available</div>}
-                <div className="tw-text-xs tw-text-gray-400">
+                {!section && <div className="text-gray-400 mb-2">No items available</div>}
+                <div className="text-xs text-gray-400">
                   {section === 'presets' ? 'No presets have been loaded' : !section ? 'No fields are defined' : null}
                 </div>
               </div>
             ) : (
               <div>
-                <div className="tw-text-gray-400 tw-mb-2">No items match your search</div>
-                <div className="tw-text-xs tw-text-gray-400">Try adjusting your search terms</div>
+                <div className="text-gray-400 mb-2">No items match your search</div>
+                <div className="text-xs text-gray-400">Try adjusting your search terms</div>
               </div>
             )}
           </div>
@@ -71,8 +71,8 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
                 id={item.id}
                 name={item.label}
                 description={item.description}
-                className="tw-flex-row tw-items-center tw-justify-start tw-gap-3 tw-h-auto tw-p-2.5 tw-bg-white tw-rounded-lg tw-border-gray-100 tw-shadow-none hover:tw-border-blue-300 hover:tw-shadow-none tw-leading-none tw-transition-colors"
-                thumbnail={<ToolboxItemThumbnail item={item} size={24} className="tw-shrink-0" />}
+                className="flex-row items-center justify-start gap-3 h-auto p-2.5 bg-white rounded-lg border-gray-100 shadow-none hover:border-blue-300 hover:shadow-none leading-none transition-colors"
+                thumbnail={<ToolboxItemThumbnail item={item} size={24} className="shrink-0" />}
               />
             </SortableItem>
           ))

@@ -145,12 +145,12 @@ export const CodeEditor = ({
     if (!showLanguageToggle || languages.length <= 1) return null;
 
     return (
-      <div className="tw-flex tw-items-center tw-gap-1">
+      <div className="flex items-center gap-1">
         {languages.map((lang, index) => {
           const Icon = LANGUAGE_ICONS[lang];
           return (
-            <div key={lang} className="tw-flex tw-items-center tw-gap-1">
-              {index > 0 && <Separator className="tw-bg-gray-400 tw-h-4 tw-w-[1px]" orientation="vertical" />}
+            <div key={lang} className="flex items-center gap-1">
+              {index > 0 && <Separator className="bg-gray-400 h-4 w-[1px]" orientation="vertical" />}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -158,14 +158,14 @@ export const CodeEditor = ({
                       size={size}
                       variant={currentLanguage === lang ? 'outline' : 'ghost'}
                       color="secondary"
-                      className="tw-flex tw-items-center tw-gap-1"
+                      className="flex items-center gap-1"
                       onClick={() => handleLanguageChange(lang)}
                       disabled={readOnly}>
                       <Icon size={12} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    <p className="form-description tw-text-gray-700 tw-leading-relaxed">{LANGUAGE_LABELS[lang]}</p>
+                    <p className="form-description text-gray-700 leading-relaxed">{LANGUAGE_LABELS[lang]}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -211,12 +211,12 @@ export const CodeEditor = ({
         options={getEditorOptions(true)}
       />
       {showExpand && (
-        <div className="tw-absolute tw-top-2 tw-right-2 tw-flex tw-items-center tw-gap-1">
+        <div className="absolute top-2 right-2 flex items-center gap-1">
           <Button
             size="xs"
             variant="ghost"
             color="secondary"
-            className="tw-h-6 tw-w-6 tw-p-0 tw-opacity-70 hover:tw-opacity-100"
+            className="h-6 w-6 p-0 opacity-70 hover:opacity-100"
             onClick={() => setIsExpanded(true)}
             disabled={readOnly}>
             <ExpandIcon size={12} />
@@ -230,24 +230,24 @@ export const CodeEditor = ({
     <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
       <DialogContent className="" style={{ width: '100%', maxWidth: modalWidth }}>
         <DialogHeader>
-          <DialogTitle className="tw-flex tw-items-center tw-justify-between">
-            <div className="tw-flex tw-items-center tw-gap-2">{label ? `${label} Editor` : 'Code Editor'}</div>
-            <div className="tw-ml-auto tw-flex tw-items-center tw-gap-1 tw-mr-4">
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">{label ? `${label} Editor` : 'Code Editor'}</div>
+            <div className="ml-auto flex items-center gap-1 mr-4">
               <LanguageSwitchButton size="xs" />
             </div>
           </DialogTitle>
         </DialogHeader>
-        <div className="tw-space-y-4 tw-max-h-[80vh] tw-overflow-y-auto">
+        <div className="space-y-4 max-h-[80vh] overflow-y-auto">
           {autocompleteSuggestions.length > 0 && (
-            <div className="tw-text-sm tw-text-gray-600">
+            <div className="text-sm text-gray-600">
               <p>
                 <strong>Available Suggestions:</strong>
               </p>
-              <div className="tw-flex tw-flex-wrap tw-gap-1 tw-mt-2">
+              <div className="flex flex-wrap gap-1 mt-2">
                 {autocompleteSuggestions.map((suggestion, index) => (
                   <code
                     key={index}
-                    className="tw-px-2 tw-py-1 tw-bg-blue-100 tw-text-blue-800 tw-rounded tw-text-xs tw-cursor-pointer hover:tw-bg-blue-200"
+                    className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs cursor-pointer hover:bg-blue-200"
                     onClick={() => {
                       const currentValue = monacoEditorRef.current?.getValue() || '';
                       const newValue = currentValue + suggestion.insertText;
@@ -285,10 +285,10 @@ export const CodeEditor = ({
     return (
       <FormItem>
         {label && (
-          <div className="tw-flex tw-items-center tw-justify-between">
+          <div className="flex items-center justify-between">
             <Label>{label}</Label>
             {showLanguageToggle && (
-              <div className="tw-ml-auto tw-flex tw-items-center tw-gap-1 tw-mr-2">
+              <div className="ml-auto flex items-center gap-1 mr-2">
                 <LanguageSwitchButton size="xs" />
               </div>
             )}

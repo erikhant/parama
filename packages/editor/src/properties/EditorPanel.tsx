@@ -156,7 +156,7 @@ export const EditorPanel: React.FC = () => {
   // Show layout editor when no field is selected but form has fields
   if (schema.fields.length > 0 && !properties.localField) {
     return (
-      <div className="tw-w-72 tw-shrink-0 tw-max-h-screen tw-overflow-y-auto tw-overflow-x-hidden tw-bg-gray-50 tw-border-l-2 tw-border-gray-100/60">
+      <div className="w-72 shrink-0 max-h-screen overflow-y-auto overflow-x-hidden bg-gray-50 border-l-2 border-gray-100/60">
         <LayoutEditor schema={schema} onChange={handleLayoutChange} />
         <FormMetadata schema={schema} />
       </div>
@@ -166,8 +166,8 @@ export const EditorPanel: React.FC = () => {
   // Show empty state when no field is provided
   if (!properties.localField) {
     return (
-      <div className="tw-w-72 tw-shrink-0 tw-max-h-screen tw-overflow-y-auto tw-overflow-x-hidden tw-bg-gray-50 tw-border-l-2 tw-border-gray-100/60">
-        <p className="tw-text-sm tw-text-center tw-text-gray-500 tw-my-52">No field provided</p>
+      <div className="w-72 shrink-0 max-h-screen overflow-y-auto overflow-x-hidden bg-gray-50 border-l-2 border-gray-100/60">
+        <p className="text-sm text-center text-gray-500 my-52">No field provided</p>
       </div>
     );
   }
@@ -177,9 +177,9 @@ export const EditorPanel: React.FC = () => {
 
   return (
     <div
-      className={`tw-shrink-0 tw-relative tw-max-h-screen tw-pb-8 tw-overflow-y-auto tw-overflow-x-hidden tw-bg-gray-50 tw-border-l-2 tw-border-gray-100/60 tw-transition-all tw-duration-200 ${!collapsed ? 'tw-w-72' : 'tw-w-10'}`}>
+      className={`shrink-0 relative max-h-screen pb-8 overflow-y-auto overflow-x-hidden bg-gray-50 border-l-2 border-gray-100/60 transition-all duration-200 ${!collapsed ? 'w-72' : 'w-10'}`}>
       <Button
-        className={`tw-absolute tw-right-1.5 tw-top-4 tw-z-10 tw-transition-all`}
+        className={`absolute right-1.5 top-4 z-10 transition-all`}
         color="secondary"
         variant="ghost"
         size="xs"
@@ -189,11 +189,11 @@ export const EditorPanel: React.FC = () => {
       </Button>
       {!collapsed && (
         <>
-          <div className="tw-p-3 tw-space-y-3">
-            <h2 className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-line-clamp-1">
+          <div className="p-3 space-y-3">
+            <h2 className="text-sm font-semibold text-gray-700 line-clamp-1">
               {'label' in properties.localField ? properties.localField.label : properties.localField.id}
             </h2>
-            <small className="tw-text-gray-500">{properties.localField?.id}</small>
+            <small className="text-gray-500">{properties.localField?.id}</small>
           </div>
           <FieldEditors field={properties.localField} editorConfig={editorConfig} onChange={handleFieldChange} />
         </>
