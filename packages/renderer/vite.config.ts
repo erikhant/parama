@@ -36,8 +36,6 @@ export default defineConfig({
         '@parama-ui/react',
         'lodash-es',
         'lucide-react',
-        'react-dropzone',
-        'react-select',
         'use-debounce'
       ],
       output: {
@@ -51,8 +49,6 @@ export default defineConfig({
           '@parama-ui/react': 'ParamaUI',
           'lodash-es': 'lodash',
           'lucide-react': 'LucideReact',
-          'react-dropzone': 'ReactDropzone',
-          'react-select': 'ReactSelect',
           'use-debounce': 'useDebounce'
         }
       }

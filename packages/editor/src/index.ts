@@ -1,4 +1,4 @@
-import './index.css';
+import './styles/index.css';
 
 // Main editor components
 export { FormEditor } from './components/FormEditor';

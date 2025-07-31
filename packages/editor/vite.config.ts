@@ -58,7 +58,7 @@ export default defineConfig({
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return 'styles.css';
+            return 'editor.css';
           }
           return '[name].[ext]';
         },

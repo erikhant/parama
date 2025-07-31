@@ -1,5 +1,5 @@
 import '@parama-ui/react/dist/parama-ui.min.css';
-import './index.css';
+import './styles/index.css';
 import { FormEditor } from '../src/components/FormEditor';
 import { createRoot } from 'react-dom/client';
 import type { FormSchema, PresetTypeDef } from '@parama-dev/form-builder-types';

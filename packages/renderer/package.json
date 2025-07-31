@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-renderer",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "description": "React components for rendering forms from the form builder",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
@@ -26,14 +26,11 @@
     "clean": "rimraf dist node_modules"
   },
   "dependencies": {
-    "@parama-dev/form-builder-core": "workspace:*",
-    "@parama-dev/form-builder-types": "workspace:*",
-    "@parama-ui/react": "workspace:*",
-    "@types/react-select": "^5.0.1",
+    "@parama-dev/form-builder-core": "^0.3.1",
+    "@parama-dev/form-builder-types": "^0.2.5",
+    "@parama-ui/react": "^1.0.5",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.510.0",
-    "react-dropzone": "^14.3.8",
-    "react-select": "^5.10.1",
     "use-debounce": "^10.0.4"
   },
   "devDependencies": {
@@ -56,21 +53,17 @@
     "vite-plugin-dts": "^4.5.3"
   },
   "peerDependencies": {
+    "@parama-dev/form-builder-core": "^0.3.1",
+    "@parama-dev/form-builder-types": "^0.2.5",
+    "@parama-ui/react": "^1.0.5",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@parama-dev/form-builder-core": "workspace:*",
-    "@parama-dev/form-builder-types": "workspace:*",
-    "@parama-ui/react": "workspace:*",
-    "ajv": "^8.17.1"
+    "react-dom": "^18.2.0"
   },
   "peerDependenciesMeta": {
     "react": {
       "optional": false
     },
     "react-dom": {
-      "optional": false
-    },
-    "ajv": {
       "optional": false
     }
   }
