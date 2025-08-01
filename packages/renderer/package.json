@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-renderer",
-  "version": "0.4.2",
+  "version": "0.5.1",
   "description": "React components for rendering forms from the form builder",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
@@ -26,9 +26,9 @@
     "clean": "rimraf dist node_modules"
   },
   "dependencies": {
-    "@parama-dev/form-builder-core": "^0.3.1",
-    "@parama-dev/form-builder-types": "^0.2.5",
-    "@parama-ui/react": "^1.0.5",
+    "@parama-dev/form-builder-core": "workspace:*",
+    "@parama-dev/form-builder-types": "workspace:*",
+    "@parama-ui/react": "workspace:*",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.510.0",
     "use-debounce": "^10.0.4"
@@ -53,9 +53,9 @@
     "vite-plugin-dts": "^4.5.3"
   },
   "peerDependencies": {
-    "@parama-dev/form-builder-core": "^0.3.1",
-    "@parama-dev/form-builder-types": "^0.2.5",
-    "@parama-ui/react": "^1.0.5",
+    "@parama-dev/form-builder-core": "workspace:*",
+    "@parama-dev/form-builder-types": "workspace:*",
+    "@parama-ui/react": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

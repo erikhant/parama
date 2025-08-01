@@ -5,6 +5,7 @@ import type {
   FieldGroupItem,
   FormField as FormFieldType,
   MultiSelectField,
+  AutoCompleteField,
   TextField,
   FileField,
   RadioField,
@@ -25,6 +26,7 @@ import {
   Input,
   Label,
   MultiSelect,
+  AutoComplete,
   RadioGroup,
   RadioGroupItem,
   Select,
@@ -140,7 +142,15 @@ const MemoizedCheckboxItems = memo(
 );
 
 // Type for input fields that have all the common properties
-type InputFieldType = TextField | FileField | RadioField | CheckboxField | SelectField | MultiSelectField | DateField;
+type InputFieldType =
+  | TextField
+  | FileField
+  | RadioField
+  | CheckboxField
+  | SelectField
+  | MultiSelectField
+  | AutoCompleteField
+  | DateField;
 
 // Separate component for block fields
 const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
@@ -218,7 +228,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
   const validationState = actions.getFieldValidation(field.id);
 
   const [textValue, setTextValue] = useState<string>(value || '');
-  const [debouncedTextValue] = useDebounce(textValue, 300);
+  const [debouncedTextValue] = useDebounce(textValue, 100); // Reduced to 100ms for better responsiveness
   const [firstRender, setFirstRender] = useState(true);
 
   const handleChange = useCallback(
@@ -305,6 +315,13 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
   const handleMultiSelectChange = useCallback(
     (selectedValues: string[]) => {
       handleChange(selectedValues);
+    },
+    [handleChange]
+  );
+
+  const handleAutocompleteChange = useCallback(
+    (selectedOption: { id: string; value: string; label: string }) => {
+      handleChange(selectedOption.value);
     },
     [handleChange]
   );
@@ -473,6 +490,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
 
   const [multiSelectOptions, setMultiselectOptions] = useState((field as MultiSelectField).options ?? []);
   const [selectOptions, setSelectOptions] = useState((field as SelectField).options ?? []);
+  const [autocompleteOptions, setAutocompleteOptions] = useState((field as AutoCompleteField).options ?? []);
 
   // Effect to handle dynamic options loading for select
   useEffect(() => {
@@ -483,6 +501,8 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
           const options = await actions.refreshDynamicOptions(field);
           setSelectOptions(options);
         };
+        actions.clearFieldError(field.id);
+
         getOptions();
       } else {
         if (field.options && Array.isArray(field.options)) {
@@ -507,6 +527,8 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
           const options = await actions.refreshDynamicOptions(field);
           setMultiselectOptions(options);
         };
+        actions.clearFieldError(field.id);
+
         getOptions();
       } else {
         if (field.options && Array.isArray(field.options)) {
@@ -520,6 +542,32 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     field.type === 'multiselect' ? field.external : null,
     // Watch for refresh trigger changes
     field.type === 'multiselect' ? field.external?._refreshTimestamp : null
+  ]);
+
+  // Effect to handle dynamic options loading for autocomplete
+  useEffect(() => {
+    if (field.type === 'autocomplete') {
+      if (field.external) {
+        // Always fetch options when external is configured
+        const getOptions = async () => {
+          const options = await actions.refreshDynamicOptions(field);
+          setAutocompleteOptions(options);
+        };
+        actions.clearFieldError(field.id);
+
+        getOptions();
+      } else {
+        if (field.options && Array.isArray(field.options)) {
+          setAutocompleteOptions(field.options);
+        }
+      }
+    }
+  }, [
+    actions,
+    field.type === 'autocomplete' ? field.options : null,
+    field.type === 'autocomplete' ? field.external : null,
+    // Watch for refresh trigger changes
+    field.type === 'autocomplete' ? field.external?._refreshTimestamp : null
   ]);
 
   const renderInput = useMemo(() => {
@@ -679,6 +727,34 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
           />
         );
 
+      case 'autocomplete':
+        const autocompleteField = field as AutoCompleteField;
+        return (
+          <AutoComplete
+            options={autocompleteOptions?.map((option) => ({
+              id: option.id?.toString() || '',
+              value: option.value,
+              label: option.label,
+              description: option.description
+            }))}
+            value={
+              autocompleteOptions?.find((opt) => opt.value === value)
+                ? {
+                    id: autocompleteOptions.find((opt) => opt.value === value)?.id?.toString() || '',
+                    value: value,
+                    label: autocompleteOptions.find((opt) => opt.value === value)?.label || '',
+                    description: autocompleteOptions.find((opt) => opt.value === value)?.description
+                  }
+                : undefined
+            }
+            onValueChange={handleAutocompleteChange}
+            disabled={isDisabled}
+            placeholder={field.placeholder || 'Search options...'}
+            shouldFilter={autocompleteField.shouldFilter !== false}
+            emptyMessage="No options found"
+          />
+        );
+
       case 'file':
         return (
           <FileUpload
@@ -726,9 +802,11 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     handleRadioChange,
     handleSelectChange,
     handleMultiSelectChange,
+    handleAutocompleteChange,
     createCheckboxHandler,
     selectOptions,
-    multiSelectOptions
+    multiSelectOptions,
+    autocompleteOptions
   ]);
 
   if (!isVisible) return null;

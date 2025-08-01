@@ -16,71 +16,7 @@ export function App() {
     title: 'Enhanced File Handling Demo',
     description: 'Demonstrates single and multiple file uploads',
     layout: { colSize: 12, gap: 4 },
-    fields: [
-      // Regular text field
-      {
-        id: 'name',
-        type: 'text',
-        name: 'fullName',
-        label: 'Full Name',
-        width: 6,
-        placeholder: 'Enter your full name',
-        value: ''
-      },
-
-      // Single file field (Profile Picture)
-      {
-        id: 'avatar',
-        type: 'file',
-        name: 'profilePicture',
-        label: 'Profile Picture',
-        width: 6,
-        value: [],
-        options: {
-          accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.gif'] },
-          multiple: false, // Single file only
-          maxFiles: 1,
-          maxSize: 5000000, // 5MB
-          server: '/api/upload',
-          instantUpload: false
-        }
-      },
-
-      // Multiple file field (Documents)
-      {
-        id: 'documents',
-        type: 'file',
-        name: 'supportingDocs',
-        label: 'Supporting Documents',
-        width: 12,
-        helpText: 'Upload up to 3 PDF or Word documents',
-        value: [],
-        options: {
-          accept: {
-            'application/pdf': ['.pdf'],
-            'application/msword': ['.doc'],
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
-          },
-          multiple: true, // Multiple files allowed
-          maxFiles: 3,
-          maxSize: 10000000, // 10MB per file
-          server: '/api/upload',
-          instantUpload: false
-        }
-      },
-      {
-        id: 'field-1753541773412',
-        label: 'Submit',
-        type: 'submit',
-        width: 2,
-        action: 'submit',
-        appearance: {
-          color: 'primary',
-          variant: 'fill',
-          size: 'default'
-        }
-      }
-    ]
+    fields: []
   };
 
   const initialPresets: PresetTypeDef[] = [
@@ -116,6 +52,10 @@ export function App() {
         schema={initialSchema}
         loadPreset={initialPresets}
         onSaveSchema={handleSave}
+        // variables={{
+        //   userName: 'john_doe',
+        //   userEmail: 'john.doe@example.com'
+        // }}
         options={{
           defaultFieldTab: 'presets',
           brand: (

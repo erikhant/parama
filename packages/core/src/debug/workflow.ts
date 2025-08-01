@@ -101,8 +101,12 @@ export function setupWorkflowDebugger(options: DebugOptions = {}) {
     const originalRefreshOptions = useFormBuilder.getState().actions.refreshDynamicOptions.bind(workflowEngine);
     const store = useFormBuilder.getState();
     workflowEngine.refreshDynamicOptions = async (field: FormField) => {
-      if (!field || (field.type !== 'select' && field.type !== 'multiselect') || !field.external) {
-        console.warn(`Field ${field.id} is not a select or multiselect with dynamic options`);
+      if (
+        !field ||
+        (field.type !== 'select' && field.type !== 'multiselect' && field.type !== 'autocomplete') ||
+        !field.external
+      ) {
+        console.warn(`Field ${field.id} is not a select, multiselect, or autocomplete with dynamic options`);
         return;
       }
       console.groupCollapsed(`%c[OPTIONS LOAD]%c ${field.id}`, 'color: #00BCD4; font-weight: bold', 'color: inherit');

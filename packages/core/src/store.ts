@@ -6,14 +6,15 @@ import type {
   FormSchema,
   ValidationState,
   ValidationTrigger,
-  ValidatorRegistry
+  ValidatorRegistry,
+  VariableContext
 } from '@parama-dev/form-builder-types';
 import { debounce, DebouncedFunc, get as getObject } from 'lodash-es';
 import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';
 import { WorkflowEngine } from './workflow/engine';
 import { evaluateValidations } from './validations/evaluate';
-import { interceptExpressionTemplate, interpolate } from './utils';
+import { interceptExpressionTemplate, interpolate, interpolateVariables, resolveInterpolatableValue } from './utils';
 
 export interface FormBuilderState {
   // Core form state
@@ -21,6 +22,7 @@ export interface FormBuilderState {
   formData: Record<string, any>;
   fileData: FormData; // File storage using FormData
   validators: ValidatorRegistry;
+  variables: VariableContext;
   selectedFieldId: string | null;
   mode: 'editor' | 'render';
   screenSize: 'mobile' | 'tablet' | 'desktop';
@@ -78,6 +80,13 @@ export interface FormBuilderState {
     // Conditional logic
     refreshFieldOptions: (fieldId: string) => Promise<void>;
 
+    // Variable management
+    updateVariables: (variables: VariableContext) => void;
+    updateVariable: (key: string, value: any) => void;
+    getVariable: (key: string) => any;
+    getVariables: () => VariableContext;
+    resolveFieldValue: (field: FormField, property: keyof FormField) => any;
+
     // applyTemplate: (templateId: string) => void;
     submitForm: () => Promise<{
       isValid: boolean;
@@ -116,6 +125,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
     formData: {},
     fileData: new FormData(),
     validators: {},
+    variables: {},
     templates: [],
     selectedFieldId: null,
     mode: 'render',
@@ -139,11 +149,30 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * Initializes the form with schema, validators, and initial data
        * @param props - Form builder initialization properties
        */
-      initialize: ({ schema, validators = {}, data = {} }) => {
+      initialize: ({ schema, validators = {}, data = {}, variables = {} }) => {
+        // Ensure variables is always an object to prevent undefined issues
+        const safeVariables = variables || {};
+        // Extract initial values from schema fields if no explicit data provided
+        let initialFormData = data;
+        if (Object.keys(data).length === 0 && schema?.fields) {
+          initialFormData = schema.fields.reduce(
+            (acc, field) => {
+              if ('value' in field && field.value !== undefined) {
+                acc[field.id] = field.value;
+              } else if ('defaultValue' in field && field.defaultValue !== undefined) {
+                acc[field.id] = field.defaultValue;
+              }
+              return acc;
+            },
+            {} as Record<string, any>
+          );
+        }
+
         set({
           schema: schema || defaultSchema,
-          formData: data,
+          formData: initialFormData,
           validators,
+          variables: safeVariables,
           visibleFields: new Set(schema?.fields.map((f) => f.id) || []),
           validation:
             schema?.fields.reduce(
@@ -469,17 +498,25 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       async refreshDynamicOptions(field: FormField): Promise<FieldGroupItem[]> {
         const formData = get().formData;
 
-        if ((field.type !== 'select' && field.type !== 'multiselect') || !field.external) {
+        if (
+          (field.type !== 'select' && field.type !== 'multiselect' && field.type !== 'autocomplete') ||
+          !field.external
+        ) {
           return [];
         }
         const { url, headers, mapper } = field.external;
 
         try {
-          const interceptedExpression = interceptExpressionTemplate(url, get());
-          const serializedUrl = interpolate(interceptedExpression, formData);
+          // Resolve URL if it's a VariableReference
+          const resolvedUrl = resolveInterpolatableValue(url, get().variables);
+          const interceptedExpression = interceptExpressionTemplate(resolvedUrl, get());
+          const serializedUrl = interpolate(interceptedExpression, formData).replace(/"/g, '');
+
+          // Resolve headers if they contain variable references
+          const resolvedHeaders = headers ? resolveInterpolatableValue(headers, get().variables) : {};
 
           const response = await fetch(serializedUrl, {
-            headers: { ...headers }
+            headers: { ...resolvedHeaders }
           });
 
           if (!response.ok) {
@@ -979,7 +1016,62 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       getFormDataWithFiles: () => ({
         data: get().formData,
         files: get().fileData
-      })
+      }),
+
+      // Variable management actions
+      /**
+       * Updates all variables in the context
+       * @param variables - New variable context
+       */
+      updateVariables: (variables: VariableContext) => {
+        // Ensure variables is always an object to prevent undefined issues
+        const safeVariables = variables || {};
+        set({ variables: safeVariables });
+      },
+
+      /**
+       * Updates a single variable in the context
+       * @param key - Variable key
+       * @param value - Variable value
+       */
+      updateVariable: (key: string, value: any) => {
+        set((state) => ({
+          variables: {
+            ...state.variables,
+            [key]: value
+          }
+        }));
+      },
+
+      /**
+       * Gets a single variable value
+       * @param key - Variable key
+       * @returns Variable value or undefined
+       */
+      getVariable: (key: string) => {
+        return get().variables[key];
+      },
+
+      /**
+       * Gets all variables
+       * @returns Current variable context
+       */
+      getVariables: () => {
+        return get().variables;
+      },
+
+      /**
+       * Resolves a field property value that may contain variable references
+       * @param field - Form field
+       * @param property - Field property to resolve
+       * @returns Resolved value
+       */
+      resolveFieldValue: (field: FormField, property: keyof FormField) => {
+        const value = field[property];
+        const variables = get().variables;
+
+        return resolveInterpolatableValue(value, variables);
+      }
     }
   };
 });

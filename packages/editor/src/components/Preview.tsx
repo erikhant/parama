@@ -13,6 +13,7 @@ import {
   SheetTitle,
   SheetTrigger
 } from '@parama-ui/react';
+import { useEditor } from '../store/useEditor';
 
 interface PreviewProps {
   disabled: boolean;
@@ -22,6 +23,7 @@ interface PreviewProps {
 
 export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange }) => {
   const { actions, screenSize } = useFormBuilder();
+  const { editor } = useEditor();
 
   return (
     <Sheet
@@ -46,6 +48,7 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
         <ScrollArea className="p-8 h-[90vh] relative">
           <FormRenderer
             schema={schema}
+            variables={editor.variables}
             className="px-1"
             onSubmit={(data, contentType) => {
               if (contentType === 'application/json') {

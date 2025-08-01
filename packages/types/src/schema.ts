@@ -1,5 +1,92 @@
 import { ValidationRule, ValidatorRegistry } from './validation';
 
+// Variable injection types
+export type VariableContext = Record<string, any>;
+
+export interface VariableResolver {
+  resolve(template: string, variables: VariableContext): string;
+  interpolate(value: any, variables: VariableContext): any;
+}
+
+export interface VariableReference {
+  template: string;
+  resolvedValue?: any;
+}
+
+// Utility type for variable interpolation
+export type Interpolatable<T> = T;
+
+// Utility functions for variable handling
+export interface VariableUtils {
+  /**
+   * Resolves variables in a template string using the pattern {{$variableName}}
+   * @param template - The template string containing variable references
+   * @param variables - The variable context to resolve from
+   * @returns The resolved string with variables replaced
+   */
+  resolveTemplate(template: string, variables: VariableContext): string;
+
+  /**
+   * Checks if a string contains variable references
+   * @param value - The string to check
+   * @returns True if the string contains variable references
+   */
+  hasVariables(value: string): boolean;
+
+  /**
+   * Extracts variable names from a template string
+   * @param template - The template string to extract variables from
+   * @returns Array of variable names found in the template
+   */
+  extractVariables(template: string): string[];
+
+  /**
+   * Interpolates variables in any value (string, object, array)
+   * @param value - The value to interpolate
+   * @param variables - The variable context
+   * @returns The interpolated value
+   */
+  interpolateValue(value: any, variables: VariableContext): any;
+}
+
+// Variable context with common user-related variables
+export interface StandardVariableContext extends VariableContext {
+  userEmail?: string;
+  userName?: string;
+  userId?: string;
+  userRole?: string;
+  currentDate?: string;
+  currentTime?: string;
+  [key: string]: any;
+}
+
+// Enhanced FormEditorOptions with variable configuration
+export interface VariableEditorConfig {
+  /**
+   * Whether to show variable suggestions in the editor
+   */
+  showVariableSuggestions?: boolean;
+
+  /**
+   * List of available variables to show in suggestions
+   */
+  availableVariables?: Array<{
+    name: string;
+    description?: string;
+    example?: string;
+  }>;
+
+  /**
+   * Custom variable prefix pattern (default: {{$)
+   */
+  variablePrefix?: string;
+
+  /**
+   * Custom variable suffix pattern (default: } })
+   */
+  variableSuffix?: string;
+}
+
 export interface FormSchema {
   id: string;
   version: string;
@@ -22,6 +109,7 @@ export type FormField =
   | CheckboxField
   | SelectField
   | MultiSelectField
+  | AutoCompleteField
   | DateField
   | ButtonField
   | BlockField;
@@ -30,6 +118,7 @@ export interface FormBuilderProps {
   schema: FormSchema;
   validators?: ValidatorRegistry;
   data?: Record<string, any>;
+  variables?: VariableContext;
   onSubmit?: (data: Record<string, any> | FormData, contentType: 'application/json' | 'multipart/form-data') => void;
   onChange?: (data: Record<string, any>) => void;
   onCancel?: () => void;
@@ -47,6 +136,7 @@ export interface FormEditorOptions {
   validationSettings?: FieldSettings;
   conditionsSettings?: FieldSettings;
   eventsSettings?: FieldSettings;
+  variableConfig?: VariableEditorConfig;
 }
 
 export type FieldSettings = 'on' | 'off' | 'readonly';
@@ -56,6 +146,7 @@ export interface FormEditorProps {
   loadPreset?: (() => PresetTypeDef[]) | PresetTypeDef[];
   schema?: FormSchema;
   options?: FormEditorOptions;
+  variables?: VariableContext;
 }
 
 export interface FormTemplate {
@@ -247,6 +338,14 @@ export interface MultiSelectField extends BaseField, DataCustomization {
   external?: ExternalDataSource<FieldGroupItem> & { _refreshTimestamp?: number };
 }
 
+export interface AutoCompleteField extends BaseField, DataCustomization {
+  type: 'autocomplete';
+  placeholder?: string;
+  shouldFilter?: boolean;
+  options: FieldGroupItem[];
+  external?: ExternalDataSource<FieldGroupItem> & { _refreshTimestamp?: number };
+}
+
 export interface ButtonField extends Pick<BaseField, 'id' | 'label' | 'disabled' | 'width' | 'conditions'> {
   type: 'submit' | 'reset' | 'button';
   action: 'submit' | 'reset' | 'cancel';
@@ -283,4 +382,19 @@ export interface FieldTypes {
 
 export interface PresetTypeDef extends FieldTypeDef {
   fields: FormField[];
+}
+
+// Type for checking if a field supports variable interpolation
+export type VariableSupported<T> = T extends Interpolatable<infer U> ? true : false;
+
+// Utility type to extract the base type from an Interpolatable type
+export type BaseType<T> = T extends Interpolatable<infer U> ? U : T;
+
+// Hook-like interface for variable context in forms
+export interface UseVariableContext {
+  variables: VariableContext;
+  updateVariable: (key: string, value: any) => void;
+  resolveValue: (value: Interpolatable<any>) => any;
+  hasVariable: (template: string) => boolean;
+  getVariableNames: (template: string) => string[];
 }

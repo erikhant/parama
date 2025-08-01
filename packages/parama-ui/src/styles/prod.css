@@ -1,6 +1,7 @@
 @import 'tailwindcss/components';
 @import '../components/styles/variables.css';
 @import '../components/styles/accordion.css';
+@import '../components/styles/autocomplete.css';
 @import '../components/styles/badge.css';
 @import '../components/styles/button.css';
 @import '../components/styles/calendar.css';
@@ -20,6 +21,7 @@
 @import '../components/styles/file-upload.css';
 @import '../components/styles/sheet.css';
 @import '../components/styles/slider.css';
+@import '../components/styles/skeleton.css';
 @import '../components/styles/switch.css';
 @import '../components/styles/tabs.css';
 @import '../components/styles/tooltip.css';

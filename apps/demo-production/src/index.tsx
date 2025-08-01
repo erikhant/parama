@@ -1,6 +1,6 @@
 import './index.css';
-import '@parama-ui/dist/styles.css';
-import '../../../packages/editor/dist/styles.css'; // Ensure editor styles are included
+import '@parama-ui/react/dist/parama-ui.min.css';
+import '@parama-dev/form-builder-editor/dist/editor.css'; // Ensure editor styles are included
 import { createRoot } from 'react-dom/client';
 import { FormEditor } from '@parama-dev/form-builder-editor';
 import type { FormSchema, PresetTypeDef } from '@parama-dev/form-builder-types';

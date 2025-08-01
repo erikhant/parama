@@ -2,7 +2,7 @@ import './index.css';
 import '@parama-ui/react/styles';
 import { createRoot } from 'react-dom/client';
 import { FormEditor } from '@parama-dev/form-builder-editor';
-import { FormSchema } from '@parama-dev/form-builder-types';
+import { FormSchema, AutoCompleteField } from '@parama-dev/form-builder-types';
 
 // Test FormData handling directly here
 function testFormDataHandling() {
@@ -172,6 +172,62 @@ const initialSchema: FormSchema = {
     gap: 6
   },
   fields: [
+    {
+      id: 'autocomplete-test',
+      name: 'country',
+      type: 'autocomplete',
+      label: 'Select Country',
+      helpText: 'Start typing to search for a country',
+      disabled: false,
+      defaultValue: null,
+      value: null,
+      readOnly: false,
+      width: 6,
+      placeholder: 'Search countries...',
+      shouldFilter: true,
+      options: [], // Initialize with empty options, will be loaded from external source
+      external: {
+        url: 'https://jsonplaceholder.typicode.com/users',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        mapper: {
+          dataSource: '$',
+          dataMapper: {
+            id: 'id',
+            label: 'name',
+            value: 'id',
+            description: 'email'
+          }
+        }
+      },
+      validations: [
+        {
+          trigger: 'change',
+          type: 'required',
+          message: 'Please select a country'
+        }
+      ]
+    } as AutoCompleteField,
+    {
+      id: 'refresh-trigger',
+      name: 'refreshTrigger',
+      type: 'text',
+      label: 'Refresh Trigger (type anything to refresh autocomplete)',
+      helpText: 'Type anything in this field to trigger autocomplete options refresh',
+      disabled: false,
+      defaultValue: '',
+      value: '',
+      readOnly: false,
+      width: 6,
+      placeholder: 'Type here to trigger refresh...',
+      events: [
+        {
+          type: 'fetch',
+          target: 'autocomplete-test'
+        }
+      ]
+    },
     {
       id: 'file-upload-1',
       name: 'avatar',

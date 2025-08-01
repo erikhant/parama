@@ -123,6 +123,31 @@ const defineDefaultValue = (type: string) => {
         height: 2,
         content: ''
       } as BlockField;
+    case 'autocomplete':
+      const autocompleteOptions: FieldGroupItem[] = [
+        {
+          id: `option-${Date.now() + 1}`,
+          label: 'Option 1',
+          value: 'option-1'
+        },
+        {
+          id: `option-${Date.now() + 2}`,
+          label: 'Option 2',
+          value: 'option-2'
+        },
+        {
+          id: `option-${Date.now() + 3}`,
+          label: 'Option 3',
+          value: 'option-3'
+        }
+      ];
+      return {
+        ...newField,
+        transformer: '',
+        placeholder: 'Search options...',
+        shouldFilter: true,
+        options: autocompleteOptions
+      } as FormFieldType;
     default:
       return { ...newField, transformer: '' } as FormFieldType;
   }

@@ -1,0 +1,65 @@
+@layer components {
+  .command-input-wrapper:has(.autocomplete-input) {
+    @apply form-control;
+  }
+
+  .command-input-wrapper:has(.autocomplete-input:focus-visible) {
+    @apply border-primary/80 ring-2 ring-primary/40;
+  }
+
+  .command-input.autocomplete-input {
+    @apply border-none border-0 pl-0 h-auto placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-0 focus-visible:border-0 dark:placeholder:text-foreground-dark/50;
+  }
+
+  .autocomplete-content {
+    @apply relative mt-1.5;
+  }
+
+  .autocomplete-body {
+    @apply shadow-lg animate-in fade-in-50 zoom-in-95 origin-top-left absolute top-0 z-10 w-full rounded-lg bg-white outline-none dark:bg-slate-900;
+  }
+
+  .autocomplete-body--open {
+    @apply block;
+  }
+
+  .autocomplete-body--hide {
+    @apply hidden;
+  }
+
+  .autocomplete-list {
+    @apply rounded-lg ring-1 ring-slate-200;
+  }
+
+  .autocomplete-skeleton-wrapper {
+    @apply p-1;
+  }
+
+  .autocomplete-skeleton-loading {
+    @apply h-8 w-full;
+  }
+
+  .autocomplete-option-item {
+    @apply flex w-full items-center gap-2;
+  }
+
+  .autocomplete-option-item--selected {
+    @apply flex justify-between items-center;
+  }
+
+  .autocomplete-option-item-icon-selected {
+    @apply size-4;
+  }
+
+  .autocomplete-option-content {
+    @apply flex flex-col gap-1 w-full cursor-pointer select-none;
+  }
+
+  .autocomplete-option-description {
+    @apply text-xs text-slate-500 dark:text-slate-400;
+  }
+
+  .autocomplete-empty-item {
+    @apply rounded-sm px-2 py-3 text-center text-sm select-none;
+  }
+}

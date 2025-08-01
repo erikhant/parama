@@ -7,7 +7,8 @@ import {
   CheckboxField,
   DateField,
   SelectField,
-  MultiSelectField
+  MultiSelectField,
+  AutoCompleteField
 } from '@parama-dev/form-builder-types';
 import { Button } from '@parama-ui/react';
 import { ArrowLeftToLine, ArrowRightToLine } from 'lucide-react';
@@ -29,7 +30,14 @@ import { BlockContentEditor } from './block/BlockContentEditor';
 import { Customization } from './common/Customization';
 
 // Type guard to check if a field supports data customization
-type FieldWithDataCustomization = TextField | RadioField | CheckboxField | DateField | SelectField | MultiSelectField;
+type FieldWithDataCustomization =
+  | TextField
+  | RadioField
+  | CheckboxField
+  | DateField
+  | SelectField
+  | MultiSelectField
+  | AutoCompleteField;
 
 // Types for editor configuration
 interface EditorConfig {
@@ -77,7 +85,8 @@ const supportsDataCustomization = (field: FormField): field is FieldWithDataCust
     'checkbox',
     'date',
     'select',
-    'multiselect'
+    'multiselect',
+    'autocomplete'
   ].includes(field.type);
 };
 

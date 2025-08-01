@@ -43,7 +43,9 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
   // Filter fields based on event type - only select fields for fetch options
   const getFilteredFields = (eventType: string) => {
     if (eventType === 'fetch') {
-      return availableFields.filter((f) => f.type === 'select');
+      return availableFields.filter(
+        (f) => f.type === 'select' || f.type === 'multiselect' || f.type === 'autocomplete'
+      );
     }
     return availableFields;
   };
@@ -103,9 +105,9 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
         <Accordion type="multiple" className="mb-2">
           {('events' in field ? field.events : [])?.map((event: Events, index: number) => (
             <AccordionItem key={index} value={`event-${index}`}>
-              <AccordionTrigger className="text-sm py-2">
+              <AccordionTrigger className="text-sm py-2 text-start whitespace-nowrap">
                 {event.type === 'setValue' ? 'Set Value' : event.type === 'reset' ? 'Reset Field' : 'Fetch Options'}
-                <span className="ml-2 text-xs opacity-70">
+                <span className="ml-2 text-xs opacity-70 max-w-32 pr-1.5 text-ellipsis line-clamp-1">
                   →{' '}
                   {(() => {
                     const targetField = availableFields.find((f) => f.id === event.target);
