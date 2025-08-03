@@ -2,7 +2,9 @@ import './index.css';
 import '@parama-ui/react/styles';
 import { createRoot } from 'react-dom/client';
 import { FormEditor } from '@parama-dev/form-builder-editor';
+import { FormRenderer } from '@parama-dev/form-builder-renderer';
 import { FormSchema, AutoCompleteField } from '@parama-dev/form-builder-types';
+import { useState } from 'react';
 
 // Test FormData handling directly here
 function testFormDataHandling() {
@@ -296,6 +298,7 @@ const initialSchema: FormSchema = {
       type: 'submit',
       label: 'Submit Form',
       action: 'submit',
+      loadingText: 'Processing your request...',
       disabled: false,
       width: 12,
       appearance: {
@@ -308,14 +311,75 @@ const initialSchema: FormSchema = {
 };
 
 function App() {
+  const [currentSchema, setCurrentSchema] = useState(initialSchema);
+  const [view, setView] = useState<'editor' | 'renderer'>('editor');
+
   const handleSaveSchema = (schema: FormSchema) => {
     console.log('Schema saved:', schema);
+    setCurrentSchema(schema);
+  };
+
+  const handleSubmit = async (data: any, contentType: string) => {
+    console.log('Form submission started with data:', data);
+    console.log('Content type:', contentType);
+
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    console.log('Form submission completed!');
+    alert('Form submitted successfully!');
+  };
+
+  const handleChange = (data: any) => {
+    console.log('Form data changed:', data);
   };
 
   return (
     <div style={{ height: '100vh', width: '100%' }}>
       <TestFormDataButton />
-      <FormEditor schema={initialSchema} onSaveSchema={handleSaveSchema} />
+      <div
+        style={{
+          position: 'fixed',
+          top: '10px',
+          left: '10px',
+          zIndex: 1000,
+          display: 'flex',
+          gap: '10px'
+        }}>
+        <button
+          onClick={() => setView('editor')}
+          style={{
+            padding: '8px 12px',
+            backgroundColor: view === 'editor' ? '#007bff' : '#6c757d',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}>
+          Editor
+        </button>
+        <button
+          onClick={() => setView('renderer')}
+          style={{
+            padding: '8px 12px',
+            backgroundColor: view === 'renderer' ? '#007bff' : '#6c757d',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}>
+          Renderer
+        </button>
+      </div>
+
+      {view === 'editor' ? (
+        <FormEditor schema={currentSchema} onSaveSchema={handleSaveSchema} />
+      ) : (
+        <div style={{ padding: '80px 20px 20px 20px', maxWidth: '800px', margin: '0 auto' }}>
+          <h2 style={{ marginBottom: '20px' }}>Form Renderer - Test Loading State</h2>
+          <FormRenderer schema={currentSchema} onSubmit={handleSubmit} onChange={handleChange} />
+        </div>
+      )}
     </div>
   );
 }

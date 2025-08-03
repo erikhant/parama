@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-editor",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "description": "Visual form builder editor with drag-and-drop interface",
   "private": false,
   "main": "./dist/index.umd.js",

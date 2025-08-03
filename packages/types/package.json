@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-types",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Type definitions for the form builder system",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

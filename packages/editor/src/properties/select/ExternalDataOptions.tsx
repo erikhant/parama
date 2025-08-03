@@ -20,7 +20,7 @@ import {
   TooltipTrigger
 } from '@parama-ui/react';
 import type { ExternalDataSource, FieldGroupItem } from '@parama-dev/form-builder-types';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CircleAlertIcon, HelpCircleIcon, Loader2Icon, PlusIcon, Trash2Icon } from 'lucide-react';
 import { Editor } from '@monaco-editor/react';
 
@@ -65,6 +65,17 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [apiUrl, setApiUrl] = useState(external.url || '');
+
+  // Sync state when external prop changes (when switching between different select fields)
+  useEffect(() => {
+    setHeaders(arrayHeaders(external.headers || {}));
+    setExternal(external);
+    setApiUrl(external.url || '');
+    // Reset other states when switching fields
+    setResult(null);
+    setError(null);
+    setTab('headers');
+  }, [external]);
 
   const addHeader = () => {
     const newHeader: Header = {

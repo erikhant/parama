@@ -4,6 +4,6 @@
   }
 
   .popover-content.datepicker {
-    @apply w-auto p-0;
+    @apply w-auto p-0 z-[99];
   }
 }

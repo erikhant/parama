@@ -349,6 +349,7 @@ export interface AutoCompleteField extends BaseField, DataCustomization {
 export interface ButtonField extends Pick<BaseField, 'id' | 'label' | 'disabled' | 'width' | 'conditions'> {
   type: 'submit' | 'reset' | 'button';
   action: 'submit' | 'reset' | 'cancel';
+  loadingText?: string; // Text to show when button is in loading state (defaults to "Submitting...")
   appearance?: {
     color?: 'primary' | 'secondary';
     variant?: 'fill' | 'outline' | 'ghost' | 'shadow';

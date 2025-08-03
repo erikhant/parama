@@ -91,6 +91,19 @@ export const GeneralButtonEditor = ({ field, onChange }: GeneralButtonEditorProp
           />
         </div>
       </FormItem>
+      {(field as ButtonField).action === 'submit' && (
+        <FormItem orientation="horizontal">
+          <Label className="!col-span-3 text-sm font-medium">Loading Text</Label>
+          <div className="col-span-2">
+            <Input
+              disabled={editor.options?.generalSettings === 'readonly'}
+              placeholder="Submitting..."
+              value={(field as ButtonField).loadingText || ''}
+              onChange={(e) => onChange({ loadingText: e.target.value })}
+            />
+          </div>
+        </FormItem>
+      )}
     </SectionPanel>
   );
 };

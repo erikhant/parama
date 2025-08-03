@@ -2,7 +2,7 @@
 	"publishedPackages": [
 		{
 			"name": "@parama-dev/form-builder-editor",
-			"version": "0.5.1"
+			"version": "0.5.3"
 		}
 	]
 }

@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-renderer",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "React components for rendering forms from the form builder",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",

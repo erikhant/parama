@@ -33,8 +33,9 @@ export interface FormBuilderState {
   readOnlyFields: Set<string>;
   disabledFields: Set<string>;
   optionsCache: Record<string, any>;
-  validationQueue: Set<string>;
-  isProcessingQueue: boolean;
+  formState: {
+    isSubmitting: boolean;
+  };
   debouncedValidators: Record<string, DebouncedFunc<(value: any) => Promise<boolean>>>;
   workflowEngine: WorkflowEngine | null;
 
@@ -137,8 +138,9 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
     readOnlyFields: new Set(),
     disabledFields: new Set(),
     optionsCache: {},
-    validationQueue: new Set(),
-    isProcessingQueue: false,
+    formState: {
+      isSubmitting: false
+    },
     debouncedValidators: {},
     workflowEngine,
     needsConditionEval: new Set(),
@@ -917,16 +919,24 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @returns Promise with validation result and form data with field names as keys
        */
       submitForm: async () => {
-        const isValid = await get().actions.validateForm();
-        const data = get().actions.getFormDataByNames();
-        // Determine content type based on data type
-        const contentType = data instanceof FormData ? 'multipart/form-data' : 'application/json';
+        // Set loading state
+        set((state) => ({ ...state, formState: { isSubmitting: true } }));
 
-        return {
-          isValid,
-          data,
-          contentType
-        };
+        try {
+          const isValid = await get().actions.validateForm();
+          const data = get().actions.getFormDataByNames();
+          // Determine content type based on data type
+          const contentType = data instanceof FormData ? 'multipart/form-data' : 'application/json';
+
+          return {
+            isValid,
+            data,
+            contentType
+          };
+        } finally {
+          // Clear loading state
+          set((state) => ({ ...state, formState: { isSubmitting: false } }));
+        }
       },
 
       /**

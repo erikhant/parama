@@ -819,6 +819,17 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
         return (
           <SectionPanel title="Properties">
             <FormItem>
+              <Label>Placeholder</Label>
+              <Input
+                type="text"
+                placeholder="e.g. Select date"
+                value={field.placeholder || ''}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
+                onChange={handlePlaceholderChange}
+              />
+            </FormItem>
+            <NameField value={field.name || ''} onChange={handleNameChange} />
+            <FormItem>
               <Label>Mode</Label>
               <Select
                 value={field.mode}
@@ -854,16 +865,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                 </SelectContent>
               </Select>
             </FormItem>
-            <FormItem>
-              <Label>Placeholder</Label>
-              <Input
-                type="text"
-                placeholder="e.g. Select date"
-                value={field.placeholder || ''}
-                disabled={editor.options?.propertiesSettings === 'readonly'}
-                onChange={handlePlaceholderChange}
-              />
-            </FormItem>
+
             <FormItem>
               <Label>Date format</Label>
               <Select

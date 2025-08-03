@@ -190,26 +190,36 @@ BlockField.displayName = 'BlockField';
 // Separate component for button fields
 const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps['onCancel'] }> = memo(
   ({ field, onCancel }) => {
-    const { actions, mode } = useFormBuilder();
+    const { actions, mode, formState } = useFormBuilder();
 
     const handleReset = () => {
       actions.resetForm();
     };
 
+    // Determine if button should be disabled during submission
+    const isDisabled = field.action === 'submit' ? formState.isSubmitting : false;
+
     return (
       <>
-        {mode === 'render' && field.appearance?.stickyAtBottom && (
-          <div className="h-24 sticky bottom-0 bg-gradient-to-t from-white from-50% column-span-12 " />
-        )}
-        <div className={`column-span-${field.width} ${field.appearance?.stickyAtBottom ? 'sticky bottom-0' : ''}`}>
+        {mode === 'render' && field.appearance?.stickyAtBottom && <div className="bg-fade column-span-12" />}
+        <div
+          className={`column-span-${field.width} ${mode === 'render' && field.appearance?.stickyAtBottom ? 'sticky-btn' : ''}`}>
           <Button
             type={field.type}
             color={field.appearance?.color}
             size={field.appearance?.size}
             variant={field.appearance?.variant}
             className="w-full"
+            disabled={isDisabled}
             onClick={field.action === 'cancel' ? onCancel : field.action === 'reset' ? handleReset : undefined}>
-            {field.label}
+            {field.action === 'submit' && formState.isSubmitting ? (
+              <>
+                <LucideIcons.Loader2 className="h-4 w-4 animate-spin" />
+                {field.loadingText || 'Submitting...'}
+              </>
+            ) : (
+              field.label
+            )}
           </Button>
         </div>
       </>
@@ -614,12 +624,12 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
           placeholder: field.placeholder,
           dateFormat: field.options?.dateFormat,
           disabled: disabledDates,
+          modalPopover: false,
           startMonth: field.options?.restrictedMonths?.[0] ? new Date(field.options.restrictedMonths[0]) : undefined,
           endMonth: field.options?.restrictedMonths?.[1] ? new Date(field.options.restrictedMonths[1]) : undefined,
           captionLayout: field.options?.dropdownType as DatePickerProps['captionLayout'],
           container: document.getElementById(`item__${field.id}`),
-          className: !validationState.isValid ? 'border-red-500' : 'border-gray-300',
-          popoverClassName: 'z-[99]'
+          className: !validationState.isValid ? 'border-red-500' : 'border-gray-300'
         };
 
         if (field.mode === 'single') {
