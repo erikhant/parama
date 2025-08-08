@@ -36,10 +36,12 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
+  Skeleton,
   FileUpload,
   Textarea
 } from '@parama-ui/react';
 import * as LucideIcons from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 
@@ -188,16 +190,16 @@ const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
 BlockField.displayName = 'BlockField';
 
 // Separate component for button fields
-const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps['onCancel'] }> = memo(
-  ({ field, onCancel }) => {
+const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps['onCancel']; disabled?: boolean }> =
+  memo(({ field, onCancel, disabled }) => {
     const { actions, mode, formState } = useFormBuilder();
 
     const handleReset = () => {
       actions.resetForm();
     };
 
-    // Determine if button should be disabled during submission
-    const isDisabled = field.action === 'submit' ? formState.isSubmitting : false;
+    // For submit buttons, also check the internal submission state
+    const isButtonDisabled = disabled || (field.action === 'submit' && formState.isSubmitting);
 
     return (
       <>
@@ -210,12 +212,12 @@ const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps
             size={field.appearance?.size}
             variant={field.appearance?.variant}
             className="w-full"
-            disabled={isDisabled}
+            disabled={isButtonDisabled}
             onClick={field.action === 'cancel' ? onCancel : field.action === 'reset' ? handleReset : undefined}>
             {field.action === 'submit' && formState.isSubmitting ? (
               <>
-                <LucideIcons.Loader2 className="h-4 w-4 animate-spin" />
-                {field.loadingText || 'Submitting...'}
+                <Loader2Icon className="size-4 animate-spin" />
+                {field.loadingText || null}
               </>
             ) : (
               field.label
@@ -224,8 +226,7 @@ const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps
         </div>
       </>
     );
-  }
-);
+  });
 
 ButtonField.displayName = 'ButtonField';
 
@@ -238,7 +239,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
   const validationState = actions.getFieldValidation(field.id);
 
   const [textValue, setTextValue] = useState<string>(value || '');
-  const [debouncedTextValue] = useDebounce(textValue, 100); // Reduced to 100ms for better responsiveness
+  const [debouncedTextValue] = useDebounce(textValue, 150); // Reduced to 100ms for better responsiveness
   const [firstRender, setFirstRender] = useState(true);
 
   const handleChange = useCallback(
@@ -393,6 +394,43 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     }
     return undefined;
   });
+
+  // State to track the parent element for date picker
+  const [parentElement, setParentElement] = useState<HTMLElement | null>(null);
+
+  // Effect to find and set the parent element for date picker
+  useEffect(() => {
+    if (field.type === 'date') {
+      const findParentElement = () => {
+        const element = document.getElementById(`item__${field.id}`);
+        if (element && !parentElement) {
+          setParentElement(element);
+          return true; // Element found
+        }
+        return false; // Element not found
+      };
+
+      // Try to find the element immediately
+      if (findParentElement()) {
+        return; // Element found immediately, no need for observer
+      }
+
+      // If not found, set up a mutation observer to watch for it
+      const observer = new MutationObserver(() => {
+        if (findParentElement()) {
+          observer.disconnect(); // Stop observing once found
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      // Cleanup observer when component unmounts
+      return () => observer.disconnect();
+    }
+  }, [field.type, field.id]); // Removed parentElement from dependencies
 
   const handleSingleDateChange = useCallback(
     (date: Date | undefined) => {
@@ -628,9 +666,13 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
           startMonth: field.options?.restrictedMonths?.[0] ? new Date(field.options.restrictedMonths[0]) : undefined,
           endMonth: field.options?.restrictedMonths?.[1] ? new Date(field.options.restrictedMonths[1]) : undefined,
           captionLayout: field.options?.dropdownType as DatePickerProps['captionLayout'],
-          container: document.getElementById(`item__${field.id}`),
           className: !validationState.isValid ? 'border-red-500' : 'border-gray-300'
         };
+
+        // Only render DatePicker if we have a parent element or if we're in editor mode
+        if (!parentElement && mode !== 'editor') {
+          return <Skeleton className="h-12">Loading date picker...</Skeleton>;
+        }
 
         if (field.mode === 'single') {
           return (
@@ -640,6 +682,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
               selected={singleDate}
               onSelect={handleSingleDateChange}
               {...commonDateProps}
+              container={parentElement}
             />
           );
         } else if (field.mode === 'multiple') {
@@ -652,6 +695,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
               min={field.options?.min}
               max={field.options?.max}
               {...commonDateProps}
+              container={parentElement}
             />
           );
         } else {
@@ -665,6 +709,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
               max={field.options?.max}
               onSelect={handleDateRangeChange}
               {...commonDateProps}
+              container={parentElement}
             />
           );
         }
@@ -816,7 +861,8 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     createCheckboxHandler,
     selectOptions,
     multiSelectOptions,
-    autocompleteOptions
+    autocompleteOptions,
+    parentElement
   ]);
 
   if (!isVisible) return null;
@@ -848,15 +894,16 @@ InputField.displayName = 'InputField';
 // Main router component that decides which sub-component to render
 export const FormField: React.FC<{
   field: FormFieldType;
+  isDisabled?: boolean;
   onChange?: FormBuilderProps['onChange'];
   onCancel?: FormBuilderProps['onCancel'];
-}> = ({ field, onChange, onCancel }) => {
+}> = ({ field, onChange, onCancel, isDisabled }) => {
   if (field.type === 'block' || field.type === 'spacer') {
     return <BlockField field={field} />;
   }
 
   if (field.type === 'submit' || field.type === 'reset' || field.type === 'button') {
-    return <ButtonField field={field as ButtonFieldType} onCancel={onCancel} />;
+    return <ButtonField field={field as ButtonFieldType} onCancel={onCancel} disabled={isDisabled} />;
   }
 
   return <InputField field={field as InputFieldType} />;

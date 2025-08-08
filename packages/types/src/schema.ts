@@ -119,9 +119,16 @@ export interface FormBuilderProps {
   validators?: ValidatorRegistry;
   data?: Record<string, any>;
   variables?: VariableContext;
-  onSubmit?: (data: Record<string, any> | FormData, contentType: 'application/json' | 'multipart/form-data') => void;
+  onSubmit?: (
+    data: Record<string, any> | FormData,
+    contentType: 'application/json' | 'multipart/form-data'
+  ) => Promise<void> | void;
   onChange?: (data: Record<string, any>) => void;
   onCancel?: () => void;
+}
+
+export interface FormState {
+  isSubmitting: boolean;
 }
 
 export interface FormEditorOptions {

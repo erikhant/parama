@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-core",
-  "version": "0.4.2",
+  "version": "0.4.4",
   "description": "Core functionality for the form builder system",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",

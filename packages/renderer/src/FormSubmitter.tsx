@@ -9,14 +9,22 @@ interface FormSubmitterProps extends Omit<FormBuilderProps, 'schema' | 'validato
 }
 
 export const FormSubmitter: React.FC<FormSubmitterProps> = ({ onSubmit, onChange, onCancel, className }) => {
-  const { schema, actions } = useFormBuilder();
+  const { schema, actions, formState } = useFormBuilder();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const { data, isValid, contentType } = await actions.submitForm();
+    try {
+      actions.setSubmissionState({ isSubmitting: true });
 
-    if (isValid) {
-      onSubmit?.(data, contentType);
+      const { data, isValid, contentType } = await actions.submitForm();
+
+      if (isValid) {
+        await onSubmit?.(data, contentType);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+    } finally {
+      actions.setSubmissionState({ isSubmitting: false });
     }
   };
 
@@ -29,7 +37,13 @@ export const FormSubmitter: React.FC<FormSubmitterProps> = ({ onSubmit, onChange
       className={cn(`grid column-${schema.layout.colSize} gap-size-${schema.layout.gap}`, className)}
       onSubmit={handleSubmit}>
       {schema.fields.map((field) => (
-        <FormField key={field.id} field={field} onChange={handleChange} onCancel={onCancel} />
+        <FormField
+          key={field.id}
+          field={field}
+          onChange={handleChange}
+          onCancel={onCancel}
+          isDisabled={formState.isSubmitting}
+        />
       ))}
     </form>
   );

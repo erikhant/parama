@@ -4,6 +4,7 @@ import type {
   FormBuilderProps,
   FormField,
   FormSchema,
+  FormState,
   ValidationState,
   ValidationTrigger,
   ValidatorRegistry,
@@ -33,9 +34,7 @@ export interface FormBuilderState {
   readOnlyFields: Set<string>;
   disabledFields: Set<string>;
   optionsCache: Record<string, any>;
-  formState: {
-    isSubmitting: boolean;
-  };
+  formState: FormState;
   debouncedValidators: Record<string, DebouncedFunc<(value: any) => Promise<boolean>>>;
   workflowEngine: WorkflowEngine | null;
 
@@ -87,6 +86,9 @@ export interface FormBuilderState {
     getVariable: (key: string) => any;
     getVariables: () => VariableContext;
     resolveFieldValue: (field: FormField, property: keyof FormField) => any;
+
+    // Submission state management
+    setSubmissionState: (state: Partial<FormState>) => void;
 
     // applyTemplate: (templateId: string) => void;
     submitForm: () => Promise<{
@@ -786,6 +788,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       resetForm: () => {
         set((state) => ({
           ...state,
+          schema: { ...state.schema, fields: state.schema.fields.map((f) => ({ ...f, value: undefined })) },
           formData: {},
           fileData: new FormData() // Clear file data
         }));
@@ -919,24 +922,16 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @returns Promise with validation result and form data with field names as keys
        */
       submitForm: async () => {
-        // Set loading state
-        set((state) => ({ ...state, formState: { isSubmitting: true } }));
+        const isValid = await get().actions.validateForm();
+        const data = get().actions.getFormDataByNames();
+        // Determine content type based on data type
+        const contentType = data instanceof FormData ? 'multipart/form-data' : 'application/json';
 
-        try {
-          const isValid = await get().actions.validateForm();
-          const data = get().actions.getFormDataByNames();
-          // Determine content type based on data type
-          const contentType = data instanceof FormData ? 'multipart/form-data' : 'application/json';
-
-          return {
-            isValid,
-            data,
-            contentType
-          };
-        } finally {
-          // Clear loading state
-          set((state) => ({ ...state, formState: { isSubmitting: false } }));
-        }
+        return {
+          isValid,
+          data,
+          contentType
+        };
       },
 
       /**
@@ -1081,6 +1076,17 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const variables = get().variables;
 
         return resolveInterpolatableValue(value, variables);
+      },
+
+      /**
+       * Sets the submission state
+       * @param isSubmitting - Whether the form is currently submitting
+       */
+      setSubmissionState: (state: Partial<FormState>) => {
+        set((prev) => ({
+          ...prev,
+          formState: { ...prev.formState, ...state }
+        }));
       }
     }
   };
