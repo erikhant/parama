@@ -1,26 +1,31 @@
 import type {
+  ExternalDataSource,
+  FieldGroupItem,
   FormBuilderProps,
   FormField,
   FormSchema,
-  FormTemplate,
+  FormState,
   ValidationState,
   ValidationTrigger,
-  ValidatorRegistry
-} from '@form-builder/types';
-import { debounce, DebouncedFunc } from 'lodash-es';
+  ValidatorRegistry,
+  VariableContext
+} from '@parama-dev/form-builder-types';
+import { debounce, DebouncedFunc, get as getObject } from 'lodash-es';
 import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';
 import { WorkflowEngine } from './workflow/engine';
 import { evaluateValidations } from './validations/evaluate';
+import { interceptExpressionTemplate, interpolate, interpolateVariables, resolveInterpolatableValue } from './utils';
 
 export interface FormBuilderState {
   // Core form state
   schema: FormSchema;
   formData: Record<string, any>;
+  fileData: FormData; // File storage using FormData
   validators: ValidatorRegistry;
+  variables: VariableContext;
   selectedFieldId: string | null;
-  // templates: FormTemplate[];
-  mode: 'editor' | 'preview';
+  mode: 'editor' | 'render';
   screenSize: 'mobile' | 'tablet' | 'desktop';
 
   // Enhanced state properties
@@ -29,8 +34,7 @@ export interface FormBuilderState {
   readOnlyFields: Set<string>;
   disabledFields: Set<string>;
   optionsCache: Record<string, any>;
-  validationQueue: Set<string>;
-  isProcessingQueue: boolean;
+  formState: FormState;
   debouncedValidators: Record<string, DebouncedFunc<(value: any) => Promise<boolean>>>;
   workflowEngine: WorkflowEngine | null;
 
@@ -49,13 +53,19 @@ export interface FormBuilderState {
     insertField: (index: number, field: FormField) => void;
     removeField: (id: string) => void;
     selectField: (id: string | null) => void;
-    changeMode: (mode: 'editor' | 'preview') => void;
+    changeMode: (mode: 'editor' | 'render') => void;
     changeScreenSize: (size: 'mobile' | 'tablet' | 'desktop') => void;
 
     // Data management
     updateFieldValue: (id: string, value: any) => void;
-    getFormData: () => Record<string, any>;
-    getFormDataByNames: () => Record<string, any>;
+    refreshDynamicOptions: (field: FormField) => Promise<FieldGroupItem[]>;
+    mapResponseToOptions: (data: any, mapper: any) => FieldGroupItem[];
+    getFormData: () => Record<string, any> | FormData;
+    getFormDataByNames: () => Record<string, any> | FormData;
+    getFieldFiles: (fieldId: string) => File[];
+    getFormDataWithFiles: () => { data: Record<string, any>; files: FormData };
+    addFileField: (fieldId: string, file: File) => boolean;
+    removeFileField: (fieldId: string, fileIndex: number) => boolean;
     resetForm: () => void;
 
     // Validation system
@@ -70,8 +80,22 @@ export interface FormBuilderState {
     // Conditional logic
     refreshFieldOptions: (fieldId: string) => Promise<void>;
 
+    // Variable management
+    updateVariables: (variables: VariableContext) => void;
+    updateVariable: (key: string, value: any) => void;
+    getVariable: (key: string) => any;
+    getVariables: () => VariableContext;
+    resolveFieldValue: (field: FormField, property: keyof FormField) => any;
+
+    // Submission state management
+    setSubmissionState: (state: Partial<FormState>) => void;
+
     // applyTemplate: (templateId: string) => void;
-    submitForm: () => Promise<{ isValid: boolean; data: Record<string, any> }>;
+    submitForm: () => Promise<{
+      isValid: boolean;
+      data: Record<string, any> | FormData;
+      contentType: 'application/json' | 'multipart/form-data';
+    }>;
   };
 }
 
@@ -102,10 +126,12 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
     // Initial state
     schema: defaultSchema,
     formData: {},
+    fileData: new FormData(),
     validators: {},
+    variables: {},
     templates: [],
     selectedFieldId: null,
-    mode: 'editor',
+    mode: 'render',
     screenSize: 'desktop',
 
     // Enhanced state
@@ -114,8 +140,9 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
     readOnlyFields: new Set(),
     disabledFields: new Set(),
     optionsCache: {},
-    validationQueue: new Set(),
-    isProcessingQueue: false,
+    formState: {
+      isSubmitting: false
+    },
     debouncedValidators: {},
     workflowEngine,
     needsConditionEval: new Set(),
@@ -126,11 +153,30 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * Initializes the form with schema, validators, and initial data
        * @param props - Form builder initialization properties
        */
-      initialize: ({ schema, validators = {}, data = {} }) => {
+      initialize: ({ schema, validators = {}, data = {}, variables = {} }) => {
+        // Ensure variables is always an object to prevent undefined issues
+        const safeVariables = variables || {};
+        // Extract initial values from schema fields if no explicit data provided
+        let initialFormData = data;
+        if (Object.keys(data).length === 0 && schema?.fields) {
+          initialFormData = schema.fields.reduce(
+            (acc, field) => {
+              if ('value' in field && field.value !== undefined) {
+                acc[field.id] = field.value;
+              } else if ('defaultValue' in field && field.defaultValue !== undefined) {
+                acc[field.id] = field.defaultValue;
+              }
+              return acc;
+            },
+            {} as Record<string, any>
+          );
+        }
+
         set({
           schema: schema || defaultSchema,
-          formData: data,
+          formData: initialFormData,
           validators,
+          variables: safeVariables,
           visibleFields: new Set(schema?.fields.map((f) => f.id) || []),
           validation:
             schema?.fields.reduce(
@@ -284,16 +330,33 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * related to the removed field are also cleaned up in the workflow engine.
        */
       removeField: (id) => {
+        const field = get().actions.getField(id);
+        const newFileData = new FormData();
+
+        if (field && field.type === 'file') {
+          // Remove file data for file fields
+          const currentFileData = get().fileData;
+          const fieldName = field.name || field.id;
+
+          // Create new FormData and copy existing entries except current field
+          for (const [key, value] of currentFileData.entries()) {
+            if (key !== fieldName) {
+              newFileData.append(key, value);
+            }
+          }
+        }
         set((state) => ({
           schema: {
             ...state.schema,
             fields: state.schema.fields.filter((f) => f.id !== id)
           },
+          fileData: field?.type === 'file' ? newFileData : state.fileData,
           // Clean up related state
           validation: Object.fromEntries(Object.entries(state.validation).filter(([key]) => key !== id)),
           visibleFields: new Set(Array.from(state.visibleFields).filter((fieldId) => fieldId !== id)),
           disabledFields: new Set(Array.from(state.disabledFields).filter((fieldId) => fieldId !== id))
         }));
+
         workflowEngine.removeField(id);
         workflowEngine.evaluateConditions();
       },
@@ -322,7 +385,31 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const field = get().actions.getField(id);
         if (!field) return undefined;
 
-        return get().formData[field.id] ?? ('defaultValue' in field ? field.defaultValue : undefined);
+        if (field.type === 'file') {
+          // Get files from FormData
+          const fieldName = field.name || field.id;
+          const isMultiple = field.options?.multiple || false;
+          const files: File[] = [];
+
+          for (const [key, value] of get().fileData.entries()) {
+            if (key === fieldName && value instanceof File) {
+              files.push(value);
+            }
+          }
+
+          if (files.length === 0) {
+            return undefined;
+          } else if (isMultiple) {
+            // Return array for multiple files
+            return files;
+          } else {
+            // Return single file for non-multiple fields
+            return files[0];
+          }
+        } else {
+          // Get regular field value
+          return get().formData[field.id] ?? ('defaultValue' in field ? field.defaultValue : undefined);
+        }
       },
 
       /**
@@ -334,13 +421,13 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       },
 
       /**
-       * Changes the form mode (editor/preview)
+       * Changes the form mode (editor/render)
        * @param mode - New mode to set
        */
       changeMode: (mode) => {
         set({ mode });
-        // Reset selected field when switching to preview mode
-        if (mode === 'preview') {
+        // Reset selected field when switching to render mode
+        if (mode === 'render') {
           set({ selectedFieldId: null });
         }
       },
@@ -358,24 +445,188 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @param value - New field value
        */
       updateFieldValue: (fieldId, value) => {
-        // Initialize debounced validator if not exists
-        if (!get().debouncedValidators[fieldId]) {
-          set((state) => ({
-            debouncedValidators: {
-              ...state.debouncedValidators,
-              [fieldId]: debounce(() => get().actions.validateField(fieldId, 'change'), 300, {
-                leading: false,
-                trailing: true
-              })
+        const field = get().actions.getField(fieldId);
+
+        if (field?.type === 'file') {
+          const currentFileData = get().fileData;
+          const fieldName = field.name;
+          const isMultiple = field.options?.multiple || false;
+
+          // Add new files based on multiple option
+          if (Array.isArray(value)) {
+            if (isMultiple) {
+              currentFileData.delete(fieldName); // Clear existing files
+              value.forEach((file: File) => {
+                currentFileData.append(fieldName, file);
+              });
+            } else {
+              // Single file only - take the first file
+              const firstFile = value[0];
+              if (firstFile) {
+                currentFileData.set(fieldName, firstFile);
+              }
             }
+          } else if (value instanceof File) {
+            // Single file provided
+            currentFileData.set(fieldName, value);
+          }
+
+          set((state) => ({ ...state, fileData: currentFileData }));
+        } else {
+          // Handle regular fields - store in formData
+          // Initialize debounced validator if not exists
+          if (!get().debouncedValidators[fieldId]) {
+            set((state) => ({
+              debouncedValidators: {
+                ...state.debouncedValidators,
+                [fieldId]: debounce(() => get().actions.validateField(fieldId, 'change'), 300, {
+                  leading: false,
+                  trailing: true
+                })
+              }
+            }));
+          }
+
+          set((state) => ({
+            formData: { ...state.formData, [fieldId]: value }
           }));
         }
 
-        set((state) => ({
-          formData: { ...state.formData, [fieldId]: value }
-        }));
-
         workflowEngine.processFieldChange(fieldId);
+      },
+
+      /**
+       * Refreshes dynamic options for a field
+       * @param field Form field to refresh
+       */
+      async refreshDynamicOptions(field: FormField): Promise<FieldGroupItem[]> {
+        const formData = get().formData;
+
+        if (
+          (field.type !== 'select' && field.type !== 'multiselect' && field.type !== 'autocomplete') ||
+          !field.external
+        ) {
+          return [];
+        }
+        const { url, headers, mapper } = field.external;
+
+        try {
+          // Resolve URL if it's a VariableReference
+          const resolvedUrl = resolveInterpolatableValue(url, get().variables);
+          const interceptedExpression = interceptExpressionTemplate(resolvedUrl, get());
+          const serializedUrl = interpolate(interceptedExpression, formData).replace(/"/g, '');
+
+          // Resolve headers if they contain variable references
+          const resolvedHeaders = headers ? resolveInterpolatableValue(headers, get().variables) : {};
+
+          const response = await fetch(serializedUrl, {
+            headers: { ...resolvedHeaders }
+          });
+
+          if (!response.ok) {
+            get().actions.setFieldError(field.id, `Failed to load options: ${response.statusText}`);
+            return [];
+          }
+
+          const data = await response.json();
+          const mappedOptions = get().actions.mapResponseToOptions(data, mapper);
+
+          // Clear any previous errors
+          get().actions.clearFieldError(field.id);
+
+          return mappedOptions;
+        } catch (error) {
+          get().actions.setFieldError(
+            field.id,
+            `Error loading options: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+          return [];
+        }
+      },
+
+      /**
+       * Maps API response to FieldGroupItem format with flexible structure handling
+       * @param data API response data
+       * @param mapper Mapping configuration
+       * @returns Array of mapped options
+       */
+      mapResponseToOptions: (data: any, mapper: ExternalDataSource<FieldGroupItem>['mapper']): FieldGroupItem[] => {
+        try {
+          // Extract the data source based on mapper configuration
+          let sourceData = data;
+
+          // If dataSource is provided, try to extract nested data
+          if (mapper?.dataSource) {
+            sourceData = getObject(data, mapper?.dataSource, data);
+          }
+
+          // Ensure we have an array to work with
+          if (!Array.isArray(sourceData)) {
+            console.warn('Response data is not an array, wrapping in array');
+            sourceData = [sourceData];
+          }
+
+          return sourceData.map((item: any, index: number): FieldGroupItem => {
+            // Handle different response structures
+            if (typeof item === 'string') {
+              return {
+                id: uuid(),
+                label: item,
+                value: item
+              } as FieldGroupItem;
+            } else if (typeof item === 'object' && item !== null) {
+              // Case: Object with properties
+              const mappedItem: FieldGroupItem = {
+                id: uuid(),
+                label: '',
+                value: ''
+              };
+
+              // Use mapper configuration if available
+              if (mapper?.dataMapper) {
+                mappedItem.id = getObject(item, mapper!.dataMapper.id) || uuid();
+                mappedItem.label =
+                  getObject(item, mapper!.dataMapper.label) ||
+                  getObject(item, mapper!.dataMapper.value) ||
+                  `Option ${index + 1}`;
+                mappedItem.value =
+                  getObject(item, mapper!.dataMapper.value) ||
+                  getObject(item, mapper!.dataMapper.id) ||
+                  `option-${index}`;
+              } else {
+                // Auto-detect common property names
+                const id = item.id || item.key || item.value || index;
+                const label =
+                  item.label ||
+                  item.name ||
+                  item.title ||
+                  item.text ||
+                  item.display ||
+                  item.id ||
+                  item.key ||
+                  item.value ||
+                  `Option ${index + 1}`;
+                const value = item.value || item.id || item.key || item.name || index;
+
+                mappedItem.id = String(id);
+                mappedItem.label = String(label);
+                mappedItem.value = String(value);
+              }
+
+              return mappedItem;
+            } else {
+              // Fallback for primitive values (numbers, booleans, etc.)
+              return {
+                id: uuid(),
+                label: String(item),
+                value: String(item)
+              };
+            }
+          });
+        } catch (error) {
+          console.error('Error mapping response to options:', error);
+          return [];
+        }
       },
 
       /**
@@ -528,31 +779,8 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const field = get().actions.getField(fieldId);
         if (!field) return;
 
-        await workflowEngine.refreshDynamicOptions(field);
+        await get().actions.refreshDynamicOptions(field);
       },
-
-      /**
-       * Applies a template to the form
-       * @param templateId - Template ID to apply
-       */
-      // applyTemplate: (templateId) => {
-      //   const { templates } = get();
-      //   const template = templates.find((t) => t.id === templateId);
-      //   if (template) {
-      //     set({
-      //       schema: template.schema,
-      //       formData: {},
-      //       // Reset all enhanced state
-      //       validation: {},
-      //       visibleFields: new Set(template.schema.fields.map((f) => f.id)),
-      //       disabledFields: new Set(),
-      //       optionsCache: {}
-      //     });
-      //     template.schema.fields.forEach((field) => {
-      //       workflowEngine.registerDependencies(field);
-      //     });
-      //   }
-      // },
 
       /**
        * Resets form data while keeping schema
@@ -560,7 +788,9 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       resetForm: () => {
         set((state) => ({
           ...state,
-          formData: {}
+          schema: { ...state.schema, fields: state.schema.fields.map((f) => ({ ...f, value: undefined })) },
+          formData: {},
+          fileData: new FormData() // Clear file data
         }));
         // Clear all validation states and errors
         get().actions.clearValidation();
@@ -569,42 +799,122 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
 
       /**
        * Gets current form data
-       * @returns Current form data with field IDs as keys
+       * @returns Current form data with field IDs as keys - FormData if files exist, otherwise JSON
        */
       getFormData: () => {
-        return get().formData;
+        const formData = get().formData;
+        const fileData = get().fileData;
+
+        // Check if FormData has any entries
+        const hasFiles = Array.from(fileData.keys()).length > 0;
+
+        if (hasFiles) {
+          // Create new FormData and merge both
+          const mergedData = new FormData();
+
+          // Add regular form data
+          Object.entries(formData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              mergedData.append(key, String(value));
+            }
+          });
+
+          // Add file data (files are already in FormData)
+          for (const [key, value] of fileData.entries()) {
+            mergedData.append(key, value);
+          }
+
+          return mergedData;
+        } else {
+          // Return JSON object for non-file forms
+          return formData;
+        }
       },
 
       /**
        * Gets current form data with field names as keys
-       * @returns Current form data remapped to use field names instead of IDs
+       * @returns Current form data remapped to use field names instead of IDs - FormData if files exist, otherwise JSON
        */
       getFormDataByNames: () => {
         const formData = get().formData;
+        const fileData = get().fileData;
+        const schema = get().schema;
         const usedNames = new Set<string>();
 
-        // Remap form data keys from field IDs to field names
-        // Only include fields that have both name and data value
-        return get().schema.fields.reduce(
-          (acc, field) => {
-            // Only process fields that have a name property (excluding ButtonField and BlockField)
+        // Check if we have files
+        const hasFiles = Array.from(fileData.entries()).length > 0;
+
+        if (hasFiles) {
+          const mergedData = new FormData();
+
+          // Process each field in schema order
+          schema.fields.forEach((field) => {
             if ('name' in field && field.name) {
-              const fieldValue = formData[field.id];
-              if (fieldValue !== undefined) {
-                // Handle duplicate field names by appending the field ID
-                let fieldName = field.name;
-                if (usedNames.has(fieldName)) {
-                  fieldName = `${field.name}_${field.id}`;
-                  console.warn(`Duplicate field name "${field.name}" found. Using "${fieldName}" instead.`);
+              let fieldName = field.name;
+
+              // Handle duplicate names
+              if (usedNames.has(fieldName)) {
+                fieldName = `${field.name}_${field.id}`;
+                console.warn(`Duplicate field name "${field.name}" found. Using "${fieldName}" instead.`);
+              }
+              usedNames.add(fieldName);
+
+              if (field.type === 'file') {
+                // Copy files for this field from fileData
+                const storedFieldName = field.name;
+                let filesFound = 0;
+                for (const [key, value] of fileData.entries()) {
+                  if (key === storedFieldName) {
+                    mergedData.append(fieldName, value);
+                    filesFound++;
+                  }
                 }
-                usedNames.add(fieldName);
-                acc[fieldName] = fieldValue;
+              } else {
+                const fieldValue = formData[field.id];
+                if (fieldValue !== undefined) {
+                  // Apply transformer if exists
+                  if ('transformer' in field && field.transformer) {
+                    const interceptedTemplate = interceptExpressionTemplate(field.transformer, get());
+                    const transformedValue = interpolate(interceptedTemplate, formData);
+                    mergedData.append(fieldName, JSON.stringify(transformedValue));
+                  } else {
+                    mergedData.append(fieldName, JSON.stringify(fieldValue));
+                  }
+                }
               }
             }
-            return acc;
-          },
-          {} as Record<string, any>
-        );
+          });
+
+          return mergedData;
+        } else {
+          // Return JSON object using existing logic for non-file forms
+          return schema.fields.reduce(
+            (acc, field) => {
+              // Only process fields that have a name property (excluding ButtonField and BlockField)
+              if ('name' in field && field.name) {
+                const fieldValue = formData[field.id];
+                if (fieldValue !== undefined) {
+                  // Handle duplicate field names by appending the field ID
+                  let fieldName = field.name;
+                  if (usedNames.has(fieldName)) {
+                    fieldName = `${field.name}_${field.id}`;
+                    console.warn(`Duplicate field name "${field.name}" found. Using "${fieldName}" instead.`);
+                  }
+                  usedNames.add(fieldName);
+                  if ('transformer' in field && field.transformer) {
+                    const interceptedTemplate = interceptExpressionTemplate(field.transformer, get());
+                    const dataTransform = interpolate(interceptedTemplate, formData);
+                    acc[fieldName] = dataTransform;
+                  } else {
+                    acc[fieldName] = fieldValue;
+                  }
+                }
+              }
+              return acc;
+            },
+            {} as Record<string, any>
+          );
+        }
       },
 
       /**
@@ -613,12 +923,170 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        */
       submitForm: async () => {
         const isValid = await get().actions.validateForm();
-        const remappedData = get().actions.getFormDataByNames();
+        const data = get().actions.getFormDataByNames();
+        // Determine content type based on data type
+        const contentType = data instanceof FormData ? 'multipart/form-data' : 'application/json';
 
         return {
           isValid,
-          data: remappedData
+          data,
+          contentType
         };
+      },
+
+      /**
+       * Gets files for a specific field
+       * @param fieldId - Field ID to get files for
+       * @returns Array of File objects for the field
+       */
+      getFieldFiles: (fieldId: string) => {
+        const field = get().actions.getField(fieldId);
+        if (!field || field.type !== 'file') return [];
+
+        const fieldName = field.name;
+        const files: File[] = [];
+
+        for (const [key, value] of get().fileData.entries()) {
+          if (key === fieldName && value instanceof File) {
+            files.push(value);
+          }
+        }
+
+        return files;
+      },
+
+      /**
+       * Adds a file to a file field (respects multiple option)
+       * @param fieldId - Field ID to add file to
+       * @param file - File to add
+       * @returns Whether the file was added successfully
+       */
+      addFileField: (fieldId: string, file: File) => {
+        const field = get().actions.getField(fieldId);
+        if (!field || field.type !== 'file') return false;
+
+        const currentFiles = get().actions.getFieldFiles(fieldId);
+        const isMultiple = field.options?.multiple || false;
+        const maxFiles = field.options?.maxFiles;
+
+        if (!isMultiple && currentFiles.length > 0) {
+          // Replace existing file for single file fields
+          get().actions.updateFieldValue(fieldId, [file]);
+        } else if (isMultiple) {
+          // Add to existing files for multiple file fields
+          const newFiles = [...currentFiles, file];
+
+          // Respect maxFiles limit
+          if (maxFiles && newFiles.length > maxFiles) {
+            console.warn(`Maximum files limit (${maxFiles}) exceeded for field ${fieldId}`);
+            return false;
+          }
+
+          get().actions.updateFieldValue(fieldId, newFiles);
+        } else {
+          // Set as first file
+          get().actions.updateFieldValue(fieldId, [file]);
+        }
+
+        return true;
+      },
+
+      /**
+       * Removes a file from a file field
+       * @param fieldId - Field ID to remove file from
+       * @param fileIndex - Index of file to remove
+       * @returns Whether the file was removed successfully
+       */
+      removeFileField: (fieldId: string, fileIndex: number) => {
+        const field = get().actions.getField(fieldId);
+        if (!field || field.type !== 'file') return false;
+
+        const currentFiles = get().actions.getFieldFiles(fieldId);
+
+        if (fileIndex < 0 || fileIndex >= currentFiles.length) {
+          console.warn(`Invalid file index ${fileIndex} for field ${fieldId}`);
+          return false;
+        }
+
+        const newFiles = currentFiles.filter((_, index) => index !== fileIndex);
+        get().actions.updateFieldValue(fieldId, newFiles);
+
+        return true;
+      },
+
+      /**
+       * Gets form data with files separated
+       * @returns Object with separate data and files properties
+       */
+      getFormDataWithFiles: () => ({
+        data: get().formData,
+        files: get().fileData
+      }),
+
+      // Variable management actions
+      /**
+       * Updates all variables in the context
+       * @param variables - New variable context
+       */
+      updateVariables: (variables: VariableContext) => {
+        // Ensure variables is always an object to prevent undefined issues
+        const safeVariables = variables || {};
+        set({ variables: safeVariables });
+      },
+
+      /**
+       * Updates a single variable in the context
+       * @param key - Variable key
+       * @param value - Variable value
+       */
+      updateVariable: (key: string, value: any) => {
+        set((state) => ({
+          variables: {
+            ...state.variables,
+            [key]: value
+          }
+        }));
+      },
+
+      /**
+       * Gets a single variable value
+       * @param key - Variable key
+       * @returns Variable value or undefined
+       */
+      getVariable: (key: string) => {
+        return get().variables[key];
+      },
+
+      /**
+       * Gets all variables
+       * @returns Current variable context
+       */
+      getVariables: () => {
+        return get().variables;
+      },
+
+      /**
+       * Resolves a field property value that may contain variable references
+       * @param field - Form field
+       * @param property - Field property to resolve
+       * @returns Resolved value
+       */
+      resolveFieldValue: (field: FormField, property: keyof FormField) => {
+        const value = field[property];
+        const variables = get().variables;
+
+        return resolveInterpolatableValue(value, variables);
+      },
+
+      /**
+       * Sets the submission state
+       * @param isSubmitting - Whether the form is currently submitting
+       */
+      setSubmissionState: (state: Partial<FormState>) => {
+        set((prev) => ({
+          ...prev,
+          formState: { ...prev.formState, ...state }
+        }));
       }
     }
   };

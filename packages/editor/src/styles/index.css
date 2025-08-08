@@ -1,0 +1,252 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  /* Better drag handle visibility */
+  [data-draggable-handle] {
+    touch-action: none;
+  }
+
+  /* Drag overlay styling */
+  .dnd-overlay {
+    z-index: 1000;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    transform-origin: center center;
+  }
+
+  /* Toolbox overlay styling */
+  .toolbox-overlay {
+    transform: translate(-50%, -50%) scale(1.05);
+    transition: transform 0.1s ease;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  }
+
+  /* Background void state */
+  .bg-void {
+    background: repeating-linear-gradient(45deg, #ffffff, #ffffff 10px, #f5f5f5 10px, #f5f5f5 20px);
+  }
+
+  .bg-fade {
+    @apply h-24 sticky bottom-0 bg-gradient-to-t from-white from-50%;
+  }
+
+  .sticky-btn {
+    @apply sticky bottom-0 z-10;
+  }
+
+  .canvas-sm {
+    @apply max-w-sm mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
+  }
+
+  .canvas-md {
+    @apply max-w-2xl mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
+  }
+
+  .canvas-xl {
+    @apply w-full;
+  }
+
+  .toolbox-search-x {
+    @apply absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1;
+  }
+
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+.column-1 {
+  @apply grid-cols-1;
+}
+.column-2 {
+  @apply grid-cols-2;
+}
+.column-3 {
+  @apply grid-cols-3;
+}
+.column-4 {
+  @apply grid-cols-4;
+}
+.column-5 {
+  @apply grid-cols-5;
+}
+.column-6 {
+  @apply grid-cols-6;
+}
+.column-7 {
+  @apply grid-cols-7;
+}
+.column-8 {
+  @apply grid-cols-8;
+}
+.column-9 {
+  @apply grid-cols-9;
+}
+.column-10 {
+  @apply grid-cols-10;
+}
+.column-11 {
+  @apply grid-cols-11;
+}
+.column-12 {
+  @apply grid-cols-12;
+}
+
+/* Column size */
+.column-span-1 {
+  @apply col-span-1;
+}
+.column-span-2 {
+  @apply col-span-2;
+}
+.column-span-3 {
+  @apply col-span-3;
+}
+.column-span-4 {
+  @apply col-span-4;
+}
+.column-span-5 {
+  @apply col-span-5;
+}
+.column-span-6 {
+  @apply col-span-6;
+}
+.column-span-7 {
+  @apply col-span-7;
+}
+.column-span-8 {
+  @apply col-span-8;
+}
+.column-span-9 {
+  @apply col-span-9;
+}
+.column-span-10 {
+  @apply col-span-10;
+}
+.column-span-11 {
+  @apply col-span-11;
+}
+.column-span-12 {
+  @apply col-span-12;
+}
+
+/* Gap */
+.gap-size-1 {
+  @apply gap-1;
+}
+.gap-size-2 {
+  @apply gap-2;
+}
+.gap-size-3 {
+  @apply gap-3;
+}
+.gap-size-4 {
+  @apply gap-4;
+}
+.gap-size-5 {
+  @apply gap-5;
+}
+.gap-size-6 {
+  @apply gap-6;
+}
+.gap-size-7 {
+  @apply gap-7;
+}
+.gap-size-8 {
+  @apply gap-8;
+}
+.gap-size-9 {
+  @apply gap-9;
+}
+.gap-size-10 {
+  @apply gap-10;
+}
+.gap-size-11 {
+  @apply gap-11;
+}
+.gap-size-12 {
+  @apply gap-12;
+}
+
+/* Height utilities for blocks */
+.height-1 {
+  height: 24px;
+}
+.height-2 {
+  height: 48px;
+}
+.height-3 {
+  height: 72px;
+}
+.height-4 {
+  height: 96px;
+}
+.height-5 {
+  height: 120px;
+}
+.height-6 {
+  height: 144px;
+}
+.height-7 {
+  height: 168px;
+}
+.height-8 {
+  height: 192px;
+}
+.height-9 {
+  height: 216px;
+}
+.height-10 {
+  height: 240px;
+}
+.height-11 {
+  height: 264px;
+}
+.height-12 {
+  height: 288px;
+}
+
+.min-height-1 {
+  min-height: 24px;
+}
+.min-height-2 {
+  min-height: 48px;
+}
+.min-height-3 {
+  min-height: 72px;
+}
+.min-height-4 {
+  min-height: 96px;
+}
+.min-height-5 {
+  min-height: 120px;
+}
+.min-height-6 {
+  min-height: 144px;
+}
+.min-height-7 {
+  min-height: 168px;
+}
+.min-height-8 {
+  min-height: 192px;
+}
+.min-height-9 {
+  min-height: 216px;
+}
+.min-height-10 {
+  min-height: 240px;
+}
+.min-height-11 {
+  min-height: 264px;
+}
+.min-height-12 {
+  min-height: 288px;
+}

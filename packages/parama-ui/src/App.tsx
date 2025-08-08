@@ -33,11 +33,13 @@ import {
   SheetFooter,
   SheetClose,
   DateRange,
-  MultiSelect
+  MultiSelect,
+  ScrollArea
 } from './index';
 import { Eye, EyeClosed, Mail, User } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './components/ui/accordion';
 import { FileUpload } from './components/ui/file-upload';
+import { AutoComplete } from './components/ui/autocomplete';
 
 function App() {
   const [type, setType] = useState<'text' | 'password'>('password');
@@ -161,6 +163,15 @@ function App() {
         </Accordion>
       </div>
       <div className="border p-4 rounded-md space-y-5">
+        <h5 className="font-semibold text-lg text-gray-700">Scroll Area</h5>
+        <ScrollArea className="h-[200px] w-[350px] rounded-md border p-4">
+          Jokester began sneaking into the castle in the middle of the night and leaving jokes all over the place: under
+          the king's pillow, in his soup, even in the royal toilet. The king was furious, but he couldn't seem to stop
+          Jokester. And then, one day, the people of the kingdom discovered that the jokes left by Jokester were so
+          funny that they couldn't help but laugh. And once they started laughing, they couldn't stop.
+        </ScrollArea>
+      </div>
+      <div className="border p-4 rounded-md space-y-5">
         <h5 className="font-semibold text-lg text-gray-700">Forms</h5>
         <FormItem>
           <Label htmlFor="name">Name</Label>
@@ -173,6 +184,25 @@ function App() {
             selected={date}
             onSelect={setDate}
             container={document.getElementById('birthdate')}
+          />
+        </FormItem>
+        <FormItem>
+          <Label htmlFor="users">Users</Label>
+          <AutoComplete
+            placeholder="Search for users"
+            options={[
+              { id: 'john', value: 'john', label: 'John Doe', description: 'john.doe@email.com' },
+              { id: 'jane', value: 'jane', label: 'Jane Smith', description: 'jane.smith@email.com' },
+              { id: 'alice', value: 'alice', label: 'Alice Johnson', description: 'alice.johnson@email.com' },
+              { id: 'bob', value: 'bob', label: 'Bob Wilson', description: 'bob.wilson@email.com' },
+              { id: 'charlie', value: 'charlie', label: 'Charlie Brown', description: 'charlie.brown@email.com' },
+              { id: 'diana', value: 'diana', label: 'Diana Prince', description: 'diana.prince@email.com' },
+              { id: 'edward', value: 'edward', label: 'Edward Norton', description: 'edward.norton@email.com' },
+              { id: 'fiona', value: 'fiona', label: 'Fiona Green', description: 'fiona.green@email.com' },
+              { id: 'george', value: 'george', label: 'George Miller', description: 'george.miller@email.com' },
+              { id: 'helen', value: 'helen', label: 'Helen White', description: 'helen.white@email.com' }
+            ]}
+            emptyMessage="No users found"
           />
         </FormItem>
         <FormItem>

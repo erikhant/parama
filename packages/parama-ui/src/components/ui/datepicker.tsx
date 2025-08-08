@@ -14,6 +14,7 @@ type DatePickerProps = React.ComponentProps<typeof Calendar> & {
   dateFormat?: string;
   name?: string;
   disabledInput?: boolean;
+  modalPopover?: boolean; // If true, use Popover for modal behavior
 };
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -22,11 +23,12 @@ const DatePicker: React.FC<DatePickerProps> = ({
   popoverClassName,
   dateFormat = 'dd/MM/yyyy',
   name,
+  modalPopover = true,
   disabledInput = false,
   ...props
 }: DatePickerProps) => {
   return (
-    <Popover>
+    <Popover modal={modalPopover}>
       <PopoverTrigger asChild>
         <FormGroup prefix={(<CalendarIcon size={16} />) as any}>
           <Input
@@ -52,10 +54,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           />
         </FormGroup>
       </PopoverTrigger>
-      <PopoverContent
-        container={container}
-        align="start"
-        className={cn('datepicker', popoverClassName)}>
+      <PopoverContent container={container} align="start" className={cn('datepicker', popoverClassName)}>
         <Calendar {...props} />
       </PopoverContent>
     </Popover>

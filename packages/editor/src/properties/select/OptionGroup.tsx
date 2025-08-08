@@ -9,7 +9,7 @@ import {
   Label,
   Switch
 } from '@parama-ui/react';
-import { FieldGroupItem, FormField } from '@form-builder/types';
+import { FieldGroupItem, FormField } from '@parama-dev/form-builder-types';
 import { memo, useCallback } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 

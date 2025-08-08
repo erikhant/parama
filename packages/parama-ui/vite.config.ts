@@ -9,7 +9,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   root: __dirname,
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+      jsxImportSource: 'react'
+    }),
     dts({
       insertTypesEntry: true,
       exclude: ['**/__tests__/**'],
@@ -35,6 +38,8 @@ export default defineConfig({
       external: [
         'react',
         'react-dom',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
         '@radix-ui/react-accordion',
         '@radix-ui/react-checkbox',
         '@radix-ui/react-dialog',
@@ -69,7 +74,9 @@ export default defineConfig({
         },
         globals: {
           react: 'React',
-          'react-dom': 'ReactDOM'
+          'react-dom': 'ReactDOM',
+          'react/jsx-runtime': 'React',
+          'react/jsx-dev-runtime': 'React'
         }
       }
     }

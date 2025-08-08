@@ -1,52 +1,58 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+[data-draggable-handle] {
+  touch-action: none;
+}
 
-@layer utilities {
-  /* Better drag handle visibility */
-  [data-draggable-handle] {
-    touch-action: none;
-  }
+/* Drag overlay styling */
+.dnd-overlay {
+  z-index: 1000;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  transform-origin: center center;
+}
 
-  /* Drag overlay styling */
-  .dnd-overlay {
-    z-index: 1000;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    transform-origin: center center;
-  }
+/* Toolbox overlay styling */
+.toolbox-overlay {
+  transform: translate(-50%, -50%) scale(1.05);
+  transition: transform 0.1s ease;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
 
-  /* Toolbox overlay styling */
-  .toolbox-overlay {
-    transform: translate(-50%, -50%) scale(1.05);
-    transition: transform 0.1s ease;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-  }
+/* Background void state */
+.bg-void {
+  background: repeating-linear-gradient(45deg, #ffffff, #ffffff 10px, #f5f5f5 10px, #f5f5f5 20px);
+}
 
-  /* Background void state */
-  .bg-void {
-    background: repeating-linear-gradient(45deg, #ffffff, #ffffff 10px, #f5f5f5 10px, #f5f5f5 20px);
-  }
+.bg-fade {
+  @apply h-24 sticky bottom-0 bg-gradient-to-t from-white from-50%;
+}
 
-  .canvas-sm {
-    @apply max-w-sm mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
-  }
+.sticky-btn {
+  @apply sticky bottom-0 z-10;
+}
 
-  .canvas-md {
-    @apply max-w-2xl mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
-  }
+.canvas-sm {
+  @apply max-w-sm mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
+}
 
-  .canvas-xl {
-    @apply w-full;
+.canvas-md {
+  @apply max-w-2xl mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
+}
+
+.canvas-xl {
+  @apply w-full;
+}
+
+.toolbox-search-x {
+  @apply absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-  @keyframes fadeInScale {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

@@ -1,7 +1,6 @@
 import _ from 'lodash';
-import type { ValidationRule } from '@form-builder/types';
+import type { ValidationRule } from '@parama-dev/form-builder-types';
 import { interpolate, objectToQueryString } from '../utils';
-import { JsonValidator } from './json';
 import validator from 'validator';
 
 export const evaluateValidations = async (
@@ -120,29 +119,10 @@ export const evaluateValidations = async (
         }
       }
       return true;
-    case 'json-schema':
-      try {
-        const validator = new JsonValidator();
-        const { isValid, formattedErrors } = validator.validate(rule.json?.schema || {}, {
-          [fieldId]: formData[fieldId]
-        });
-        return isValid || formattedErrors.join(', ') || rule.message;
-      } catch {
-        return rule.message;
-      }
     default:
       return true; // No validation needed
   }
 };
-
-// export const createValidatorRegistry = (
-//   customValidators: ValidatorRegistry = {}
-// ): ValidatorRegistry => {
-//   return {
-//     // ...builtInValidators,
-//     ...customValidators
-//   };
-// };
 
 export const builtInValidatorTemplate: ValidationRule[] = [
   {

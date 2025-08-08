@@ -1,5 +1,5 @@
-import { BlockField } from '@form-builder/types';
-import { FormItem, Label, Textarea } from '@parama-ui/react';
+import { BlockField } from '@parama-dev/form-builder-types';
+import { CodeEditor } from '../../components/CodeEditor';
 import { useEditor } from '../../store/useEditor';
 import { SectionPanel } from '../SectionPanel';
 
@@ -17,20 +17,20 @@ export const BlockContentEditor = ({ field, onChange }: BlockContentEditorProps)
 
   return (
     <SectionPanel title="Content">
-      <FormItem>
-        <Label className="block text-sm font-medium">HTML Content</Label>
-        <Textarea
-          rows={8}
-          placeholder="Enter your HTML content here..."
-          disabled={editor.options?.propertiesSettings === 'readonly'}
-          value={typeof field.content === 'string' ? field.content : ''}
-          onChange={(e) => onChange({ content: e.target.value })}
-          className="font-mono text-sm"
-        />
-        <p className="form-description">
-          You can use HTML tags and inline styles. Content will be rendered as-is in the form.
-        </p>
-      </FormItem>
+      <CodeEditor
+        label="HTML Content"
+        defaultLang="html"
+        languages={['html', 'plaintext']}
+        value={typeof field.content === 'string' ? field.content : ''}
+        onChange={(value) => onChange({ content: value })}
+        readOnly={editor.options?.propertiesSettings === 'readonly'}
+        placeholder="Enter your HTML content here..."
+        description="You can use HTML tags and inline styles. Content will be rendered as-is in the form."
+        height="120px"
+        expandedHeight="400px"
+        showExpand={true}
+        showLanguageToggle={true}
+      />
     </SectionPanel>
   );
 };

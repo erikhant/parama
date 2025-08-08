@@ -1,5 +1,15 @@
-import { useFormBuilder } from '@form-builder/core';
-import { FormField, FormSchema } from '@form-builder/types';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import {
+  FormField,
+  FormSchema,
+  TextField,
+  RadioField,
+  CheckboxField,
+  DateField,
+  SelectField,
+  MultiSelectField,
+  AutoCompleteField
+} from '@parama-dev/form-builder-types';
 import { Button } from '@parama-ui/react';
 import { ArrowLeftToLine, ArrowRightToLine } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -17,6 +27,17 @@ import { GeneralButtonEditor } from './button/GeneralButtonEditor';
 import { AppearanceButtonEditor } from './button/AppearanceButtonEditor';
 import { GeneralBlockEditor } from './block/GeneralBlockEditor';
 import { BlockContentEditor } from './block/BlockContentEditor';
+import { Customization } from './common/Customization';
+
+// Type guard to check if a field supports data customization
+type FieldWithDataCustomization =
+  | TextField
+  | RadioField
+  | CheckboxField
+  | DateField
+  | SelectField
+  | MultiSelectField
+  | AutoCompleteField;
 
 // Types for editor configuration
 interface EditorConfig {
@@ -26,6 +47,7 @@ interface EditorConfig {
   showValidation: boolean;
   showConditions: boolean;
   showEvents: boolean;
+  showDataCustomization: boolean;
   useButtonEditor: boolean;
   useBlockEditor: boolean;
 }
@@ -43,9 +65,29 @@ const getEditorConfig = (field: FormField, editorOptions: any): EditorConfig => 
     showValidation: editorOptions?.validationSettings !== 'off' && !isButtonType && !isBlockType,
     showConditions: editorOptions?.conditionsSettings !== 'off' && !isHiddenType,
     showEvents: editorOptions?.eventsSettings !== 'off' && !isHiddenType && !isButtonType && !isBlockType,
+    showDataCustomization: editorOptions?.dataSettings !== 'off' && supportsDataCustomization(field),
     useButtonEditor: isButtonType,
     useBlockEditor: isBlockType
   };
+};
+
+const supportsDataCustomization = (field: FormField): field is FieldWithDataCustomization => {
+  return [
+    'text',
+    'email',
+    'textarea',
+    'password',
+    'number',
+    'tel',
+    'url',
+    'hidden',
+    'radio',
+    'checkbox',
+    'date',
+    'select',
+    'multiselect',
+    'autocomplete'
+  ].includes(field.type);
 };
 
 // Component for rendering field editors based on configuration
@@ -66,9 +108,7 @@ const FieldEditors: React.FC<FieldEditorsProps> = ({ field, editorConfig, onChan
         ) : (
           <GeneralEditor field={field} onChange={onChange} />
         ))}
-      {editorConfig.useBlockEditor && field.type === 'block' && (
-        <BlockContentEditor field={field as any} onChange={onChange} />
-      )}
+      {editorConfig.useBlockEditor && <BlockContentEditor field={field as any} onChange={onChange} />}
       {editorConfig.showProperties && <PropertiesEditor field={field} onChange={onChange} />}
       {editorConfig.showAppearance &&
         (editorConfig.useButtonEditor ? (
@@ -79,6 +119,9 @@ const FieldEditors: React.FC<FieldEditorsProps> = ({ field, editorConfig, onChan
       {editorConfig.showValidation && <ValidationEditor field={field} onChange={onChange} />}
       {editorConfig.showConditions && <ConditionEditor field={field} onChange={onChange} />}
       {editorConfig.showEvents && <EventsEditor field={field} onChange={onChange} />}
+      {editorConfig.showDataCustomization && supportsDataCustomization(field) && (
+        <Customization field={field} onChange={onChange} />
+      )}
     </>
   );
 };

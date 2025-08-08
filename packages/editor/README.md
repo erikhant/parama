@@ -1,11 +1,11 @@
-# @form-builder/editor
+# @parama-dev/form-builder-editor
 
 A visual form builder editor with drag-and-drop interface for creating forms.
 
 ## Installation
 
 ```bash
-npm install @form-builder/editor @form-builder/core @form-builder/types @form-builder/renderer @parama-ui/react react react-dom
+npm install @parama-dev/form-builder-editor @parama-dev/form-builder-core @parama-dev/form-builder-types @parama-dev/form-builder-renderer @parama-ui/react react react-dom
 ```
 
 ## Usage
@@ -13,9 +13,9 @@ npm install @form-builder/editor @form-builder/core @form-builder/types @form-bu
 ### Basic Usage
 
 ```tsx
-import { FormEditor } from '@form-builder/editor';
+import { FormEditor } from '@parama-dev/form-builder-editor';
 // Import the required styles
-import '@form-builder/editor/styles';
+import '@parama-dev/form-builder-editor/styles';
 
 function App() {
   const handleSave = (schema) => {
@@ -32,14 +32,14 @@ If you prefer to import CSS from your bundler configuration or CSS file:
 
 ```css
 /* In your main CSS file */
-@import '@form-builder/editor/dist/styles.css';
+@import '@parama-dev/form-builder-editor/dist/styles.css';
 ```
 
 Or in your bundler (webpack, vite, etc.):
 
 ```js
 // In your main.js or app.js
-import '@form-builder/editor/dist/styles.css';
+import '@parama-dev/form-builder-editor/dist/styles.css';
 ```
 
 ### CSS Integration

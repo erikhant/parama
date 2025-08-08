@@ -1,14 +1,21 @@
 {
-  "name": "@form-builder/demo-production",
+  "name": "@parama-dev/demo-production",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 5002",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "json-server": "json-server --watch db.json --port 3000"
   },
   "dependencies": {
+    "@parama-dev/form-builder-core": "workspace:*",
+    "@parama-dev/form-builder-editor": "workspace:*",
+    "@parama-dev/form-builder-renderer": "workspace:*",
+    "@parama-dev/form-builder-types": "workspace:*",
+    "@parama-ui/react": "workspace:*",
+    "json-server": "1.0.0-beta.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

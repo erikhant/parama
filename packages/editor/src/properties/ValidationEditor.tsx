@@ -11,10 +11,10 @@ import {
   SelectValue,
   Switch
 } from '@parama-ui/react';
-import type { FormField, ValidationRule, FileField, FileOptions } from '@form-builder/types';
+import type { FormField, ValidationRule, FileField, FileOptions } from '@parama-dev/form-builder-types';
 import { SectionPanel } from './SectionPanel';
 import { useMemo, useCallback, useEffect, useState } from 'react';
-import { builtInValidatorTemplate, useFormBuilder } from '@form-builder/core';
+import { builtInValidatorTemplate, useFormBuilder } from '@parama-dev/form-builder-core';
 import { useEditor } from '../store/useEditor';
 
 type ValidationEditorProps = {
@@ -125,7 +125,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
           ...fileOptions,
           maxSize: bytesValue,
           preferredUnit // Store the user's preferred unit
-        } as FileOptions & { preferredUnit: SizeUnit }
+        } as FileOptions
       });
     }
   };
@@ -137,7 +137,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
         ...fileOptions,
         maxSize: currentMaxSize, // Keep the same bytes
         preferredUnit: newUnit // Update preferred unit
-      } as FileOptions & { preferredUnit: SizeUnit }
+      } as FileOptions
     });
   };
 

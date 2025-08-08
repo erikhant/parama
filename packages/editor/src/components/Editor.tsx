@@ -17,10 +17,10 @@ import type {
   FormEditorProps,
   FormField as FormFieldType,
   PresetTypeDef
-} from '@form-builder/types';
+} from '@parama-dev/form-builder-types';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { setupWorkflowDebugger, useFormBuilder } from '@form-builder/core';
+import { setupWorkflowDebugger, useFormBuilder } from '@parama-dev/form-builder-core';
 import { useEffect, useState } from 'react';
 import { FieldOverlay, FormCanvas } from '../canvas';
 import { EditorPanel } from '../properties/EditorPanel';
@@ -29,6 +29,7 @@ import { ToolboxItemOverlay, ToolboxPanel } from '../toolbox';
 import { DragPreview } from './DragPreview';
 import { Toolbar } from './Toolbar';
 import { Toaster } from 'sonner';
+import { cn } from '@parama-ui/react';
 
 const defineDefaultValue = (type: string) => {
   const newField = {
@@ -61,11 +62,13 @@ const defineDefaultValue = (type: string) => {
       ];
       return {
         ...(newField as CheckboxField),
-        items: checkbox
+        items: checkbox,
+        transformer: ''
       };
     case 'date':
       return {
         ...newField,
+        transformer: '',
         mode: 'single',
         options: {
           dateFormat: 'dd/MM/yyyy'
@@ -120,8 +123,33 @@ const defineDefaultValue = (type: string) => {
         height: 2,
         content: ''
       } as BlockField;
+    case 'autocomplete':
+      const autocompleteOptions: FieldGroupItem[] = [
+        {
+          id: `option-${Date.now() + 1}`,
+          label: 'Option 1',
+          value: 'option-1'
+        },
+        {
+          id: `option-${Date.now() + 2}`,
+          label: 'Option 2',
+          value: 'option-2'
+        },
+        {
+          id: `option-${Date.now() + 3}`,
+          label: 'Option 3',
+          value: 'option-3'
+        }
+      ];
+      return {
+        ...newField,
+        transformer: '',
+        placeholder: 'Search options...',
+        shouldFilter: true,
+        options: autocompleteOptions
+      } as FormFieldType;
     default:
-      return newField as FormFieldType;
+      return { ...newField, transformer: '' } as FormFieldType;
   }
 };
 
@@ -138,14 +166,15 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
   );
 
   useEffect(() => {
+    actions.changeMode('editor');
     if (process.env.NODE_ENV !== 'development') return;
 
     // Enable all debug features
-    const cleanupDebugger = setupWorkflowDebugger();
+    // const cleanupDebugger = setupWorkflowDebugger();
 
     return () => {
       // Cleanup debugger on unmount
-      cleanupDebugger?.();
+      // cleanupDebugger?.();
     };
   }, []);
 
@@ -189,10 +218,7 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
       if (active.data.current.type === 'preset') {
         const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
         if (preset && preset.fields) {
-          const fieldsToAdd = preset.fields.map((field: FormFieldType) => ({
-            ...field,
-            id: `field-${Date.now()}-${Math.random()}`
-          })) as FormFieldType[];
+          const fieldsToAdd = preset.fields;
 
           // Insert all preset fields
           if (over.data.current?.fromCanvas) {
@@ -251,7 +277,11 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragMove={handleDragMove}>
-        <div className="editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden">
+        <div
+          className={cn(
+            'editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden',
+            editor.options?.containerClassname
+          )}>
           <ToolboxPanel />
           <FormCanvas />
           <EditorPanel />

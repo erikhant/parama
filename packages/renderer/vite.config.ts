@@ -8,7 +8,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+      jsxImportSource: 'react'
+    }),
     dts({
       insertTypesEntry: true,
       exclude: ['**/__tests__/**'],
@@ -26,26 +29,26 @@ export default defineConfig({
       external: [
         'react',
         'react-dom',
-        '@form-builder/core',
-        '@form-builder/types',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+        '@parama-dev/form-builder-core',
+        '@parama-dev/form-builder-types',
         '@parama-ui/react',
         'lodash-es',
         'lucide-react',
-        'react-dropzone',
-        'react-select',
         'use-debounce'
       ],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          '@form-builder/core': 'FormBuilderCore',
-          '@form-builder/types': 'FormBuilderTypes',
+          'react/jsx-runtime': 'React',
+          'react/jsx-dev-runtime': 'React',
+          '@parama-dev/form-builder-core': 'FormBuilderCore',
+          '@parama-dev/form-builder-types': 'FormBuilderTypes',
           '@parama-ui/react': 'ParamaUI',
           'lodash-es': 'lodash',
           'lucide-react': 'LucideReact',
-          'react-dropzone': 'ReactDropzone',
-          'react-select': 'ReactSelect',
           'use-debounce': 'useDebounce'
         }
       }

@@ -1,5 +1,5 @@
-import { useFormBuilder } from '@form-builder/core';
-import { Events, FormField } from '@form-builder/types';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import { Events, FormField } from '@parama-dev/form-builder-types';
 import {
   Button,
   FormItem,
@@ -16,10 +16,10 @@ import {
   AccordionTrigger,
   FormGroup
 } from '@parama-ui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useEditor } from '../store/useEditor';
 import { SectionPanel } from './SectionPanel';
-import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
+import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { HelperTooltip } from '../components/HelperTooltip';
 
 type EventsEditorProps = {
@@ -39,6 +39,16 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
 
   // Get all fields except the current one as potential targets
   const availableFields = schema.fields.filter((f) => f.id !== field.id);
+
+  // Filter fields based on event type - only select fields for fetch options
+  const getFilteredFields = (eventType: string) => {
+    if (eventType === 'fetch') {
+      return availableFields.filter(
+        (f) => f.type === 'select' || f.type === 'multiselect' || f.type === 'autocomplete'
+      );
+    }
+    return availableFields;
+  };
 
   const handleAddEvent = () => {
     if (!newEvent.target) return;
@@ -65,6 +75,15 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
     onChange({ events: updatedEvents });
   };
 
+  useEffect(() => {
+    setIsAddingEvent(false);
+    setNewEvent({
+      type: 'setValue',
+      target: '',
+      params: { value: '' }
+    });
+  }, [field.id]);
+
   const EventTooltip = () => (
     <HelperTooltip className="max-w-xs">
       Events are triggered when a field's value changes and validation is successful.
@@ -86,9 +105,9 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
         <Accordion type="multiple" className="mb-2">
           {('events' in field ? field.events : [])?.map((event: Events, index: number) => (
             <AccordionItem key={index} value={`event-${index}`}>
-              <AccordionTrigger className="text-sm py-2">
+              <AccordionTrigger className="text-sm py-2 text-start whitespace-nowrap">
                 {event.type === 'setValue' ? 'Set Value' : event.type === 'reset' ? 'Reset Field' : 'Fetch Options'}
-                <span className="ml-2 text-xs opacity-70">
+                <span className="ml-2 text-xs opacity-70 max-w-32 pr-1.5 text-ellipsis line-clamp-1">
                   →{' '}
                   {(() => {
                     const targetField = availableFields.find((f) => f.id === event.target);
@@ -103,7 +122,9 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
                     <Select
                       disabled={editor.options?.eventsSettings === 'readonly'}
                       value={event.type}
-                      onValueChange={(value) => handleUpdateEvent(index, { type: value as Events['type'] })}>
+                      onValueChange={(value) =>
+                        handleUpdateEvent(index, { type: value as Events['type'], target: '' })
+                      }>
                       <SelectTrigger>
                         <SelectValue placeholder="Select event type" />
                       </SelectTrigger>
@@ -125,7 +146,7 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
                         <SelectValue placeholder="Select target field" />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableFields.map((f) => (
+                        {getFilteredFields(event.type).map((f) => (
                           <SelectItem key={f.id} value={f.id}>
                             {'name' in f ? f.name : f.id}
                           </SelectItem>
@@ -178,7 +199,7 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
             <Label>Action</Label>
             <Select
               value={newEvent.type}
-              onValueChange={(value) => setNewEvent({ ...newEvent, type: value as Events['type'] })}>
+              onValueChange={(value) => setNewEvent({ ...newEvent, type: value as Events['type'], target: '' })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select event type" />
               </SelectTrigger>
@@ -197,7 +218,7 @@ export const EventsEditor = ({ field, onChange }: EventsEditorProps) => {
                 <SelectValue placeholder="Select field" />
               </SelectTrigger>
               <SelectContent>
-                {availableFields.map((f) => (
+                {getFilteredFields(newEvent.type || 'setValue').map((f) => (
                   <SelectItem key={f.id} value={f.id}>
                     {'name' in f ? f.name : f.id}
                   </SelectItem>

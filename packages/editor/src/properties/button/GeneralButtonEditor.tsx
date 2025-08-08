@@ -1,5 +1,5 @@
-import { useFormBuilder } from '@form-builder/core';
-import { ButtonField, FormField } from '@form-builder/types';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import { ButtonField, FormField } from '@parama-dev/form-builder-types';
 import { FormItem, Input, Label, Slider } from '@parama-ui/react';
 import { useEffect, useState } from 'react';
 import { SectionPanel } from '../SectionPanel';
@@ -91,6 +91,19 @@ export const GeneralButtonEditor = ({ field, onChange }: GeneralButtonEditorProp
           />
         </div>
       </FormItem>
+      {(field as ButtonField).action === 'submit' && (
+        <FormItem orientation="horizontal">
+          <Label className="!col-span-3 text-sm font-medium">Loading Text</Label>
+          <div className="col-span-2">
+            <Input
+              disabled={editor.options?.generalSettings === 'readonly'}
+              placeholder="Submitting..."
+              value={(field as ButtonField).loadingText || ''}
+              onChange={(e) => onChange({ loadingText: e.target.value })}
+            />
+          </div>
+        </FormItem>
+      )}
     </SectionPanel>
   );
 };

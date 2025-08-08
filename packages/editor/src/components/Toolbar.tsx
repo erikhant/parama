@@ -1,10 +1,11 @@
-import { useFormBuilder } from '@form-builder/core';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
 import { Button } from '@parama-ui/react';
 import { MonitorIcon, SaveIcon, SmartphoneIcon, TabletIcon } from 'lucide-react';
 import { SchemaViewer } from './SchemaViewer';
 import { Preview } from './Preview';
 import { useEditor } from '../store/useEditor';
-import { FormEditorProps } from '@form-builder/types';
+import { FormEditorProps } from '@parama-dev/form-builder-types';
+import React from 'react';
 
 export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSaveSchema'] }) => {
   const { editor } = useEditor();
@@ -20,7 +21,15 @@ export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSav
   return (
     <div className="w-full inline-flex justify-between items-center h-12 p-2 bg-white border-b border-gray-100">
       <div className="text-lg bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent font-semibold ml-3">
-        Parama Editor
+        {typeof editor.options?.brand === 'string' ? (
+          editor.options.brand
+        ) : React.isValidElement(editor.options?.brand) ? (
+          editor.options?.brand
+        ) : typeof editor.options?.brand === 'function' ? (
+          React.createElement(editor.options?.brand as React.ComponentType)
+        ) : (
+          <div className="w-5" />
+        )}
       </div>
       <div>
         {/* Responsive view aspect ratio */}
@@ -52,7 +61,7 @@ export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSav
         <Preview
           schema={schema}
           disabled={fieldLength === 0}
-          onOpenChange={(isOpen) => actions.changeMode(isOpen ? 'preview' : 'editor')}
+          onOpenChange={(isOpen) => actions.changeMode(isOpen ? 'render' : 'editor')}
         />
         <Button size="sm" className="rounded-md" disabled={fieldLength === 0} onClick={handleSaveSchema}>
           <SaveIcon size={16} />

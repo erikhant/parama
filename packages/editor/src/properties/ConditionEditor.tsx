@@ -1,4 +1,4 @@
-import { FormField } from '@form-builder/types';
+import { FormField } from '@parama-dev/form-builder-types';
 import { SectionPanel } from './SectionPanel';
 import { FormGroup, FormItem, Input, Label } from '@parama-ui/react';
 import { useEditor } from '../store/useEditor';

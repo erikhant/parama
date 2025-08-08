@@ -5,10 +5,15 @@ import type {
   FieldGroupItem,
   FormField,
   ValidationRule
-} from '@form-builder/types';
+} from '@parama-dev/form-builder-types';
 import _, { debounce } from 'lodash';
 import { FormBuilderState } from '../store';
-import { interceptExpressionTemplate, interpolate } from '../utils';
+import {
+  interceptExpressionTemplate,
+  interpolate,
+  resolveInterpolatableValue,
+  resolveExpressionVariables
+} from '../utils';
 import { DependencyGraph } from './graph';
 
 interface WorkflowEngineOptions {
@@ -21,13 +26,11 @@ export class WorkflowEngine {
   public graph: DependencyGraph;
   private getState: () => FormBuilderState;
   private setState: (updater: (state: FormBuilderState) => FormBuilderState) => void;
-  private debounceWait: number;
 
   constructor(options: WorkflowEngineOptions) {
     this.graph = new DependencyGraph();
     this.getState = options.getState;
     this.setState = options.setState;
-    this.debounceWait = options.debounceWait || 100;
   }
 
   /**
@@ -128,17 +131,39 @@ export class WorkflowEngine {
     }
   }
 
-  private async executeEvents(events: Events[]) {
+  private executeEvents(events: Events[]) {
     const formData = this.getState().formData;
+    const state = this.getState();
 
     for (const event of events) {
-      const targetField = this.getState().actions.getField(event.target);
+      const targetField = state.actions.getField(event.target);
       if (!targetField) {
         continue;
       }
       switch (event.type) {
         case 'fetch':
-          this.refreshDynamicOptions(targetField);
+          // Trigger dynamic options refresh by updating a refresh timestamp
+          // This will cause the useEffect in FormField to re-run
+          if (
+            (targetField.type === 'select' ||
+              targetField.type === 'multiselect' ||
+              targetField.type === 'autocomplete') &&
+            'external' in targetField &&
+            targetField.external
+          ) {
+            this.getState().actions.updateField(targetField.id, {
+              external: {
+                ...targetField.external,
+                _refreshTimestamp: Date.now() // Use current timestamp to trigger refresh
+              }
+            } as any);
+          } else {
+            console.log(
+              '[WORKFLOW ENGINE] Field does not qualify for fetch event:',
+              targetField.type,
+              'external' in targetField ? !!(targetField as any).external : false
+            );
+          }
           break;
 
         case 'reset':
@@ -149,7 +174,8 @@ export class WorkflowEngine {
           break;
 
         case 'setValue':
-          const interceptedExpression = interceptExpressionTemplate(event.params?.value, this.getState());
+          const resolvedValue = resolveInterpolatableValue(event.params?.value, state.variables);
+          const interceptedExpression = interceptExpressionTemplate(resolvedValue, this.getState());
           const value = interpolate(interceptedExpression, formData);
           this.getState().actions.updateFieldValue(targetField.id, JSON.parse(value));
           break;
@@ -165,43 +191,7 @@ export class WorkflowEngine {
    * @param field Form field to refresh
    */
   public async refreshDynamicOptions(field: FormField): Promise<void> {
-    const formData = this.getState().formData;
-
-    if ((field.type !== 'select' && field.type !== 'multiselect') || !field.external) {
-      return;
-    }
-    const { url, headers, mapper } = field.external;
-
-    if (!mapper || !mapper.dataSource || !mapper.dataMapper) {
-      return;
-    }
-
-    const interceptedExpression = interceptExpressionTemplate(url, this.getState());
-    const serializedUrl = interpolate(interceptedExpression, formData);
-
-    const response = await fetch(serializedUrl, {
-      headers: { ...headers }
-    });
-    if (!response.ok) {
-      this.getState().actions.updateField(field.id, {
-        error: 'Failed to load options'
-      });
-      return;
-    }
-    const data = await response.json();
-    const options = _.get(data, mapper.dataSource, []);
-    const mappedOptions: FieldGroupItem[] = options.map((item: any) => {
-      return {
-        id: _.get(item, mapper.dataMapper.id),
-
-        label: _.get(item, mapper.dataMapper.label),
-        value: _.get(item, mapper.dataMapper.value)
-      };
-    });
-    // Update field options in state
-    this.getState().actions.updateField(field.id, {
-      options: mappedOptions
-    });
+    return;
   }
 
   /**
@@ -296,11 +286,22 @@ export class WorkflowEngine {
   }
 
   private evaluateCondition(condition: Condition | undefined, formData: Record<string, any>): boolean {
+    console.log('Evaluating condition:', condition);
+
     if (!condition?.expression) return true;
-    const interceptExpression = interceptExpressionTemplate(condition.expression, this.getState());
+
+    const state = this.getState();
+
+    // First resolve any variables in the expression (with proper quoting for JavaScript)
+    const resolvedExpression = resolveExpressionVariables(condition.expression, state.variables);
+    console.log('resolved variables:', resolvedExpression);
+    // Intercept the expression to replace field names with IDs
+    const interceptExpression = interceptExpressionTemplate(resolvedExpression, state);
+    console.log('Intercepted expression:', interceptExpression);
     try {
       // Replace formData references with actual values
       const expr = interpolate(interceptExpression, formData);
+      console.log('Condition expression:', expr);
       // Create safe evaluation
       const result = new Function(`return ${expr}`)();
       return result;
@@ -315,7 +316,11 @@ export class WorkflowEngine {
     const matches = conditionStr.matchAll(/\{\{(.*?)\}\}/g);
 
     for (const match of matches) {
-      deps.add(match[1].trim());
+      const trimmedKey = match[1].trim();
+      // Skip variable patterns ({{$variableName}})
+      if (!trimmedKey.startsWith('$')) {
+        deps.add(trimmedKey);
+      }
     }
 
     return Array.from(deps).filter((dep) => dep.length > 0);
@@ -339,7 +344,11 @@ export class WorkflowEngine {
       if (rule.type === 'cross-field' && rule.expression) {
         const matches = rule.expression.matchAll(/\{\{(.*?)\}\}/g);
         for (const match of matches) {
-          deps.add(match[1]);
+          const trimmedKey = match[1].trim();
+          // Skip variable patterns ({{$variableName}})
+          if (!trimmedKey.startsWith('$')) {
+            deps.add(trimmedKey);
+          }
         }
       }
     });

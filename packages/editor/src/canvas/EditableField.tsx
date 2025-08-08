@@ -1,8 +1,8 @@
-import { FormField } from '@form-builder/renderer';
-import { FormField as FormFieldType } from '@form-builder/types';
+import { FormField } from '@parama-dev/form-builder-renderer';
+import { FormField as FormFieldType } from '@parama-dev/form-builder-types';
 import { SortableItem } from '../components';
 import { FieldHighligter } from './FieldHighligter';
-import { useFormBuilder } from '@form-builder/core';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
 
 type EditableFieldProps = {
   field: FormFieldType;

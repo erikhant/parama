@@ -9,7 +9,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   root: __dirname,
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+      jsxImportSource: 'react'
+    }),
     dts({
       insertTypesEntry: true,
       exclude: ['**/__tests__/**'],
@@ -33,9 +36,11 @@ export default defineConfig({
       external: [
         'react',
         'react-dom',
-        '@form-builder/core',
-        '@form-builder/types',
-        '@form-builder/renderer',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+        '@parama-dev/form-builder-core',
+        '@parama-dev/form-builder-types',
+        '@parama-dev/form-builder-renderer',
         '@parama-ui/react',
         '@dnd-kit/core',
         '@dnd-kit/modifiers',
@@ -53,16 +58,18 @@ export default defineConfig({
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return 'styles.css';
+            return 'editor.css';
           }
           return '[name].[ext]';
         },
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          '@form-builder/core': 'FormBuilderCore',
-          '@form-builder/types': 'FormBuilderTypes',
-          '@form-builder/renderer': 'FormBuilderRenderer',
+          'react/jsx-runtime': 'React',
+          'react/jsx-dev-runtime': 'React',
+          '@parama-dev/form-builder-core': 'FormBuilderCore',
+          '@parama-dev/form-builder-types': 'FormBuilderTypes',
+          '@parama-dev/form-builder-renderer': 'FormBuilderRenderer',
           '@parama-ui/react': 'ParamaUI',
           '@dnd-kit/core': 'DndKitCore',
           '@dnd-kit/modifiers': 'DndKitModifiers',

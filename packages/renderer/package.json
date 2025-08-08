@@ -1,6 +1,6 @@
 {
-  "name": "@form-builder/renderer",
-  "version": "0.1.0",
+  "name": "@parama-dev/form-builder-renderer",
+  "version": "0.5.5",
   "description": "React components for rendering forms from the form builder",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
@@ -26,16 +26,11 @@
     "clean": "rimraf dist node_modules"
   },
   "dependencies": {
-    "@form-builder/core": "workspace:*",
-    "@form-builder/types": "workspace:*",
+    "@parama-dev/form-builder-core": "workspace:*",
+    "@parama-dev/form-builder-types": "workspace:*",
     "@parama-ui/react": "workspace:*",
-    "@types/react-select": "^5.0.1",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.510.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-dropzone": "^14.3.8",
-    "react-select": "^5.10.1",
     "use-debounce": "^10.0.4"
   },
   "devDependencies": {
@@ -49,6 +44,8 @@
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "rollup": "^3.29.5",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.30.1",
@@ -56,10 +53,18 @@
     "vite-plugin-dts": "^4.5.3"
   },
   "peerDependencies": {
+    "@parama-dev/form-builder-core": "workspace:*",
+    "@parama-dev/form-builder-types": "workspace:*",
+    "@parama-ui/react": "workspace:*",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@form-builder/core": "^0.1.0",
-    "@form-builder/types": "^0.1.0",
-    "@parama-ui/react": "^1.0.0"
+    "react-dom": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": false
+    },
+    "react-dom": {
+      "optional": false
+    }
   }
 }

@@ -1,10 +1,11 @@
-import { useFormBuilder } from '@form-builder/core';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
 import type {
   BlockField,
   DateField,
   FieldGroupItem,
   FormField as FormFieldType,
   MultiSelectField,
+  AutoCompleteField,
   TextField,
   FileField,
   RadioField,
@@ -12,7 +13,7 @@ import type {
   SelectField,
   ButtonField as ButtonFieldType,
   FormBuilderProps
-} from '@form-builder/types';
+} from '@parama-dev/form-builder-types';
 import {
   Button,
   Checkbox,
@@ -25,6 +26,7 @@ import {
   Input,
   Label,
   MultiSelect,
+  AutoComplete,
   RadioGroup,
   RadioGroupItem,
   Select,
@@ -34,10 +36,12 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
+  Skeleton,
   FileUpload,
   Textarea
 } from '@parama-ui/react';
 import * as LucideIcons from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 
@@ -47,17 +51,19 @@ const MemoizedIcon = memo(({ iconName, size = 15 }: { iconName: string; size?: n
   return Icon ? <Icon size={size} /> : null;
 });
 
-const MemoizedSelectOptions = memo(({ options }: { options: FieldGroupItem[] }) => (
-  <>
-    {options
-      .filter((opt) => opt.id && opt.value && opt.label)
-      .map((opt) => (
-        <SelectItem key={opt.id} value={opt.value}>
-          {opt.label}
-        </SelectItem>
-      ))}
-  </>
-));
+const MemoizedSelectOptions = memo(({ field, options }: { field: FormFieldType; options: FieldGroupItem[] }) => {
+  return (
+    <>
+      {options
+        .filter((opt) => opt.id && opt.value && opt.label)
+        .map((opt) => (
+          <SelectItem key={opt.id} value={opt.value}>
+            {opt.label}
+          </SelectItem>
+        ))}
+    </>
+  );
+});
 
 const MemoizedSelectGroupsOptions = memo(
   ({
@@ -138,7 +144,15 @@ const MemoizedCheckboxItems = memo(
 );
 
 // Type for input fields that have all the common properties
-type InputFieldType = TextField | FileField | RadioField | CheckboxField | SelectField | MultiSelectField | DateField;
+type InputFieldType =
+  | TextField
+  | FileField
+  | RadioField
+  | CheckboxField
+  | SelectField
+  | MultiSelectField
+  | AutoCompleteField
+  | DateField;
 
 // Separate component for block fields
 const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
@@ -176,29 +190,43 @@ const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
 BlockField.displayName = 'BlockField';
 
 // Separate component for button fields
-const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps['onCancel'] }> = memo(
-  ({ field, onCancel }) => {
-    const { actions } = useFormBuilder();
+const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps['onCancel']; disabled?: boolean }> =
+  memo(({ field, onCancel, disabled }) => {
+    const { actions, mode, formState } = useFormBuilder();
 
     const handleReset = () => {
       actions.resetForm();
     };
 
+    // For submit buttons, also check the internal submission state
+    const isButtonDisabled = disabled || (field.action === 'submit' && formState.isSubmitting);
+
     return (
-      <div className={`column-span-${field.width}`}>
-        <Button
-          type={field.type}
-          color={field.appearance?.color}
-          size={field.appearance?.size}
-          variant={field.appearance?.variant}
-          className="w-full"
-          onClick={field.action === 'cancel' ? onCancel : field.action === 'reset' ? handleReset : undefined}>
-          {field.label}
-        </Button>
-      </div>
+      <>
+        {mode === 'render' && field.appearance?.stickyAtBottom && <div className="bg-fade column-span-12" />}
+        <div
+          className={`column-span-${field.width} ${mode === 'render' && field.appearance?.stickyAtBottom ? 'sticky-btn' : ''}`}>
+          <Button
+            type={field.type}
+            color={field.appearance?.color}
+            size={field.appearance?.size}
+            variant={field.appearance?.variant}
+            className="w-full"
+            disabled={isButtonDisabled}
+            onClick={field.action === 'cancel' ? onCancel : field.action === 'reset' ? handleReset : undefined}>
+            {field.action === 'submit' && formState.isSubmitting ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                {field.loadingText || null}
+              </>
+            ) : (
+              field.label
+            )}
+          </Button>
+        </div>
+      </>
     );
-  }
-);
+  });
 
 ButtonField.displayName = 'ButtonField';
 
@@ -206,11 +234,12 @@ ButtonField.displayName = 'ButtonField';
 const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
   const { formData, actions, visibleFields, disabledFields, readOnlyFields, mode } = useFormBuilder();
 
-  const value = formData[field.id] ?? field.defaultValue;
+  // Use getFieldValue for intelligent value retrieval (handles both regular and file fields)
+  const value = actions.getFieldValue(field.id) ?? field.defaultValue;
   const validationState = actions.getFieldValidation(field.id);
 
   const [textValue, setTextValue] = useState<string>(value || '');
-  const [debouncedTextValue] = useDebounce(textValue, 300);
+  const [debouncedTextValue] = useDebounce(textValue, 150); // Reduced to 100ms for better responsiveness
   const [firstRender, setFirstRender] = useState(true);
 
   const handleChange = useCallback(
@@ -301,6 +330,13 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     [handleChange]
   );
 
+  const handleAutocompleteChange = useCallback(
+    (selectedOption: { id: string; value: string; label: string }) => {
+      handleChange(selectedOption.value);
+    },
+    [handleChange]
+  );
+
   const handleRadioChange = useCallback(
     (value: string) => {
       handleChange(value);
@@ -359,6 +395,43 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     return undefined;
   });
 
+  // State to track the parent element for date picker
+  const [parentElement, setParentElement] = useState<HTMLElement | null>(null);
+
+  // Effect to find and set the parent element for date picker
+  useEffect(() => {
+    if (field.type === 'date') {
+      const findParentElement = () => {
+        const element = document.getElementById(`item__${field.id}`);
+        if (element && !parentElement) {
+          setParentElement(element);
+          return true; // Element found
+        }
+        return false; // Element not found
+      };
+
+      // Try to find the element immediately
+      if (findParentElement()) {
+        return; // Element found immediately, no need for observer
+      }
+
+      // If not found, set up a mutation observer to watch for it
+      const observer = new MutationObserver(() => {
+        if (findParentElement()) {
+          observer.disconnect(); // Stop observing once found
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      // Cleanup observer when component unmounts
+      return () => observer.disconnect();
+    }
+  }, [field.type, field.id]); // Removed parentElement from dependencies
+
   const handleSingleDateChange = useCallback(
     (date: Date | undefined) => {
       setSingleDate(date);
@@ -385,11 +458,10 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
 
   const handleFileChange = useCallback(
     (files: File[]) => {
-      console.log('Selected files:', files);
-      // setFiles(files);
+      actions.clearFieldError(field.id);
       handleChange(files);
     },
-    [handleChange]
+    [handleChange, actions, field.id, field.name]
   );
 
   // Memoized disabled dates (same as before)
@@ -464,24 +536,87 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     return null;
   }, [field.appearance, renderAppearance]);
 
-  const multiselectOptions = useMemo(() => {
-    if (field.type === 'multiselect' && Array.isArray(field.options)) {
-      return field.options.map((option: FieldGroupItem) => ({
-        value: option.value,
-        label: option.label
-      }));
-    }
-    return [];
-  }, [field.type, field.type === 'multiselect' ? (field as MultiSelectField).options : null]);
+  const [multiSelectOptions, setMultiselectOptions] = useState((field as MultiSelectField).options ?? []);
+  const [selectOptions, setSelectOptions] = useState((field as SelectField).options ?? []);
+  const [autocompleteOptions, setAutocompleteOptions] = useState((field as AutoCompleteField).options ?? []);
 
-  // Effect to handle dynamic options loading
+  // Effect to handle dynamic options loading for select
   useEffect(() => {
-    if ((field.type === 'select' || field.type === 'multiselect') && field.external) {
-      if (firstRender) return;
+    if (field.type === 'select') {
+      if (field.external) {
+        // Always fetch options when external is configured
+        const getOptions = async () => {
+          const options = await actions.refreshDynamicOptions(field);
+          setSelectOptions(options);
+        };
+        actions.clearFieldError(field.id);
 
-      actions.refreshFieldOptions(field.id);
+        getOptions();
+      } else {
+        if (field.options && Array.isArray(field.options)) {
+          setSelectOptions(field.options);
+        }
+      }
     }
-  }, [field.id, field.type === 'select' || field.type === 'multiselect' ? field.external : null, firstRender]);
+  }, [
+    actions,
+    field.type === 'select' ? field.options : null,
+    field.type === 'select' ? field.external : null,
+    // Watch for refresh trigger changes
+    field.type === 'select' ? field.external?._refreshTimestamp : null
+  ]);
+
+  // Effect to handle dynamic options loading for multiselect
+  useEffect(() => {
+    if (field.type === 'multiselect') {
+      if (field.external) {
+        // Always fetch options when external is configured
+        const getOptions = async () => {
+          const options = await actions.refreshDynamicOptions(field);
+          setMultiselectOptions(options);
+        };
+        actions.clearFieldError(field.id);
+
+        getOptions();
+      } else {
+        if (field.options && Array.isArray(field.options)) {
+          setMultiselectOptions(field.options);
+        }
+      }
+    }
+  }, [
+    actions,
+    field.type === 'multiselect' ? field.options : null,
+    field.type === 'multiselect' ? field.external : null,
+    // Watch for refresh trigger changes
+    field.type === 'multiselect' ? field.external?._refreshTimestamp : null
+  ]);
+
+  // Effect to handle dynamic options loading for autocomplete
+  useEffect(() => {
+    if (field.type === 'autocomplete') {
+      if (field.external) {
+        // Always fetch options when external is configured
+        const getOptions = async () => {
+          const options = await actions.refreshDynamicOptions(field);
+          setAutocompleteOptions(options);
+        };
+        actions.clearFieldError(field.id);
+
+        getOptions();
+      } else {
+        if (field.options && Array.isArray(field.options)) {
+          setAutocompleteOptions(field.options);
+        }
+      }
+    }
+  }, [
+    actions,
+    field.type === 'autocomplete' ? field.options : null,
+    field.type === 'autocomplete' ? field.external : null,
+    // Watch for refresh trigger changes
+    field.type === 'autocomplete' ? field.external?._refreshTimestamp : null
+  ]);
 
   const renderInput = useMemo(() => {
     switch (field.type) {
@@ -527,13 +662,17 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
           placeholder: field.placeholder,
           dateFormat: field.options?.dateFormat,
           disabled: disabledDates,
+          modalPopover: false,
           startMonth: field.options?.restrictedMonths?.[0] ? new Date(field.options.restrictedMonths[0]) : undefined,
           endMonth: field.options?.restrictedMonths?.[1] ? new Date(field.options.restrictedMonths[1]) : undefined,
           captionLayout: field.options?.dropdownType as DatePickerProps['captionLayout'],
-          container: document.getElementById(`item__${field.id}`),
-          className: !validationState.isValid ? 'border-red-500' : 'border-gray-300',
-          popoverClassName: 'z-[99]'
+          className: !validationState.isValid ? 'border-red-500' : 'border-gray-300'
         };
+
+        // Only render DatePicker if we have a parent element or if we're in editor mode
+        if (!parentElement && mode !== 'editor') {
+          return <Skeleton className="h-12">Loading date picker...</Skeleton>;
+        }
 
         if (field.mode === 'single') {
           return (
@@ -543,6 +682,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
               selected={singleDate}
               onSelect={handleSingleDateChange}
               {...commonDateProps}
+              container={parentElement}
             />
           );
         } else if (field.mode === 'multiple') {
@@ -555,6 +695,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
               min={field.options?.min}
               max={field.options?.max}
               {...commonDateProps}
+              container={parentElement}
             />
           );
         } else {
@@ -568,6 +709,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
               max={field.options?.max}
               onSelect={handleDateRangeChange}
               {...commonDateProps}
+              container={parentElement}
             />
           );
         }
@@ -598,6 +740,9 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
         );
 
       case 'select':
+        const selectField = field as SelectField;
+        const optionsToUse = selectField.external ? selectOptions : selectField.options || [];
+
         return (
           <Select
             name={field.name}
@@ -609,11 +754,11 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
               <SelectValue className="text-slate-400" placeholder={field.placeholder || 'Select an option'} />
             </SelectTrigger>
             <SelectContent>
-              {Array.isArray(field.options) && field.options.length > 0 && (
-                <MemoizedSelectOptions options={field.options} />
+              {Array.isArray(optionsToUse) && optionsToUse.length > 0 && (
+                <MemoizedSelectOptions field={field} options={optionsToUse} />
               )}
-              {field.optionGroups && field.optionGroups.length > 0 && (
-                <MemoizedSelectGroupsOptions optionGroups={field.optionGroups} />
+              {selectField.optionGroups && selectField.optionGroups.length > 0 && (
+                <MemoizedSelectGroupsOptions optionGroups={selectField.optionGroups} />
               )}
             </SelectContent>
           </Select>
@@ -629,8 +774,39 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
             modalPopover={true}
             color="primary"
             variant="shadow"
-            options={multiselectOptions}
+            options={multiSelectOptions?.map((option) => ({
+              value: option.value,
+              label: option.label
+            }))}
             onValueChange={handleMultiSelectChange}
+          />
+        );
+
+      case 'autocomplete':
+        const autocompleteField = field as AutoCompleteField;
+        return (
+          <AutoComplete
+            options={autocompleteOptions?.map((option) => ({
+              id: option.id?.toString() || '',
+              value: option.value,
+              label: option.label,
+              description: option.description
+            }))}
+            value={
+              autocompleteOptions?.find((opt) => opt.value === value)
+                ? {
+                    id: autocompleteOptions.find((opt) => opt.value === value)?.id?.toString() || '',
+                    value: value,
+                    label: autocompleteOptions.find((opt) => opt.value === value)?.label || '',
+                    description: autocompleteOptions.find((opt) => opt.value === value)?.description
+                  }
+                : undefined
+            }
+            onValueChange={handleAutocompleteChange}
+            disabled={isDisabled}
+            placeholder={field.placeholder || 'Search options...'}
+            shouldFilter={autocompleteField.shouldFilter !== false}
+            emptyMessage="No options found"
           />
         );
 
@@ -646,6 +822,8 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
             maxFiles={field.options.maxFiles}
             maxSize={field.options.maxSize}
             instantUpload={field.options.instantUpload}
+            bulkUpload={field.options.bulkUpload}
+            preferredUnit={field.options.preferredUnit}
             onFilesChange={handleFileChange}
             onError={(error) => {
               actions.setFieldError(field.id, (error as Error).message || 'File upload failed');
@@ -679,7 +857,12 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     handleRadioChange,
     handleSelectChange,
     handleMultiSelectChange,
-    createCheckboxHandler
+    handleAutocompleteChange,
+    createCheckboxHandler,
+    selectOptions,
+    multiSelectOptions,
+    autocompleteOptions,
+    parentElement
   ]);
 
   if (!isVisible) return null;
@@ -711,15 +894,16 @@ InputField.displayName = 'InputField';
 // Main router component that decides which sub-component to render
 export const FormField: React.FC<{
   field: FormFieldType;
+  isDisabled?: boolean;
   onChange?: FormBuilderProps['onChange'];
   onCancel?: FormBuilderProps['onCancel'];
-}> = ({ field, onChange, onCancel }) => {
+}> = ({ field, onChange, onCancel, isDisabled }) => {
   if (field.type === 'block' || field.type === 'spacer') {
     return <BlockField field={field} />;
   }
 
   if (field.type === 'submit' || field.type === 'reset' || field.type === 'button') {
-    return <ButtonField field={field as ButtonFieldType} onCancel={onCancel} />;
+    return <ButtonField field={field as ButtonFieldType} onCancel={onCancel} disabled={isDisabled} />;
   }
 
   return <InputField field={field as InputFieldType} />;

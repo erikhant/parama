@@ -1,0 +1,25 @@
+@layer components {
+  .scroll-area-root {
+    @apply relative overflow-hidden;
+  }
+
+  .scroll-area-viewport {
+    @apply h-full w-full rounded-[inherit];
+  }
+
+  .scroll-bar {
+    @apply flex touch-none select-none transition-colors;
+  }
+
+  .scroll-bar-vertical {
+    @apply h-full w-2.5 border-l border-l-transparent p-[1px];
+  }
+
+  .scroll-bar-horizontal {
+    @apply h-2.5 flex-col border-t border-t-transparent p-[1px];
+  }
+
+  .scroll-bar-thumb {
+    @apply relative flex-1 rounded-full bg-slate-200 dark:bg-slate-800;
+  }
+}

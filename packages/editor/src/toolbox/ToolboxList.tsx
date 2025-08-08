@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LucideIcon } from 'lucide-react';
 import { SortableItem } from '../components';
 import { ToolboxItem } from './ToolboxItem';
-import { ToolboxSearch } from './ToolboxSearch';
-import { FieldTypeDef, PresetTypeDef } from '@form-builder/types';
+import { FieldTypeDef, PresetTypeDef } from '@parama-dev/form-builder-types';
 import { ToolboxSearchWithHook } from './ToolboxSearchWithHook';
 import { ToolboxItemThumbnail } from './ToolboxItemThumbnail';
 
@@ -20,7 +18,6 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
   showSearch = true,
   searchPlaceholder = 'Search items...'
 }) => {
-  const id = `toolbox-${Date.now()}`;
   const [filteredItems, setFilteredItems] = useState<FieldTypeDef[] | PresetTypeDef[]>([]);
 
   // Update filtered items when items prop changes
@@ -52,7 +49,7 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
               <div>
                 {!section && <div className="text-gray-400 mb-2">No items available</div>}
                 <div className="text-xs text-gray-400">
-                  {section === 'presets' ? 'No presets have been loaded' : 'No fields are defined'}
+                  {section === 'presets' ? 'No presets have been loaded' : !section ? 'No fields are defined' : null}
                 </div>
               </div>
             ) : (
@@ -68,10 +65,10 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
               key={item.id}
               id={item.id}
               index={index}
-              data={{ fromToolbox: true, type: item.type, id }}
+              data={{ fromToolbox: true, type: item.type, id: item.id }}
               useDynamicIndicator={false}>
               <ToolboxItem
-                id={id}
+                id={item.id}
                 name={item.label}
                 description={item.description}
                 className="flex-row items-center justify-start gap-3 h-auto p-2.5 bg-white rounded-lg border-gray-100 shadow-none hover:border-blue-300 hover:shadow-none leading-none transition-colors"

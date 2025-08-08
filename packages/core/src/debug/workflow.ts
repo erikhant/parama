@@ -1,5 +1,5 @@
 // workflowDebugger.ts
-import type { FormField, ValidationTrigger } from '@form-builder/types';
+import type { FormField, ValidationTrigger } from '@parama-dev/form-builder-types';
 import { useFormBuilder } from '../store';
 import { DependencyGraph } from '../workflow/graph';
 import { WorkflowEngine } from '../workflow/engine';
@@ -98,11 +98,15 @@ export function setupWorkflowDebugger(options: DebugOptions = {}) {
 
   // 5. Options Loading Debugging
   if (logOptionsLoading) {
-    const originalRefreshOptions = workflowEngine.refreshDynamicOptions.bind(workflowEngine);
+    const originalRefreshOptions = useFormBuilder.getState().actions.refreshDynamicOptions.bind(workflowEngine);
     const store = useFormBuilder.getState();
     workflowEngine.refreshDynamicOptions = async (field: FormField) => {
-      if (!field || (field.type !== 'select' && field.type !== 'multiselect') || !field.external) {
-        console.warn(`Field ${field.id} is not a select or multiselect with dynamic options`);
+      if (
+        !field ||
+        (field.type !== 'select' && field.type !== 'multiselect' && field.type !== 'autocomplete') ||
+        !field.external
+      ) {
+        console.warn(`Field ${field.id} is not a select, multiselect, or autocomplete with dynamic options`);
         return;
       }
       console.groupCollapsed(`%c[OPTIONS LOAD]%c ${field.id}`, 'color: #00BCD4; font-weight: bold', 'color: inherit');

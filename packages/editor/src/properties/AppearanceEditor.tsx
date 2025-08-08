@@ -1,4 +1,4 @@
-import type { FormField } from '@form-builder/types';
+import type { FormField } from '@parama-dev/form-builder-types';
 import {
   Badge,
   Button,
@@ -14,7 +14,6 @@ import {
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { IconPicker } from '../components/IconPicker';
-import { ManageOptions } from './select/ManageOptions';
 import { SectionPanel } from './SectionPanel';
 import { useEditor } from '../store/useEditor';
 
@@ -25,6 +24,20 @@ type AppearanceEditorProps = {
 
 export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => {
   const { editor } = useEditor();
+
+  const [enableSelectionMonth, setEnableSelectionMonth] = useState(() => {
+    if (field.type === 'date') {
+      return field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years';
+    }
+    return false;
+  });
+
+  const [enableSelectionYear, setEnableSelectionYear] = useState(() => {
+    if (field.type === 'date') {
+      return field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-months';
+    }
+    return false;
+  });
 
   const renderAppearanceOptions = () => {
     switch (field.type) {
@@ -492,13 +505,6 @@ export const AppearanceEditor = ({ field, onChange }: AppearanceEditorProps) => 
           </SectionPanel>
         );
       case 'date':
-        const [enableSelectionMonth, setEnableSelectionMonth] = useState(
-          field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-years'
-        );
-        const [enableSelectionYear, setEnableSelectionYear] = useState(
-          field.options?.dropdownType !== undefined && field.options?.dropdownType !== 'dropdown-months'
-        );
-
         return (
           <SectionPanel title="Appearance">
             <FormItem orientation="horizontal">

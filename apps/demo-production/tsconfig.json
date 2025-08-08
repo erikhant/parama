@@ -16,10 +16,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@form-builder/types": ["../../packages/types/dist"],
-      "@form-builder/core": ["../../packages/core/dist"],
-      "@form-builder/renderer": ["../../packages/renderer/dist"],
-      "@form-builder/editor": ["../../packages/editor/dist"],
+      "@parama-dev/form-builder-types": ["../../packages/types/dist"],
+      "@parama-dev/form-builder-core": ["../../packages/core/dist"],
+      "@parama-dev/form-builder-renderer": ["../../packages/renderer/dist"],
+      "@parama-dev/form-builder-editor": ["../../packages/editor/dist"],
       "@parama-ui/react": ["../../packages/parama-ui/dist"],
       "@parama-ui/react/styles": ["../../packages/parama-ui/dist/parama-ui.min.css"]
     }

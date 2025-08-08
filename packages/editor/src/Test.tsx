@@ -1,8 +1,8 @@
-import './index.css';
-import '../../parama-ui/dist/parama-ui.min.css';
-import { FormEditor } from '@form-builder/editor';
+import '@parama-ui/react/dist/parama-ui.min.css';
+import './styles/index.css';
+import { FormEditor } from '../src/components/FormEditor';
 import { createRoot } from 'react-dom/client';
-import type { FormSchema } from '@form-builder/types';
+import type { FormSchema, PresetTypeDef } from '@parama-dev/form-builder-types';
 
 // Example usage of the FormEditor component
 export function App() {
@@ -11,36 +11,62 @@ export function App() {
   };
 
   const initialSchema: FormSchema = {
-    id: 'example-form',
-    version: '1.0',
-    title: 'Example Form',
-    description: 'A simple example form',
-    layout: {
-      colSize: 12,
-      gap: 4
-    },
-    fields: [
-      {
-        id: 'field-1',
-        name: 'name',
-        type: 'text',
-        label: 'Name',
-        placeholder: 'Enter your name',
-        value: '',
-        width: 6,
-        validations: [
-          {
-            type: 'required',
-            message: 'Name is required'
-          }
-        ]
-      }
-    ]
+    id: 'enhanced-file-demo',
+    version: '1.0.0',
+    title: 'Enhanced File Handling Demo',
+    description: 'Demonstrates single and multiple file uploads',
+    layout: { colSize: 12, gap: 4 },
+    fields: []
   };
+
+  const initialPresets: PresetTypeDef[] = [
+    {
+      id: 'preset-1',
+      label: 'Preset 1',
+      type: 'preset',
+      description: 'This is a preset for demonstration purposes',
+      group: 'presets',
+      fields: [
+        {
+          id: Date.now().toString(),
+          name: 'name',
+          type: 'text',
+          label: 'Name',
+          placeholder: 'Enter your name',
+          value: '',
+          width: 6,
+          validations: [
+            {
+              type: 'required',
+              message: 'Name is required'
+            }
+          ]
+        }
+      ]
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <FormEditor schema={initialSchema} onSaveSchema={handleSave} />
+      <FormEditor
+        schema={initialSchema}
+        loadPreset={initialPresets}
+        onSaveSchema={handleSave}
+        // variables={{
+        //   userName: 'john_doe',
+        //   userEmail: 'john.doe@example.com'
+        // }}
+        options={{
+          defaultFieldTab: 'presets',
+          brand: (
+            <img
+              src="https://www.pikpng.com/pngl/b/34-345940_download-in-png-format-png-format-clipart.png"
+              alt="Brand Logo"
+              className="h-6"
+            />
+          )
+        }}
+      />
     </div>
   );
 }

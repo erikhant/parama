@@ -104,3 +104,67 @@ This project structure mimics how the packages would be used after:
 3. Importing in application code: `import { FormEditor } from '@form-builder/editor'`
 
 The aliases in `vite.config.ts` simulate the node_modules resolution that would happen in a real npm installation.
+
+## JSON Server Integration
+
+This demo now includes form submission functionality using JSON Server for data persistence.
+
+### Getting Started with JSON Server
+
+#### 1. Start JSON Server (in one terminal)
+
+```bash
+npm run json-server
+```
+
+This will start JSON Server on http://localhost:3000 and watch the `db.json` file for changes.
+
+#### 2. Start the Development Server (in another terminal)
+
+```bash
+npm run dev
+```
+
+This will start the Vite development server on http://localhost:5002.
+
+### Form Submission Features
+
+- **Real-time persistence**: Form submissions are saved to `db.json`
+- **RESTful API**: Access submissions via JSON Server endpoints
+- **Error handling**: Proper error messages if JSON Server is not running
+
+### API Endpoints
+
+When JSON Server is running, you can access:
+
+- `GET /form-submissions` - View all form submissions
+- `POST /form-submissions` - Submit new form data
+- `GET /form-submissions/:id` - Get specific submission
+- `PUT /form-submissions/:id` - Update submission
+- `DELETE /form-submissions/:id` - Delete submission
+
+### Form Submission Structure
+
+Each form submission is saved with the following structure:
+
+```json
+{
+  "id": "timestamp",
+  "formId": "production-test-form",
+  "formTitle": "Production Test Form",
+  "submittedAt": "2025-01-01T12:00:00.000Z",
+  "data": {
+    "fullName": "John Doe",
+    "email": "john@example.com"
+  }
+}
+```
+
+### Usage Instructions
+
+1. Open http://localhost:5002 in your browser
+2. Use the FormEditor to modify the form schema if needed
+3. Fill out the form in the FormRenderer section
+4. Click submit to save the form data to JSON Server
+5. Check the `db.json` file to see the submitted data
+6. View all submissions at http://localhost:3000/form-submissions

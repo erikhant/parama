@@ -1,13 +1,14 @@
-import { useFormBuilder } from '@form-builder/core';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
 import {
   CheckboxField,
   DateField,
   FieldGroupItem,
   FormField,
   MultiSelectField,
+  AutoCompleteField,
   RadioField,
   SelectField
-} from '@form-builder/types';
+} from '@parama-dev/form-builder-types';
 import {
   Accordion,
   AccordionContent,
@@ -114,20 +115,23 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
   const handleOptionDelete = useCallback(
     (index: number) => {
       const newOptions = (field as SelectField | MultiSelectField).options?.filter((_, i) => i !== index) || [];
+      const deletedOptionValue = (field as SelectField | MultiSelectField).options?.[index].value;
 
-      if ((field as SelectField).defaultValue === (field as SelectField).options?.[index].value) {
+      if ((field as SelectField).defaultValue === deletedOptionValue) {
         onChange({ defaultValue: undefined, options: newOptions });
         updateFieldValue(field.id, undefined);
-      } else if (
-        (field as MultiSelectField).defaultValue?.includes((field as MultiSelectField).options?.[index].value)
-      ) {
+      } else if ((field as MultiSelectField).defaultValue?.includes(deletedOptionValue)) {
         const newDefaultValue = (field as MultiSelectField).defaultValue?.filter(
-          (value: string) => value !== (field as MultiSelectField).options?.[index].value
+          (value: string) => value !== deletedOptionValue
         );
         onChange({ defaultValue: newDefaultValue.length > 0 ? newDefaultValue : undefined, options: newOptions });
+        updateFieldValue(field.id, newDefaultValue.length > 0 ? newDefaultValue : undefined);
+      } else {
+        // If the deleted option wasn't the default value, just update the options array
+        onChange({ options: newOptions });
       }
     },
-    [(field as SelectField).options, onChange]
+    [(field as SelectField).options, onChange, updateFieldValue]
   );
 
   const handleGroupUpdate = useCallback(
@@ -267,13 +271,24 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
   );
 
   // Memoized conditions
-  const hasNoOptionsConfigured = useMemo(
-    () =>
-      (!(field as SelectField).options || (field as SelectField).options.length === 0) &&
-      (!(field as SelectField).optionGroups || (field as SelectField).optionGroups!.length === 0) &&
-      !(field as SelectField).external,
-    [(field as SelectField).options, (field as SelectField).optionGroups, (field as SelectField).external]
-  );
+  const hasNoOptionsConfigured = useMemo(() => {
+    if (field.type === 'select' || field.type === 'multiselect' || field.type === 'autocomplete') {
+      const fieldWithOptions = field as SelectField | MultiSelectField | AutoCompleteField;
+      return (
+        (!fieldWithOptions.options || fieldWithOptions.options.length === 0) &&
+        (!('optionGroups' in fieldWithOptions) ||
+          !(fieldWithOptions as SelectField).optionGroups ||
+          (fieldWithOptions as SelectField).optionGroups!.length === 0) &&
+        !fieldWithOptions.external
+      );
+    }
+    return false;
+  }, [
+    field.type,
+    (field as SelectField | MultiSelectField | AutoCompleteField).options,
+    (field as SelectField).optionGroups,
+    (field as SelectField | MultiSelectField | AutoCompleteField).external
+  ]);
 
   const renderTypeSpecificProperties = useMemo(() => {
     switch (field.type) {
@@ -379,8 +394,8 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                   className="w-auto !-mt-0">
                   {field.options?.map((option, index) => (
                     <AccordionItem key={String(option.id)} value={String(option.id)}>
-                      <AccordionTrigger className="text-gray-700 text-sm">
-                        {option.label || 'Option name'}
+                      <AccordionTrigger className="text-gray-700 text-sm py-2 text-start whitespace-nowrap max-w-[15rem]">
+                        <span className="pr-1.5 text-ellipsis line-clamp-1">{option.label || 'Option name'}</span>
                       </AccordionTrigger>
                       <AccordionContent className="pt-1">
                         <OptionItem
@@ -515,8 +530,8 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                   className="w-auto !-mt-0">
                   {field.options?.map((option, index) => (
                     <AccordionItem key={String(option.id)} value={String(option.id)}>
-                      <AccordionTrigger className="text-gray-700 text-sm">
-                        {option.label || 'Option name'}
+                      <AccordionTrigger className="text-gray-700 text-sm py-2 text-start whitespace-nowrap max-w-[15rem]">
+                        <span className="pr-1.5 text-ellipsis line-clamp-1">{option.label || 'Option name'}</span>
                       </AccordionTrigger>
                       <AccordionContent className="pt-1">
                         <OptionItem
@@ -544,6 +559,138 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                                   onChange({
                                     defaultValue: newValue.length > 0 ? newValue : undefined
                                   });
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+                {editor.options?.propertiesSettings !== 'readonly' && !field.external && (
+                  <Button onClick={handleAddOption} size="xs" color="secondary" variant="ghost">
+                    <Plus size={15} /> Add option
+                  </Button>
+                )}
+              </>
+            )}
+            {/* EXTERNAL DATA OPTIONS */}
+            {field.external?.url && (
+              <div>
+                <Label className="text-xs text-gray-600">API Source</Label>
+                <div className="flex items-center space-x-2">
+                  <Badge size="sm">
+                    <p className="max-w-48 truncate">{field.external.url}</p>
+                  </Badge>
+                  {editor.options?.propertiesSettings !== 'readonly' && (
+                    <ExternalDataOptions external={field.external} onChange={(value) => onChange({ external: value })}>
+                      <Button variant="ghost" size="xs" color="secondary" className="text-gray-600">
+                        <span className="sr-only">Edit API source</span>
+                        <PencilLineIcon size={15} />
+                      </Button>
+                    </ExternalDataOptions>
+                  )}
+                </div>
+              </div>
+            )}
+          </SectionPanel>
+        );
+      case 'autocomplete':
+        return (
+          <SectionPanel title="Properties">
+            <FormItem>
+              <Label>Placeholder</Label>
+              <Input
+                type="text"
+                value={field.placeholder || ''}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
+                onChange={handlePlaceholderChange}
+              />
+            </FormItem>
+            <NameField value={field.name || ''} onChange={handleNameChange} hasValidation />
+            <FormItem orientation="horizontal">
+              <div className="form-captions !col-span-3">
+                <Label htmlFor="enable-filter">Enable filtering</Label>
+                <p className="form-description">Allow users to filter options by typing</p>
+              </div>
+              <div className="col-span-2 flex items-center justify-end">
+                <Switch
+                  id="enable-filter"
+                  disabled={editor.options?.propertiesSettings === 'readonly'}
+                  checked={(field as AutoCompleteField).shouldFilter !== false}
+                  onCheckedChange={(checked) => onChange({ shouldFilter: checked })}
+                />
+              </div>
+            </FormItem>
+            <div className="flex justify-between items-center">
+              <Label>Options</Label>
+              {editor.options?.propertiesSettings !== 'readonly' ? (
+                hasNoOptionsConfigured ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="xs" color="secondary" variant="ghost">
+                        <Plus size={15} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-32" align="end">
+                      <DropdownMenuItem onSelect={handleAddOption}>List</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <ExternalDataOptions
+                          external={field.external}
+                          onChange={(value) => onChange({ external: value })}>
+                          <button className="dropdown-item w-full hover:bg-slate-100">API source</button>
+                        </ExternalDataOptions>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button
+                    className="text-xs text-gray-500"
+                    variant="ghost"
+                    size="xs"
+                    color="secondary"
+                    onClick={handleRemoveAllOptions}>
+                    Remove all
+                  </Button>
+                )
+              ) : null}
+            </div>
+
+            {/* OPTION LIST */}
+            {(field.options?.length || 0) > 0 && (
+              <>
+                <Accordion
+                  type="multiple"
+                  defaultValue={field.options?.map((option) => String(option.id))}
+                  className="w-auto !-mt-0">
+                  {field.options?.map((option, index) => (
+                    <AccordionItem key={String(option.id)} value={String(option.id)}>
+                      <AccordionTrigger className="text-gray-700 text-sm py-2 text-start whitespace-nowrap max-w-[15rem]">
+                        <span className="pr-1.5 text-ellipsis line-clamp-1">{option.label || 'Option name'}</span>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-1">
+                        <OptionItem
+                          key={option.id}
+                          option={option}
+                          index={index}
+                          onUpdate={handleOptionUpdate}
+                          onDelete={handleOptionDelete}
+                        />
+                        {editor.options?.propertiesSettings !== 'readonly' && (
+                          <div className="flex items-center ml-4 gap-2 mt-2">
+                            <Label htmlFor={option.id as string} className="text-xs text-gray-600">
+                              Set as default
+                            </Label>
+                            <Switch
+                              id={option.id as string}
+                              disabled={option.value === '' || option.label === ''}
+                              checked={field.defaultValue === option.value}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  onChange({ defaultValue: option.value });
+                                } else if (field.defaultValue === option.value) {
+                                  onChange({ defaultValue: undefined });
                                 }
                               }}
                             />
@@ -611,8 +758,8 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
               className="w-auto !-mt-0">
               {field.items?.map((item, index) => (
                 <AccordionItem key={String(item.id)} value={String(item.id)}>
-                  <AccordionTrigger className="text-gray-700 text-sm py-3">
-                    {item.label || 'Item name'}
+                  <AccordionTrigger className="text-gray-700 text-sm py-2 text-start whitespace-nowrap max-w-[15rem] py-3">
+                    <span className="pr-1.5 text-ellipsis line-clamp-1">{item.label || 'Item name'}</span>
                   </AccordionTrigger>
                   <AccordionContent className="pt-1">
                     <OptionItem
@@ -672,6 +819,17 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
         return (
           <SectionPanel title="Properties">
             <FormItem>
+              <Label>Placeholder</Label>
+              <Input
+                type="text"
+                placeholder="e.g. Select date"
+                value={field.placeholder || ''}
+                disabled={editor.options?.propertiesSettings === 'readonly'}
+                onChange={handlePlaceholderChange}
+              />
+            </FormItem>
+            <NameField value={field.name || ''} onChange={handleNameChange} />
+            <FormItem>
               <Label>Mode</Label>
               <Select
                 value={field.mode}
@@ -707,16 +865,7 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
                 </SelectContent>
               </Select>
             </FormItem>
-            <FormItem>
-              <Label>Placeholder</Label>
-              <Input
-                type="text"
-                placeholder="e.g. Select date"
-                value={field.placeholder || ''}
-                disabled={editor.options?.propertiesSettings === 'readonly'}
-                onChange={handlePlaceholderChange}
-              />
-            </FormItem>
+
             <FormItem>
               <Label>Date format</Label>
               <Select

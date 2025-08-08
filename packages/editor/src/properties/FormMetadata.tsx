@@ -1,4 +1,4 @@
-import { FormSchema } from '@form-builder/types';
+import { FormSchema } from '@parama-dev/form-builder-types';
 
 export function FormMetadata({ schema }: { schema: FormSchema }) {
   const { id, title, description, version, createdAt, createdBy } = schema;

@@ -4,7 +4,7 @@ Your form builder monorepo has been successfully configured for production publi
 
 ## 📦 Published Packages
 
-### 1. **@form-builder/types** (v0.1.0)
+### 1. **@parama-dev/form-builder-types** (v0.1.0)
 
 - Type definitions for the form builder system
 - Zero dependencies
@@ -16,19 +16,19 @@ Your form builder monorepo has been successfully configured for production publi
 - Zero dependencies (peer dependencies: react, react-dom)
 - Includes CSS styles: `dist/parama-ui.min.css`
 
-### 3. **@form-builder/core** (v0.1.0)
+### 3. **@parama-dev/form-builder-core** (v0.1.0)
 
 - Core functionality for the form builder system
-- Depends on: `@form-builder/types`
+- Depends on: `@parama-dev/form-builder-types`
 - Includes validation engine, workflow management, store management
 
-### 4. **@form-builder/renderer** (v0.1.0)
+### 4. **@parama-dev/form-builder-renderer** (v0.1.0)
 
 - React components for rendering forms from schemas
-- Depends on: `@form-builder/core`, `@form-builder/types`, `@parama-ui/react`
+- Depends on: `@parama-dev/form-builder-core`, `@parama-dev/form-builder-types`, `@parama-ui/react`
 - Includes file upload support, custom field components
 
-### 5. **@form-builder/editor** (v0.1.0)
+### 5. **@parama-dev/form-builder-editor** (v0.1.0)
 
 - Visual form builder editor with drag-and-drop interface
 - Depends on: all above packages
@@ -78,7 +78,7 @@ apps/
 
 The packages are built in dependency order:
 
-1. `@form-builder/types` → 2. `@parama-ui/react` → 3. `@form-builder/core` → 4. `@form-builder/renderer` → 5. `@form-builder/editor`
+1. `@parama-dev/form-builder-types` → 2. `@parama-ui/react` → 3. `@parama-dev/form-builder-core` → 4. `@parama-dev/form-builder-renderer` → 5. `@parama-dev/form-builder-editor`
 
 ## 📝 Usage Examples
 
@@ -86,16 +86,16 @@ The packages are built in dependency order:
 
 ```bash
 # For just the renderer
-npm install @form-builder/renderer @form-builder/core @form-builder/types @parama-ui/react
+npm install @parama-dev/form-builder-renderer @parama-dev/form-builder-core @parama-dev/form-builder-types @parama-ui/react
 
 # For the complete editor
-npm install @form-builder/editor @form-builder/renderer @form-builder/core @form-builder/types @parama-ui/react
+npm install @parama-dev/form-builder-editor @parama-dev/form-builder-renderer @parama-dev/form-builder-core @parama-dev/form-builder-types @parama-ui/react
 ```
 
 ### Using the Renderer
 
 ```tsx
-import { FormRenderer } from '@form-builder/renderer';
+import { FormRenderer } from '@parama-dev/form-builder-renderer';
 import '@parama-ui/react/styles';
 
 function App() {
@@ -106,7 +106,7 @@ function App() {
 ### Using the Editor
 
 ```tsx
-import { FormEditor } from '@form-builder/editor';
+import { FormEditor } from '@parama-dev/form-builder-editor';
 import '@parama-ui/react/styles';
 
 function App() {
@@ -126,7 +126,7 @@ function App() {
 
    ```bash
    cd apps/demo
-   pnpm add @form-builder/types@latest @form-builder/core@latest @form-builder/renderer@latest @form-builder/editor@latest @parama-ui/react@latest
+   pnpm add @parama-dev/form-builder-types@latest @parama-dev/form-builder-core@latest @parama-dev/form-builder-renderer@latest @parama-dev/form-builder-editor@latest @parama-ui/react@latest
    ```
 
 3. Test the demo:

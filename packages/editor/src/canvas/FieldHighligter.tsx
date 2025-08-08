@@ -1,4 +1,4 @@
-import { useFormBuilder } from '@form-builder/core';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
 
 type FieldHighligterProps = {
   id: string;

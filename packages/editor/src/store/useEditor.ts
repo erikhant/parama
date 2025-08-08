@@ -1,4 +1,10 @@
-import { FieldTypeDef, FormEditorOptions, FormEditorProps, FormField, PresetTypeDef } from '@form-builder/types';
+import {
+  FieldTypeDef,
+  FormEditorOptions,
+  FormEditorProps,
+  FormField,
+  PresetTypeDef
+} from '@parama-dev/form-builder-types';
 import type { LucideIcon } from 'lucide-react';
 import {
   ArrowDown10,
@@ -10,6 +16,7 @@ import {
   EyeOff,
   MousePointerClick,
   RectangleEllipsis,
+  SearchIcon,
   SeparatorHorizontalIcon,
   TextCursorInput,
   Upload,
@@ -19,14 +26,6 @@ import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';
 
 const fieldTypes: FieldTypeDef[] = [
-  {
-    id: uuid(),
-    type: 'hidden',
-    label: 'Hidden input',
-    icon: EyeOff as LucideIcon,
-    group: 'fields',
-    description: 'A hidden input field that is not visible to the user.'
-  },
   {
     id: uuid(),
     type: 'text',
@@ -42,6 +41,14 @@ const fieldTypes: FieldTypeDef[] = [
     icon: ArrowDown10 as LucideIcon,
     group: 'fields',
     description: 'A numeric input field for entering numbers.'
+  },
+  {
+    id: uuid(),
+    type: 'hidden',
+    label: 'Hidden input',
+    icon: EyeOff as LucideIcon,
+    group: 'fields',
+    description: 'A hidden input field that is not visible to the user.'
   },
   {
     id: uuid(),
@@ -74,6 +81,14 @@ const fieldTypes: FieldTypeDef[] = [
     icon: ChevronDown as LucideIcon,
     group: 'fields',
     description: 'Choose one option from a list.'
+  },
+  {
+    id: uuid(),
+    type: 'autocomplete',
+    label: 'Autocomplete',
+    icon: SearchIcon as LucideIcon,
+    group: 'fields',
+    description: 'Input field with suggestions based on user input.'
   },
   {
     id: uuid(),
@@ -153,8 +168,11 @@ interface FormEditorState {
 
 const defaultOptions: FormEditorOptions = {
   showJsonCode: true,
+  defaultFieldTab: 'fields',
+  propertiesSettings: 'on',
   generalSettings: 'on',
   appearanceSettings: 'on',
+  dataSettings: 'on',
   validationSettings: 'on',
   conditionsSettings: 'on',
   eventsSettings: 'on'
@@ -163,11 +181,18 @@ const defaultOptions: FormEditorOptions = {
 export const useEditor = create<FormEditorState>((set, get) => ({
   initialize: (props) => {
     const { options: customOptions, ...editorProps } = props;
-    const mergedOptions = Object.assign({}, defaultOptions, customOptions);
+    const mergedOptions = Object.assign(defaultOptions, customOptions);
+
+    // Ensure variables is always an object to prevent undefined issues
+    const safeEditorProps = {
+      ...editorProps,
+      variables: editorProps.variables || {}
+    };
+
     set((state) => ({
       editor: {
         ...state.editor,
-        ...editorProps,
+        ...safeEditorProps,
         options: mergedOptions
       },
       toolbox: {
@@ -178,6 +203,7 @@ export const useEditor = create<FormEditorState>((set, get) => ({
   },
   editor: {
     options: defaultOptions,
+    variables: {},
     setInsertionIndex: (index) => {
       set((state) => ({
         canvas: {

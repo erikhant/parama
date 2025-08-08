@@ -1,4 +1,4 @@
-import type { FieldGroupItem } from '@form-builder/types';
+import type { FieldGroupItem } from '@parama-dev/form-builder-types';
 import {
   Button,
   Dialog,
