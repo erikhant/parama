@@ -220,6 +220,15 @@ export interface FileOptions {
   preferredUnit?: string; // e.g., 'MB', 'KB'
 }
 
+// Descriptor for pre-existing files (e.g., already uploaded and referenced by URL)
+export interface FileDescriptor {
+  id?: string;
+  name: string;
+  url: string;
+  size?: number;
+  type?: string;
+}
+
 export interface BaseField {
   id: string;
   name: string;
@@ -233,6 +242,8 @@ export interface BaseField {
   readOnly?: boolean;
   placeholder?: string;
   width: number;
+  widthTablet?: number;
+  widthMobile?: number;
   appearance?: Record<string, any>;
   conditions?: FieldConditions;
   events?: Events[];
@@ -353,7 +364,8 @@ export interface AutoCompleteField extends BaseField, DataCustomization {
   external?: ExternalDataSource<FieldGroupItem> & { _refreshTimestamp?: number };
 }
 
-export interface ButtonField extends Pick<BaseField, 'id' | 'label' | 'disabled' | 'width' | 'conditions'> {
+export interface ButtonField
+  extends Pick<BaseField, 'id' | 'label' | 'disabled' | 'width' | 'widthTablet' | 'widthMobile' | 'conditions'> {
   type: 'submit' | 'reset' | 'button';
   action: 'submit' | 'reset' | 'cancel';
   loadingText?: string; // Text to show when button is in loading state (defaults to "Submitting...")
@@ -365,7 +377,7 @@ export interface ButtonField extends Pick<BaseField, 'id' | 'label' | 'disabled'
   };
 }
 
-export interface BlockField extends Pick<BaseField, 'id' | 'width' | 'conditions'> {
+export interface BlockField extends Pick<BaseField, 'id' | 'width' | 'widthTablet' | 'widthMobile' | 'conditions'> {
   type: 'block' | 'spacer';
   height?: number;
   content: any; // Can be a React component or HTML content

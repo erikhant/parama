@@ -1,4 +1,5 @@
 import {
+  closestCenter,
   DndContext,
   DragEndEvent,
   DragMoveEvent,
@@ -21,7 +22,7 @@ import type {
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { setupWorkflowDebugger, useFormBuilder } from '@parama-dev/form-builder-core';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FieldOverlay, FormCanvas } from '../canvas';
 import { EditorPanel } from '../properties/EditorPanel';
 import { useEditor } from '../store/useEditor';
@@ -157,19 +158,49 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
   const { actions, schema } = useFormBuilder();
   const { editor, canvas, toolbox } = useEditor();
   const [activeId, setActiveId] = useState<string | null>(null);
+  
+  // Use ref to track last insertion index to prevent unnecessary updates
+  const lastInsertionIndexRef = useRef<number | null>(null);
+  
+  // Throttled insertion index setter to reduce re-renders
+  const setInsertionIndexThrottled = useCallback((index: number | null) => {
+    if (lastInsertionIndexRef.current !== index) {
+      lastInsertionIndexRef.current = index;
+      editor.setInsertionIndex(index);
+    }
+  }, [editor]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px movement before drag starts
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates
     })
   );
 
+  // Auto-scroll when dragging near edges of the scroll container
+  const autoScrollIfNeeded = useCallback((clientY: number) => {
+    const container = document.getElementById('canvas-scroll');
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const threshold = 60;
+    const scrollSpeed = 18;
+
+    if (clientY < rect.top + threshold) {
+      container.scrollTop -= scrollSpeed;
+    } else if (clientY > rect.bottom - threshold) {
+      container.scrollTop += scrollSpeed;
+    }
+  }, []);
+
   useEffect(() => {
     actions.changeMode('editor');
     if (process.env.NODE_ENV !== 'development') return;
 
-    // Enable all debug features
+    // Enable all debug features (kept disabled by default to avoid perf hit)
     // const cleanupDebugger = setupWorkflowDebugger();
 
     return () => {
@@ -185,35 +216,104 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
     }
   };
 
-  const handleDragMove = (event: DragMoveEvent) => {
+  const handleDragMove = useCallback((event: DragMoveEvent) => {
     const { active, over } = event;
 
-    if (!over || !active) return;
+    if (!active) return;
 
-    if (active.data.current?.fromToolbox && over.data.current?.fromCanvas) {
-      const overIndex = schema.fields.findIndex((f) => f.id === over.id);
-      const overElement = document.querySelector(`[data-id="${over.id}"]`);
-      if (overElement) {
-        const rect = overElement.getBoundingClientRect();
-        const midpoint = rect.top + rect.height / 2;
-        const shouldInsertAfter = event.delta.y > 0 || event.active.rect.current.translated?.top! > midpoint;
-        editor.setInsertionIndex(shouldInsertAfter ? overIndex + 1 : overIndex);
-      }
+    // Smooth auto-scroll near edges
+    const pointerY = active.rect.current.translated?.top ?? active.rect.current.initial?.top ?? 0;
+    autoScrollIfNeeded(pointerY);
+    
+    // If dragging over empty canvas (no items or below the last row), set insertion index to end
+    if (!over) {
+      setInsertionIndexThrottled(schema.fields.length);
+      return;
     }
-  };
+
+    // If hovering the synthetic end indicator, force insertion at end
+    if (over?.data?.current?.indicator) {
+      setInsertionIndexThrottled(schema.fields.length);
+      return;
+    }
+
+    // Determine insertion position in a grid (horizontal + vertical) while hovering a field
+    if (over.data.current?.fromCanvas) {
+      const overIndex = schema.fields.findIndex((f) => f.id === over.id);
+      const overElement = document.querySelector(`[data-id="${over.id}"]`) as HTMLElement | null;
+      if (!overElement) return;
+
+      const rect = overElement.getBoundingClientRect();
+      const translated = active.rect.current.translated;
+      const initial = active.rect.current.initial;
+
+      let newIndex: number;
+
+      // Fallback to vertical if translated not available
+      if (!translated) {
+        const midpointY = rect.top + rect.height / 2;
+        const pointerTop = initial?.top ?? 0;
+        const shouldInsertAfter = pointerTop > midpointY;
+        newIndex = shouldInsertAfter ? overIndex + 1 : overIndex;
+      } else {
+        const pointerX = translated.left + (active.rect.current.initial?.width ?? 0) / 2;
+        const pointerY = translated.top + (active.rect.current.initial?.height ?? 0) / 2;
+        const midpointX = rect.left + rect.width / 2;
+        const midpointY = rect.top + rect.height / 2;
+
+        // If pointer is within the same row vertically, use horizontal decision; otherwise vertical
+        // Increase vertical tolerance slightly to avoid jitter when hovering along row boundaries
+        const verticalTolerance = Math.min(12, rect.height * 0.15);
+        const isSameRow = pointerY > rect.top - verticalTolerance && pointerY < rect.bottom + verticalTolerance;
+        const shouldInsertAfter = isSameRow ? pointerX > midpointX : pointerY > midpointY;
+        newIndex = shouldInsertAfter ? overIndex + 1 : overIndex;
+      }
+
+      setInsertionIndexThrottled(newIndex);
+    }
+  }, [schema.fields, setInsertionIndexThrottled, autoScrollIfNeeded]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     setActiveId(null);
     const insertionIndex = canvas.currentInsertionIndex;
+    
+    // Reset refs and state
+    lastInsertionIndexRef.current = null;
     editor.setInsertionIndex(null);
 
-    if (!over) return;
+    // If dropping from toolbox and we have a computed insertion index but not hovering over a specific item,
+    // allow inserting at the computed index (e.g., at the end of the list)
+    if (!over) {
+      // Drop outside any item; use computed insertion index if available
+      if (insertionIndex !== null) {
+        if (active.data.current?.fromToolbox) {
+          const newField = defineDefaultValue(active.data.current.type as string);
+          actions.insertField(insertionIndex, newField as FormFieldType);
+          actions.selectField(newField.id as string);
+        } else if (active.data.current?.fromCanvas) {
+          const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
+          const target = Math.min(schema.fields.length - 1, insertionIndex);
+          const newFields = arrayMove(actions.getFields(), oldIndex, target);
+          actions.updateFields(newFields);
+          actions.selectField(active.id as string);
+        }
+      }
+      return;
+    }
     if (active.data.current?.fromToolbox && over.data.current?.fromToolbox) return;
 
     // Handle toolbox -> canvas drop
     if (active.data.current?.fromToolbox) {
+      // If hovering the end indicator, insert at computed index or at end
+      if (over.data.current?.indicator) {
+        const newField = defineDefaultValue(active.data.current.type as string);
+        const targetIndex = insertionIndex !== null ? insertionIndex : schema.fields.length;
+        actions.insertField(targetIndex, newField as FormFieldType);
+        actions.selectField(newField.id as string);
+        return;
+      }
       // Handle preset drop - expand all fields from preset
       if (active.data.current.type === 'preset') {
         const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
@@ -244,7 +344,7 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
         const newField = defineDefaultValue(active.data.current.type as string);
 
         // Insert at position if over existing field
-        if (over.data.current?.fromCanvas) {
+        if (over.data.current?.fromCanvas || insertionIndex !== null) {
           // Use the insertion index calculated during drag move
           const targetIndex =
             insertionIndex !== null ? insertionIndex : schema.fields.findIndex((f) => f.id === over.id);
@@ -258,12 +358,24 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
       }
     }
     // Handle reordering existing fields
-    else if (active.data.current?.fromCanvas && over.data.current?.fromCanvas) {
+    else if (active.data.current?.fromCanvas) {
+      // Dropping over end indicator -> move to end or computed index
+      if (over.data.current?.indicator) {
+        const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
+        const targetIndex = Math.min(schema.fields.length - 1, insertionIndex ?? schema.fields.length - 1);
+        const newFields = arrayMove(actions.getFields(), oldIndex, targetIndex);
+        actions.updateFields(newFields);
+        actions.selectField(active.id as string);
+        return;
+      }
+
+      if (over.data.current?.fromCanvas) {
       const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
       const newIndex = schema.fields.findIndex((f) => f.id === over.id);
       const newFields = arrayMove(actions.getFields(), oldIndex, newIndex);
       actions.updateFields(newFields);
       actions.selectField(active.id as string);
+      }
     }
   };
 
@@ -272,7 +384,7 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
       <Toolbar onSaveSchema={onSaveSchema} />
       <DndContext
         sensors={sensors}
-        collisionDetection={rectIntersection}
+        collisionDetection={closestCenter}
         modifiers={[restrictToWindowEdges]}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}

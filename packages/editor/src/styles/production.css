@@ -45,17 +45,6 @@
   @apply absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1;
 }
 
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 .column-1 {
   @apply grid-cols-1;
 }
@@ -242,4 +231,98 @@
 }
 .min-height-12 {
   min-height: 288px;
+}
+
+/* Simulated responsive modes triggered by screen classes on the canvas/preview */
+.screen-tablet .md\:column-span-1 { grid-column: span 1 / span 1; }
+.screen-tablet .md\:column-span-2 { grid-column: span 2 / span 2; }
+.screen-tablet .md\:column-span-3 { grid-column: span 3 / span 3; }
+.screen-tablet .md\:column-span-4 { grid-column: span 4 / span 4; }
+.screen-tablet .md\:column-span-5 { grid-column: span 5 / span 5; }
+.screen-tablet .md\:column-span-6 { grid-column: span 6 / span 6; }
+.screen-tablet .md\:column-span-7 { grid-column: span 7 / span 7; }
+.screen-tablet .md\:column-span-8 { grid-column: span 8 / span 8; }
+.screen-tablet .md\:column-span-9 { grid-column: span 9 / span 9; }
+.screen-tablet .md\:column-span-10 { grid-column: span 10 / span 10; }
+.screen-tablet .md\:column-span-11 { grid-column: span 11 / span 11; }
+.screen-tablet .md\:column-span-12 { grid-column: span 12 / span 12; }
+
+.screen-mobile .sm\:column-span-1 { grid-column: span 1 / span 1; }
+.screen-mobile .sm\:column-span-2 { grid-column: span 2 / span 2; }
+.screen-mobile .sm\:column-span-3 { grid-column: span 3 / span 3; }
+.screen-mobile .sm\:column-span-4 { grid-column: span 4 / span 4; }
+.screen-mobile .sm\:column-span-5 { grid-column: span 5 / span 5; }
+.screen-mobile .sm\:column-span-6 { grid-column: span 6 / span 6; }
+.screen-mobile .sm\:column-span-7 { grid-column: span 7 / span 7; }
+.screen-mobile .sm\:column-span-8 { grid-column: span 8 / span 8; }
+.screen-mobile .sm\:column-span-9 { grid-column: span 9 / span 9; }
+.screen-mobile .sm\:column-span-10 { grid-column: span 10 / span 10; }
+.screen-mobile .sm\:column-span-11 { grid-column: span 11 / span 11; }
+.screen-mobile .sm\:column-span-12 { grid-column: span 12 / span 12; }
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Optimize drag performance */
+.dragging {
+  pointer-events: none;
+}
+
+/* Smooth transitions for sortable items */
+.sortable-item {
+  transition: transform 200ms ease-out, opacity 200ms ease-out;
+}
+
+.sortable-item.dragging {
+  transition: none;
+  z-index: 999;
+}
+
+/* Responsive column-span utilities for custom span classes */
+@media screen and (max-width: 768px) {
+  .md\:column-span-1 { grid-column: span 1 / span 1; }
+  .md\:column-span-2 { grid-column: span 2 / span 2; }
+  .md\:column-span-3 { grid-column: span 3 / span 3; }
+  .md\:column-span-4 { grid-column: span 4 / span 4; }
+  .md\:column-span-5 { grid-column: span 5 / span 5; }
+  .md\:column-span-6 { grid-column: span 6 / span 6; }
+  .md\:column-span-7 { grid-column: span 7 / span 7; }
+  .md\:column-span-8 { grid-column: span 8 / span 8; }
+  .md\:column-span-9 { grid-column: span 9 / span 9; }
+  .md\:column-span-10 { grid-column: span 10 / span 10; }
+  .md\:column-span-11 { grid-column: span 11 / span 11; }
+  .md\:column-span-12 { grid-column: span 12 / span 12; }
+}
+
+@media screen and (max-width: 640px) {
+  .sm\:column-span-1 { grid-column: span 1 / span 1; }
+  .sm\:column-span-2 { grid-column: span 2 / span 2; }
+  .sm\:column-span-3 { grid-column: span 3 / span 3; }
+  .sm\:column-span-4 { grid-column: span 4 / span 4; }
+  .sm\:column-span-5 { grid-column: span 5 / span 5; }
+  .sm\:column-span-6 { grid-column: span 6 / span 6; }
+  .sm\:column-span-7 { grid-column: span 7 / span 7; }
+  .sm\:column-span-8 { grid-column: span 8 / span 8; }
+  .sm\:column-span-9 { grid-column: span 9 / span 9; }
+  .sm\:column-span-10 { grid-column: span 10 / span 10; }
+  .sm\:column-span-11 { grid-column: span 11 / span 11; }
+  .sm\:column-span-12 { grid-column: span 12 / span 12; }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-editor",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "Visual form builder editor with drag-and-drop interface",
   "private": false,
   "main": "./dist/index.umd.js",
@@ -40,11 +40,11 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@parama-dev/form-builder-core": "workspace:*",
-    "@parama-dev/form-builder-renderer": "workspace:*",
-    "@parama-dev/form-builder-types": "workspace:*",
+    "@parama-dev/form-builder-core": "^0.5.0",
+    "@parama-dev/form-builder-renderer": "^0.6.0",
+    "@parama-dev/form-builder-types": "^0.3.3",
     "@monaco-editor/react": "4.7.0",
-    "@parama-ui/react": "workspace:*",
+    "@parama-ui/react": "^1.3.0",
     "framer-motion": "^12.12.1",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.510.0",
@@ -74,10 +74,10 @@
     "vite": "^6.3.5"
   },
   "peerDependencies": {
-    "@parama-dev/form-builder-core": "workspace:*",
-    "@parama-dev/form-builder-types": "workspace:*",
-    "@parama-dev/form-builder-renderer": "workspace:*",
-    "@parama-ui/react": "workspace:*",
+    "@parama-dev/form-builder-core": "^0.5.0",
+    "@parama-dev/form-builder-types": "^0.3.3",
+    "@parama-dev/form-builder-renderer": "^0.6.0",
+    "@parama-ui/react": "^1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwindcss": "3.4.17"

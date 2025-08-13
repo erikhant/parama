@@ -47,7 +47,7 @@ interface MultiSelectProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
    */
   onValueChange: (value: string[]) => void;
 
-  /** The default selected values when the component mounts. */
+  /** The default selected values when the component mounts or updates. */
   defaultValue?: string[];
 
   /**
@@ -107,6 +107,11 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
     ref
   ) => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>(defaultValue);
+    // keep internal state in sync when parent updates defaultValue
+    React.useEffect(() => {
+      setSelectedValues(defaultValue || []);
+    }, [defaultValue]);
+
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
     const [isAnimating, setIsAnimating] = React.useState(false);
 

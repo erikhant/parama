@@ -61,7 +61,90 @@
       transform: scale(1);
     }
   }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Optimize drag performance */
+  .dragging {
+    pointer-events: none;
+  }
+
+  /* Smooth transitions for sortable items */
+  .sortable-item {
+    transition: transform 200ms ease-out, opacity 200ms ease-out;
+  }
+
+  .sortable-item.dragging {
+    transition: none;
+    z-index: 999;
+  }
+
 }
+
+/* Responsive column-span utilities for custom span classes */
+@media screen and (max-width: 768px) {
+  .md\:column-span-1 { grid-column: span 1 / span 1 !important; }
+  .md\:column-span-2 { grid-column: span 2 / span 2 !important; }
+  .md\:column-span-3 { grid-column: span 3 / span 3 !important; }
+  .md\:column-span-4 { grid-column: span 4 / span 4 !important; }
+  .md\:column-span-5 { grid-column: span 5 / span 5 !important; }
+  .md\:column-span-6 { grid-column: span 6 / span 6 !important; }
+  .md\:column-span-7 { grid-column: span 7 / span 7 !important; }
+  .md\:column-span-8 { grid-column: span 8 / span 8 !important; }
+  .md\:column-span-9 { grid-column: span 9 / span 9 !important; }
+  .md\:column-span-10 { grid-column: span 10 / span 10 !important; }
+  .md\:column-span-11 { grid-column: span 11 / span 11 !important; }
+  .md\:column-span-12 { grid-column: span 12 / span 12 !important; }
+}
+
+@media screen and (max-width: 640px) {
+  .sm\:column-span-1 { grid-column: span 1 / span 1 !important; }
+  .sm\:column-span-2 { grid-column: span 2 / span 2 !important; }
+  .sm\:column-span-3 { grid-column: span 3 / span 3 !important; }
+  .sm\:column-span-4 { grid-column: span 4 / span 4 !important; }
+  .sm\:column-span-5 { grid-column: span 5 / span 5 !important; }
+  .sm\:column-span-6 { grid-column: span 6 / span 6 !important; }
+  .sm\:column-span-7 { grid-column: span 7 / span 7 !important; }
+  .sm\:column-span-8 { grid-column: span 8 / span 8 !important; }
+  .sm\:column-span-9 { grid-column: span 9 / span 9 !important; }
+  .sm\:column-span-10 { grid-column: span 10 / span 10 !important; }
+  .sm\:column-span-11 { grid-column: span 11 / span 11 !important; }
+  .sm\:column-span-12 { grid-column: span 12 / span 12 !important; }
+}
+
+  /* Simulated responsive modes triggered by screen classes on the canvas/preview */
+  .screen-tablet .md\:column-span-1 { grid-column: span 1 / span 1 !important; }
+  .screen-tablet .md\:column-span-2 { grid-column: span 2 / span 2 !important; }
+  .screen-tablet .md\:column-span-3 { grid-column: span 3 / span 3 !important; }
+  .screen-tablet .md\:column-span-4 { grid-column: span 4 / span 4 !important; }
+  .screen-tablet .md\:column-span-5 { grid-column: span 5 / span 5 !important; }
+  .screen-tablet .md\:column-span-6 { grid-column: span 6 / span 6 !important; }
+  .screen-tablet .md\:column-span-7 { grid-column: span 7 / span 7 !important; }
+  .screen-tablet .md\:column-span-8 { grid-column: span 8 / span 8 !important; }
+  .screen-tablet .md\:column-span-9 { grid-column: span 9 / span 9 !important; }
+  .screen-tablet .md\:column-span-10 { grid-column: span 10 / span 10 !important; }
+  .screen-tablet .md\:column-span-11 { grid-column: span 11 / span 11 !important; }
+  .screen-tablet .md\:column-span-12 { grid-column: span 12 / span 12 !important; }
+
+  .screen-mobile .sm\:column-span-1 { grid-column: span 1 / span 1 !important; }
+  .screen-mobile .sm\:column-span-2 { grid-column: span 2 / span 2 !important; }
+  .screen-mobile .sm\:column-span-3 { grid-column: span 3 / span 3 !important; }
+  .screen-mobile .sm\:column-span-4 { grid-column: span 4 / span 4 !important; }
+  .screen-mobile .sm\:column-span-5 { grid-column: span 5 / span 5 !important; }
+  .screen-mobile .sm\:column-span-6 { grid-column: span 6 / span 6 !important; }
+  .screen-mobile .sm\:column-span-7 { grid-column: span 7 / span 7 !important; }
+  .screen-mobile .sm\:column-span-8 { grid-column: span 8 / span 8 !important; }
+  .screen-mobile .sm\:column-span-9 { grid-column: span 9 / span 9 !important; }
+  .screen-mobile .sm\:column-span-10 { grid-column: span 10 / span 10 !important; }
+  .screen-mobile .sm\:column-span-11 { grid-column: span 11 / span 11 !important; }
+  .screen-mobile .sm\:column-span-12 { grid-column: span 12 / span 12 !important; }
 
 .column-1 {
   @apply grid-cols-1;

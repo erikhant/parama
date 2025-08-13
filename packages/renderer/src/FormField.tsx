@@ -98,7 +98,7 @@ const MemoizedRadioItems = memo(({ items, defaultValue }: { items: FieldGroupIte
       .filter((item) => item.id && item.value && item.label)
       .map((item) => (
         <div key={item.id} className="flex items-center space-x-2">
-          <RadioGroupItem value={item.value} id={item.id as string} />
+          <RadioGroupItem value={item.value} id={item.id as string} checked={item.value === defaultValue} />
           <Label htmlFor={item.id as string}>{item.label}</Label>
         </div>
       ))}
@@ -119,7 +119,7 @@ const MemoizedCheckboxItems = memo(
     defaultValue: string[] | undefined;
     required: boolean;
     disabled?: boolean;
-    onCheckedChange: (item: any) => (checked: boolean) => void;
+    onCheckedChange: (item: any) => (checked: boolean | 'indeterminate') => void;
   }) => (
     <>
       {items
@@ -132,7 +132,7 @@ const MemoizedCheckboxItems = memo(
               required={required}
               disabled={disabled || item.disabled}
               value={item.value}
-              defaultChecked={defaultValue?.includes(item.value)}
+              checked={(defaultValue || []).includes(item.value)}
               onCheckedChange={onCheckedChange(item)}
               className="mr-2"
             />
@@ -164,7 +164,13 @@ const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
     const spacerHeight = height * 24; // 24px per height unit
 
     return (
-      <div className={`column-span-${field.width}`} style={{ height: `${spacerHeight}px` }}>
+      <div
+        className={cn(
+          `column-span-${field.width}`,
+          (field as any).widthTablet ? `md:column-span-${(field as any).widthTablet}` : '',
+          (field as any).widthMobile ? `sm:column-span-${(field as any).widthMobile}` : ''
+        )}
+        style={{ height: `${spacerHeight}px` }}>
         {isEditor && (
           <div className="h-full bg-void border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
             <span className="text-gray-500 text-sm">Spacer ({height} units)</span>
@@ -176,7 +182,11 @@ const BlockField: React.FC<{ field: BlockField }> = memo(({ field }) => {
 
   return (
     <div
-      className={`column-span-${field.width}`}
+      className={cn(
+        `column-span-${field.width}`,
+        (field as any).widthTablet ? `md:column-span-${(field as any).widthTablet}` : '',
+        (field as any).widthMobile ? `sm:column-span-${(field as any).widthMobile}` : ''
+      )}
       style={{ minHeight: field.height ? `${field.height * 24}px` : 'auto' }}>
       {typeof field.content === 'string' ? (
         <div className="min-h-full" dangerouslySetInnerHTML={{ __html: field.content }} />
@@ -205,7 +215,12 @@ const ButtonField: React.FC<{ field: ButtonFieldType; onCancel: FormBuilderProps
       <>
         {mode === 'render' && field.appearance?.stickyAtBottom && <div className="bg-fade column-span-12" />}
         <div
-          className={`column-span-${field.width} ${mode === 'render' && field.appearance?.stickyAtBottom ? 'sticky-btn' : ''}`}>
+          className={cn(
+            `column-span-${field.width}`,
+            (field as any).widthTablet ? `md:column-span-${(field as any).widthTablet}` : '',
+            (field as any).widthMobile ? `sm:column-span-${(field as any).widthMobile}` : '',
+            mode === 'render' && field.appearance?.stickyAtBottom ? 'sticky-btn' : ''
+          )}>
           <Button
             type={field.type}
             color={field.appearance?.color}
@@ -236,11 +251,61 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
 
   // Use getFieldValue for intelligent value retrieval (handles both regular and file fields)
   const value = actions.getFieldValue(field.id) ?? field.defaultValue;
+  const existingFiles = useMemo(() => (field.type === 'file' ? actions.getExistingFiles(field.id) : []), [actions, field.id, field.type]);
   const validationState = actions.getFieldValidation(field.id);
-
-  const [textValue, setTextValue] = useState<string>(value || '');
-  const [debouncedTextValue] = useDebounce(textValue, 150); // Reduced to 100ms for better responsiveness
   const [firstRender, setFirstRender] = useState(true);
+
+  const [hiddenValue, setHiddenValue] = useState<string>(value || '');
+  const [textValue, setTextValue] = useState<string>(value || '');
+  const [debouncedTextValue] = useDebounce(textValue, 150);
+  const [selectValue, setSelectValue] = useState<string>(value || '');
+  const [multiselectValue, setMultiselectValue] = useState<string[]>(value || []);
+  const [autocompleteValue, setAutocompleteValue] = useState<string>(value || '');
+  const [radioValue, setRadioValue] = useState<string>(value || '');
+  const [checkboxValue, setCheckboxValue] = useState<string[]>(value || []);
+
+  const [singleDate, setSingleDate] = useState<Date | undefined>(() => {
+    if ((field as DateField).mode === 'single' && value) {
+      return value instanceof Date ? value : typeof value === 'string' ? new Date(value) : undefined;
+    }
+    return undefined;
+  });
+
+  const [multipleDates, setMultipleDates] = useState<Date[] | undefined>(() => {
+    if ((field as DateField).mode === 'multiple' && Array.isArray(value)) {
+      return value
+        .filter((d) => d instanceof Date || (typeof d === 'string' && !isNaN(Date.parse(d))))
+        .map((d) => (d instanceof Date ? d : new Date(d)));
+    }
+    return undefined;
+  });
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    if (
+      (field as DateField).mode === 'range' &&
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      ('from' in value || 'to' in value)
+    ) {
+      const isValidDateValue = (val: any) => {
+        if (!val) return false;
+        if (val instanceof Date) return !isNaN(val.getTime());
+        if (typeof val === 'string') return !isNaN(Date.parse(val));
+        return false;
+      };
+
+      return {
+        from: isValidDateValue(value.from)
+          ? value.from instanceof Date
+            ? value.from
+            : new Date(value.from)
+          : undefined,
+        to: isValidDateValue(value.to) ? (value.to instanceof Date ? value.to : new Date(value.to)) : undefined
+      };
+    }
+    return undefined;
+  });
 
   const handleChange = useCallback(
     (value: any) => {
@@ -257,6 +322,47 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     }
     handleChange(debouncedTextValue);
   }, [debouncedTextValue]);
+
+  // Sync state when store value changes (e.g., when `data` prop updates)
+  useEffect(() => {
+    if (firstRender) {
+      setFirstRender(false);
+      return;
+    }
+    // Sync text state when store value changes
+    setTextValue((prev) => (prev !== (value || '') ? (value || '') : prev));
+    setHiddenValue((prev) => (prev !== (value || '') ? (value || '') : prev));
+    // Sync date state when store value changes
+    if (field.type === 'date') {
+      setSingleDate(value ? (value instanceof Date ? value : new Date(value)) : undefined);
+      setMultipleDates(value ? (Array.isArray(value) ? value.map((v) => (v instanceof Date ? v : new Date(v))) : []) : undefined);
+      setDateRange(value ? (typeof value === 'object' && !Array.isArray(value) && ('from' in value || 'to' in value) ? {
+        from: value.from instanceof Date ? value.from : new Date(value.from),
+        to: value.to instanceof Date ? value.to : new Date(value.to)
+      } : undefined) : undefined);
+    }
+    // Sync select state when store value changes
+    if (field.type === 'select') {
+      setSelectValue(value || '');
+    }
+    // Sync multiselect state when store value changes
+    if (field.type === 'multiselect') {
+      setMultiselectValue(value || []);
+    }
+    // Sync autocomplete state when store value changes
+    if (field.type === 'autocomplete') {
+      setAutocompleteValue(value || '');
+    }
+    // Sync radio state when store value changes
+    if (field.type === 'radio') {
+      setRadioValue(value || '');
+    }
+    // Sync checkbox state when store value changes
+    if (field.type === 'checkbox') {
+      setCheckboxValue(value || []);
+    }
+
+  }, [value, field.id]);
 
   const renderAppearance = useCallback(
     ({
@@ -345,55 +451,14 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
   );
 
   const createCheckboxHandler = useCallback(
-    (item: any) => (checked: boolean) => {
-      const newValue = checked ? [...(value || []), item.value] : (value || []).filter((v: any) => v !== item.value);
+    (item: any) => (checked: boolean | 'indeterminate') => {
+      const isChecked = checked === true;
+      const current = Array.isArray(value) ? value : [];
+      const newValue = isChecked ? [...current.filter((v: any) => v !== item.value), item.value] : current.filter((v: any) => v !== item.value);
       handleChange(newValue);
     },
     [value, handleChange]
   );
-
-  const [singleDate, setSingleDate] = useState<Date | undefined>(() => {
-    if ((field as DateField).mode === 'single' && value) {
-      return value instanceof Date ? value : typeof value === 'string' ? new Date(value) : undefined;
-    }
-    return undefined;
-  });
-
-  const [multipleDates, setMultipleDates] = useState<Date[] | undefined>(() => {
-    if ((field as DateField).mode === 'multiple' && Array.isArray(value)) {
-      return value
-        .filter((d) => d instanceof Date || (typeof d === 'string' && !isNaN(Date.parse(d))))
-        .map((d) => (d instanceof Date ? d : new Date(d)));
-    }
-    return undefined;
-  });
-
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    if (
-      (field as DateField).mode === 'range' &&
-      value &&
-      typeof value === 'object' &&
-      !Array.isArray(value) &&
-      ('from' in value || 'to' in value)
-    ) {
-      const isValidDateValue = (val: any) => {
-        if (!val) return false;
-        if (val instanceof Date) return !isNaN(val.getTime());
-        if (typeof val === 'string') return !isNaN(Date.parse(val));
-        return false;
-      };
-
-      return {
-        from: isValidDateValue(value.from)
-          ? value.from instanceof Date
-            ? value.from
-            : new Date(value.from)
-          : undefined,
-        to: isValidDateValue(value.to) ? (value.to instanceof Date ? value.to : new Date(value.to)) : undefined
-      };
-    }
-    return undefined;
-  });
 
   // State to track the parent element for date picker
   const [parentElement, setParentElement] = useState<HTMLElement | null>(null);
@@ -626,7 +691,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
             <Input {...commonInputProps} className={cn(commonInputProps.className, 'bg-void')} type="text" readOnly />
           );
         } else {
-          return <input type="hidden" value={field.value} />;
+          return <input type="hidden" value={hiddenValue} />;
         }
       case 'text':
       case 'email':
@@ -718,12 +783,12 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
         return (
           <RadioGroup
             name={field.name}
-            defaultValue={field.defaultValue}
+            defaultValue={radioValue}
             disabled={isDisabled}
             required={isRequired}
             onValueChange={handleRadioChange}
             orientation={field.appearance?.position}>
-            <MemoizedRadioItems items={field.items || []} />
+            <MemoizedRadioItems defaultValue={radioValue} items={field.items || []} />
           </RadioGroup>
         );
 
@@ -732,7 +797,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
           <MemoizedCheckboxItems
             items={field.items || []}
             fieldName={field.name}
-            defaultValue={value}
+            defaultValue={checkboxValue}
             disabled={isDisabled}
             required={isRequired}
             onCheckedChange={createCheckboxHandler}
@@ -746,7 +811,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
         return (
           <Select
             name={field.name}
-            value={value}
+            value={selectValue}
             disabled={isDisabled}
             required={isRequired}
             onValueChange={handleSelectChange}>
@@ -768,7 +833,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
         return (
           <MultiSelect
             name={field.name}
-            defaultValue={value}
+            defaultValue={multiselectValue}
             disabled={isDisabled}
             placeholder={field.placeholder || 'Select options'}
             modalPopover={true}
@@ -793,12 +858,12 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
               description: option.description
             }))}
             value={
-              autocompleteOptions?.find((opt) => opt.value === value)
+              autocompleteOptions?.find((opt) => opt.value === autocompleteValue)
                 ? {
-                    id: autocompleteOptions.find((opt) => opt.value === value)?.id?.toString() || '',
-                    value: value,
-                    label: autocompleteOptions.find((opt) => opt.value === value)?.label || '',
-                    description: autocompleteOptions.find((opt) => opt.value === value)?.description
+                    id: autocompleteOptions.find((opt) => opt.value === autocompleteValue)?.id?.toString() || '',
+                    value: autocompleteValue,
+                    label: autocompleteOptions.find((opt) => opt.value === autocompleteValue)?.label || '',
+                    description: autocompleteOptions.find((opt) => opt.value === autocompleteValue)?.description
                   }
                 : undefined
             }
@@ -825,6 +890,8 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
             bulkUpload={field.options.bulkUpload}
             preferredUnit={field.options.preferredUnit}
             onFilesChange={handleFileChange}
+            initialFiles={existingFiles}
+            onExistingFileRemove={(index) => actions.removeExistingFileMeta(field.id, index)}
             onError={(error) => {
               actions.setFieldError(field.id, (error as Error).message || 'File upload failed');
             }}
@@ -870,7 +937,11 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
   return (
     <FormItem
       id={`item__${field.id}`}
-      className={`column-span-${field.width}`}
+      className={cn(
+        `column-span-${field.width}`,
+        (field as any).widthTablet ? `md:column-span-${(field as any).widthTablet}` : '',
+        (field as any).widthMobile ? `sm:column-span-${(field as any).widthMobile}` : ''
+      )}
       orientation={field.type === 'checkbox' || field.type === 'radio' ? field.appearance?.position : 'vertical'}>
       {mode === 'editor' ? <Label>{field.label}</Label> : field.type !== 'hidden' ? <Label>{field.label}</Label> : null}
       {field.type === 'file' && field.helpText && <p className="form-description">{field.helpText}</p>}
@@ -892,7 +963,7 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
 InputField.displayName = 'InputField';
 
 // Main router component that decides which sub-component to render
-export const FormField: React.FC<{
+export const FormFieldRenderer: React.FC<{
   field: FormFieldType;
   isDisabled?: boolean;
   onChange?: FormBuilderProps['onChange'];
@@ -909,4 +980,4 @@ export const FormField: React.FC<{
   return <InputField field={field as InputFieldType} />;
 };
 
-FormField.displayName = 'FormField';
+FormFieldRenderer.displayName = 'FormField';

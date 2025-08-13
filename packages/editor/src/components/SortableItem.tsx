@@ -43,8 +43,11 @@ export const SortableItem: React.FC<SortableItemProps> = ({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.3 : 1
+    // Disable transition during dragging to prevent conflicts
+    transition: isDragging ? 'none' : transition,
+    opacity: isDragging ? 0.3 : 1,
+    // Improve performance during drag
+    willChange: isDragging ? 'transform' : 'auto'
   };
 
   const attrs = !useHandle ? { ...listeners, ...attributes } : {};
@@ -61,7 +64,7 @@ export const SortableItem: React.FC<SortableItemProps> = ({
         ref={setNodeRef}
         style={style}
         {...attrs}
-        className={`relative group ${!useHandle ? ' cursor-grab ' : ' '}${className}`}>
+        className={`sortable-item relative group ${isDragging ? 'dragging' : ''} ${!useHandle ? ' cursor-grab ' : ' '}${className}`}>
         <div
           className={cn(
             'absolute top-1 right-1 z-10 flex items-center justify-end w-auto gap-1 transition-opacity duration-200 bg-gray-50/50',

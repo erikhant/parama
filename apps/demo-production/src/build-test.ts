@@ -1,5 +1,5 @@
-import { FormSchema, FormEditorProps, FormField } from '@form-builder/types';
-import { FormEditor } from '@form-builder/editor';
+import { FormSchema, FormEditorProps } from '@parama-dev/form-builder-types';
+import { FormEditor } from '@parama-dev/form-builder-editor';
 // import { FormBuilder } from '@form-builder/core'; // You can uncomment this to test core package
 // import { FormRenderer } from '@form-builder/renderer'; // You can uncomment this to test renderer package
 

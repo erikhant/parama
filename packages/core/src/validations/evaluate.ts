@@ -20,7 +20,43 @@ export const evaluateValidations = async (
           return rule.message;
         }
       }
-      return !!value || rule.message;
+      // Specialized handling for various value shapes, especially Date fields
+      if (value === null || value === undefined || value === '') return rule.message;
+
+      // Handle Date object
+      if (value instanceof Date) {
+        return !isNaN(value.getTime()) || rule.message;
+      }
+
+      // Handle arrays (e.g., multi-date, files, multiselect)
+      if (Array.isArray(value)) {
+        return value.length > 0 || rule.message;
+      }
+
+      // Handle date range-like objects: { from?: Date|string, to?: Date|string }
+      if (typeof value === 'object') {
+        const maybeRange = value as any;
+        if ('from' in maybeRange || 'to' in maybeRange) {
+          const isValidDateValue = (d: any) => {
+            if (!d) return false;
+            if (d instanceof Date) return !isNaN(d.getTime());
+            if (typeof d === 'string') return !isNaN(Date.parse(d));
+            return false;
+          };
+          const fromOk = isValidDateValue(maybeRange.from);
+          const toOk = isValidDateValue(maybeRange.to);
+          // Required for range means both ends selected
+          return (fromOk && toOk) || rule.message;
+        }
+      }
+
+      // Handle strings (trimmed) and other primitives
+      if (typeof value === 'string') {
+        return value.trim().length > 0 || rule.message;
+      }
+
+      // Fallback for other primitive types
+      return Boolean(value) || rule.message;
     case 'pattern':
       if (rule.name === 'email') {
         if (!value) return true;

@@ -13,6 +13,14 @@ import { v4 as uuid } from 'uuid';
 import { Button } from '@/components/ui/button';
 import { cn, getAssetByType } from '@/lib/utils';
 
+interface FileDescriptor {
+  id?: string;
+  name: string;
+  url: string;
+  size?: number;
+  type?: string;
+}
+
 interface FileOptions {
   accept: {
     [key: string]: readonly string[];
@@ -45,6 +53,10 @@ interface FileUploadProps extends FileOptions {
   onFileUploaded?: <T>(response: T) => void;
   onFileRemove?: (id: string, index: number) => void;
   onError?: (error: unknown) => void;
+  /** Pre-existing files to display (already uploaded and referenced by URL) */
+  initialFiles?: FileDescriptor[];
+  /** Callback when an initial file (from initialFiles) is removed */
+  onExistingFileRemove?: (index: number) => void;
 }
 
 export function FileUpload({
@@ -68,11 +80,19 @@ export function FileUpload({
   onFilesChange,
   onFileUploaded,
   onFileRemove,
-  onError
+  onError,
+  initialFiles,
+  onExistingFileRemove
 }: FileUploadProps) {
   const [files, setFiles] = useState<FilePreview[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const prevFilesRef = useRef<FilePreview[]>([]);
+  const [existing, setExisting] = useState<FileDescriptor[]>([]);
+
+  // Sync initial files from props
+  useEffect(() => {
+    setExisting(initialFiles ?? []);
+  }, [initialFiles]);
 
   // Clean up object URLs for images only
   useEffect(() => {
@@ -231,6 +251,18 @@ export function FileUpload({
     [onFilesChange, onFileRemove]
   );
 
+  // Remove existing (initial) file handler
+  const removeExistingFile = useCallback(
+    (index: number) => {
+      setExisting((prev) => {
+        const next = prev.filter((_, i) => i !== index);
+        return next;
+      });
+      onExistingFileRemove?.(index);
+    },
+    [onExistingFileRemove]
+  );
+
   // Clear all files handler
   const clearAllFiles = useCallback(() => {
     setFiles([]);
@@ -273,18 +305,52 @@ export function FileUpload({
       </div>
 
       {/* File preview section */}
-      {files.length > 0 && (
+      {(existing.length > 0 || files.length > 0) && (
         <div className="file-upload-preview">
           <div className="file-upload-preview-header">
             <h3 className="file-upload-preview-title">{multiple ? 'Selected Files' : 'Selected File'}</h3>
             {multiple && (
               <span className="file-upload-preview-stats">
-                {files.length} file{files.length !== 1 ? 's' : ''} • {(totalSize / 1024 / 1024).toFixed(2)} MB
+                {existing.length + files.length} file{existing.length + files.length !== 1 ? 's' : ''}
               </span>
             )}
           </div>
 
           <ul className="file-upload-list">
+            {/* Render existing files first */}
+            {existing.map((file, index) => (
+              <li key={`existing-${index}`} className="file-upload-list-item">
+                <div className="file-upload-list-item-content">
+                  {file.type && file.type.startsWith('image/') ? (
+                    <img
+                      loading="lazy"
+                      src={file.url}
+                      alt={file.name}
+                      width={40}
+                      height={40}
+                      className="file-upload-image-preview"
+                    />
+                  ) : (
+                    <div className={cn('file-upload-file-icon-container')}>
+                      <FileIcon className="file-upload-file-icon" />
+                    </div>
+                  )}
+                  <div className="file-upload-file-info">
+                    <a href={file.url || undefined} target="_blank" rel="noreferrer" className="file-upload-file-name">
+                      {file.name}
+                    </a>
+                    {file.size ? <p className="file-upload-file-size">{(file.size / 1024).toFixed(2)} KB</p> : null}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeExistingFile(index)}
+                  className="file-upload-remove-button">
+                  <XIcon className="file-upload-action-icon" />
+                </button>
+              </li>
+            ))}
+            {/* Render newly selected files */}
             {files.map((file, index) => (
               <li key={file.id} className={cn('file-upload-list-item', file.hasError && 'file-upload-list-item-error')}>
                 <div className="file-upload-list-item-content">

@@ -341,6 +341,13 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
     [getValidationByType, handleValidationChange, removeValidation, validations]
   );
 
+  const renderDateValidations = useMemo(
+    () => (
+      <SectionPanel title="Validation">{renderRequiredValidation}</SectionPanel>
+    ),
+    [renderRequiredValidation]
+  );
+
   const renderTextValidatorTemplate = useMemo(
     () => (
       <FormItem className="py-2">
@@ -554,6 +561,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
   const renderFileValidation = useMemo(() => {
     return (
       <SectionPanel title="Validation">
+         {renderRequiredValidation}
         <FormItem>
           <Label>Accepted file types</Label>
           <MultiSelect
@@ -657,6 +665,8 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
       return renderNumberValidations;
     case 'password':
       return renderPasswordValidation;
+    case 'date':
+      return renderDateValidations;
     case 'file':
       return renderFileValidation;
     default:

@@ -1,6 +1,7 @@
 import type {
   ExternalDataSource,
   FieldGroupItem,
+  FileField,
   FormBuilderProps,
   FormField,
   FormSchema,
@@ -16,12 +17,14 @@ import { create } from 'zustand';
 import { WorkflowEngine } from './workflow/engine';
 import { evaluateValidations } from './validations/evaluate';
 import { interceptExpressionTemplate, interpolate, interpolateVariables, resolveInterpolatableValue } from './utils';
+import type { FileDescriptor } from '@parama-dev/form-builder-types';
 
 export interface FormBuilderState {
   // Core form state
   schema: FormSchema;
   formData: Record<string, any>;
   fileData: FormData; // File storage using FormData
+  existingFiles: Record<string, FileDescriptor[]>; // Pre-existing file metadata by field name
   validators: ValidatorRegistry;
   variables: VariableContext;
   selectedFieldId: string | null;
@@ -64,8 +67,10 @@ export interface FormBuilderState {
     getFormDataByNames: () => Record<string, any> | FormData;
     getFieldFiles: (fieldId: string) => File[];
     getFormDataWithFiles: () => { data: Record<string, any>; files: FormData };
+    getExistingFiles: (fieldId: string) => FileDescriptor[];
     addFileField: (fieldId: string, file: File) => boolean;
     removeFileField: (fieldId: string, fileIndex: number) => boolean;
+    removeExistingFileMeta: (fieldId: string, fileIndex: number) => boolean;
     resetForm: () => void;
 
     // Validation system
@@ -127,6 +132,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
     schema: defaultSchema,
     formData: {},
     fileData: new FormData(),
+    existingFiles: {},
     validators: {},
     variables: {},
     templates: [],
@@ -157,7 +163,9 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         // Ensure variables is always an object to prevent undefined issues
         const safeVariables = variables || {};
         // Extract initial values from schema fields if no explicit data provided
-        let initialFormData = data;
+        let initialFormData = { ...data};
+        const initialExistingFiles: Record<string, FileDescriptor[]> = {};
+
         if (Object.keys(data).length === 0 && schema?.fields) {
           initialFormData = schema.fields.reduce(
             (acc, field) => {
@@ -171,12 +179,62 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
             {} as Record<string, any>
           );
         }
+        else if (Object.keys(data).length > 0 && schema?.fields) {
+          schema.fields.forEach((field) => {
+            // Normalize initial files from provided data or schema defaults
+            if (field.type === 'file') {
+              const fieldKey = field.id;
+              const fieldName = (field as FileField).name || field.id;
+              const candidate =  data[field.name] ?? (field as FileField).value ?? field.defaultValue;
+
+              const normalize = (input: any): FileDescriptor[] => {
+                if (!input) return [];
+                const toDesc = (v: any): FileDescriptor | null => {
+                  if (!v) return null;
+                  if (typeof v === 'string') {
+                    const parts = v.split('/');
+                    const name = parts[parts.length - 1] || 'file';
+                    return { name, url: v };
+                  }
+                  if (typeof v === 'object' && 'url' in v) {
+                    // Assume it is already a descriptor-like object
+                    const d = v as any;
+                    return {
+                      id: d.id,
+                      name: d.name || 'file',
+                      url: d.url,
+                      size: d.size,
+                      type: d.type
+                    } as FileDescriptor;
+                  }
+                  return null;
+                };
+                if (Array.isArray(input)) {
+                  return input.map(toDesc).filter(Boolean) as FileDescriptor[];
+                }
+                const single = toDesc(input);
+                return single ? [single] : [];
+              };
+
+              const descriptors = normalize(candidate);
+              if (descriptors.length > 0) {
+                initialExistingFiles[fieldName] = descriptors;
+                // Ensure primitive formData does not carry file placeholder
+                delete (initialFormData as any)[fieldKey];
+              }
+            }
+            else if ('name' in field && field.name) {
+              initialFormData[field.id] = data[field.name] ?? field.defaultValue;
+            }
+          });
+        }
 
         set({
           schema: schema || defaultSchema,
           formData: initialFormData,
           validators,
           variables: safeVariables,
+          existingFiles: initialExistingFiles,
           visibleFields: new Set(schema?.fields.map((f) => f.id) || []),
           validation:
             schema?.fields.reduce(
@@ -205,6 +263,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       /**
        * Updates the form layout configuration
        * @param layout - New layout properties
+       * @note This ONLY used in the `editor` mode
        */
       updateLayout: (layout) => {
         set((state) => ({
@@ -693,7 +752,17 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
           }
         }));
 
-        const value = get().formData[fieldId] ?? ('defaultValue' in field ? field.defaultValue : undefined);
+        // For file fields, consider both existing files (metadata) and newly selected files
+        let value: any;
+        if (field.type === 'file') {
+          const newFilesCount = get().actions.getFieldFiles(fieldId).length;
+          const fieldName = field.name || field.id;
+          const existingCount = (get().existingFiles[fieldName] || []).length;
+          const total = newFilesCount + existingCount;
+          value = Array.from({ length: total });
+        } else {
+          value = get().formData[fieldId] ?? ('defaultValue' in field ? field.defaultValue : undefined);
+        }
         const results = await Promise.all(
           field.validations
             .filter((rule: any) => !rule.trigger || rule.trigger === trigger)
@@ -956,6 +1025,16 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
       },
 
       /**
+       * Gets existing (preloaded) files metadata for a specific field
+       */
+      getExistingFiles: (fieldId: string) => {
+        const field = get().actions.getField(fieldId);
+        if (!field || field.type !== 'file') return [];
+        const fieldName = field.name || field.id;
+        return get().existingFiles[fieldName] || [];
+      },
+
+      /**
        * Adds a file to a file field (respects multiple option)
        * @param fieldId - Field ID to add file to
        * @param file - File to add
@@ -1011,6 +1090,20 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
         const newFiles = currentFiles.filter((_, index) => index !== fileIndex);
         get().actions.updateFieldValue(fieldId, newFiles);
 
+        return true;
+      },
+
+      /**
+       * Removes an existing (preloaded) file metadata entry
+       */
+      removeExistingFileMeta: (fieldId: string, fileIndex: number) => {
+        const field = get().actions.getField(fieldId);
+        if (!field || field.type !== 'file') return false;
+        const fieldName = field.name || field.id;
+        const current = get().existingFiles[fieldName] || [];
+        if (fileIndex < 0 || fileIndex >= current.length) return false;
+        const next = current.filter((_, idx) => idx !== fileIndex);
+        set((state) => ({ existingFiles: { ...state.existingFiles, [fieldName]: next } }));
         return true;
       },
 
@@ -1080,7 +1173,7 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
 
       /**
        * Sets the submission state
-       * @param isSubmitting - Whether the form is currently submitting
+       * @param state - Submission state to set
        */
       setSubmissionState: (state: Partial<FormState>) => {
         set((prev) => ({

@@ -40,7 +40,13 @@ export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange
         </Button>
       </SheetTrigger>
       <SheetContent
-        className={`w-full !px-0 ${screenSize === 'mobile' ? '!max-w-sm' : screenSize === 'tablet' ? '!max-w-2xl' : '!max-w-4xl'}`}>
+        className={`w-full !px-0 ${
+          screenSize === 'mobile'
+            ? 'screen-mobile !max-w-sm'
+            : screenSize === 'tablet'
+            ? 'screen-tablet !max-w-2xl'
+            : '!max-w-4xl'
+        }`}>
         <SheetHeader className="px-8">
           <SheetTitle>{schema.title || 'Preview'}</SheetTitle>
           <SheetDescription>{schema.description || ''}</SheetDescription>

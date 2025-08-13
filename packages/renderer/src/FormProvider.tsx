@@ -6,7 +6,7 @@ import { isEqual } from 'lodash-es';
 export const FormProvider: React.FC<FormBuilderProps & { children: React.ReactNode }> = ({
   schema,
   validators = {},
-  data = {},
+  data,
   variables,
   children
 }) => {
@@ -22,6 +22,7 @@ export const FormProvider: React.FC<FormBuilderProps & { children: React.ReactNo
     const shouldReinitialize =
       isFirstRender.current ||
       prevValues.current.schema !== schema || // Reference comparison for schema
+      prevValues.current.data !== data || // Reference comparison for data
       prevValues.current.variables !== variables || // Reference comparison for variables
       !isEqual(prevValues.current, currentValues);
 
@@ -31,6 +32,7 @@ export const FormProvider: React.FC<FormBuilderProps & { children: React.ReactNo
       isFirstRender.current = false;
     }
   }, [schema, data, variables, validators, initialize]);
+
 
   return <Fragment>{children}</Fragment>;
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormBuilder } from '@parama-dev/form-builder-core';
-import { FormField } from './FormField';
+import { FormFieldRenderer } from './FormField';
 import { FormBuilderProps } from '@parama-dev/form-builder-types';
 import { cn } from '@parama-ui/react';
 
@@ -37,7 +37,7 @@ export const FormSubmitter: React.FC<FormSubmitterProps> = ({ onSubmit, onChange
       className={cn(`grid column-${schema.layout.colSize} gap-size-${schema.layout.gap}`, className)}
       onSubmit={handleSubmit}>
       {schema.fields.map((field) => (
-        <FormField
+        <FormFieldRenderer
           key={field.id}
           field={field}
           onChange={handleChange}
