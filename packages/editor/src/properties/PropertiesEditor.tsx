@@ -610,11 +610,11 @@ export const PropertiesEditor = memo<PropertiesEditorProps>(({ field, onChange }
             </FormItem>
             <NameField value={field.name || ''} onChange={handleNameChange} hasValidation />
             <FormItem orientation="horizontal">
-              <div className="form-captions !col-span-3">
+              <div className="form-captions !col-span-4">
                 <Label htmlFor="enable-filter">Enable filtering</Label>
-                <p className="form-description">Allow users to filter options by typing</p>
+                <p className="form-description">Allow filter options by typing</p>
               </div>
-              <div className="col-span-2 flex items-center justify-end">
+              <div className="col-span-1 flex items-center justify-end">
                 <Switch
                   id="enable-filter"
                   disabled={editor.options?.propertiesSettings === 'readonly'}

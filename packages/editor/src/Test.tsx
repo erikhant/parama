@@ -28,7 +28,7 @@ export function App() {
       group: 'presets',
       fields: [
         {
-          id: Date.now().toString(),
+          id: '__name_1',
           name: 'name',
           type: 'text',
           label: 'Name',
@@ -39,6 +39,26 @@ export function App() {
             {
               type: 'required',
               message: 'Name is required'
+            }
+          ]
+        },
+        {
+          id: '__email_1',
+          name: 'email',
+          type: 'email',
+          label: 'Email',
+          placeholder: 'Enter your email',
+          value: '',
+          width: 6,
+          validations: [
+            {
+              type: 'required',
+              message: 'Email is required'
+            },
+            {
+              type: 'pattern',
+              name: 'email',
+              message: 'Invalid email format'
             }
           ]
         }

@@ -51,7 +51,7 @@ export const SortableItem: React.FC<SortableItemProps> = ({
   };
 
   const attrs = !useHandle ? { ...listeners, ...attributes } : {};
-  const isUseDynamic = useDynamicIndicator && canvas.currentInsertionIndex !== null;
+  const isUseDynamic = useDynamicIndicator && canvas.dragSource === 'toolbox' && canvas.currentInsertionIndex !== null;
 
   return (
     <React.Fragment>

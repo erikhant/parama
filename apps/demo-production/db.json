@@ -1,25 +1,14 @@
 {
-  "users": [
+  "reports": [
     {
-      "id": "3baf",
-      "firstName": "Robby ",
-      "lastName": "Pandu Pangestu",
-      "email": "robby@idproo.id",
-      "phone": "0891232222",
-      "dateOfBirth": "2025-07-26T17:00:00.000Z",
-      "job": "fe",
-      "colorFav": "red",
-      "hobby": [
-        "swim",
-        "run",
-        "walk"
-      ],
-      "notification": "sms",
-      "prefProduct": [
-        "smartphone",
-        "laptop",
-        "pc"
-      ]
+      "title__tax_0b19e614-2f8c-4ae2-a50b-3ebe690aebfd": "Laporan_Keadaan_Papua_Hukum_HAM",
+      "due_date__tax_2fde1626-546c-421d-ae33-087ebee26c34": "2025-08-13T17:00:00.000Z",
+      "tema__attr_1f434bd0-05fa-4ae0-bc33-23ba26f75b75": "Hukum_dan_HAM__08ddd37a-1bd8-455b-8899-cb61a4022124",
+      "laporan_periodik__attr_c736d6d1-08a0-436b-b98b-51c3f3aea416": "Laporan_Semester__08ddd35d-a515-457a-8620-cc3085785507",
+      "security__attr_2da42a91-eaf1-448f-b572-c07ac03c0537": "Confidential__08ddc061-dd0e-4a5d-8fe6-bde0ba84ea3e",
+      "direktorat__tax_08ddc066-3eac-4e8f-8a6e-a431f9297c6e": "DIR_A__a10b023c-d8f9-4ff1-90d9-85cfb8bea09b",
+      "satuan__tax_08ddc066-3eac-4eeb-87f3-0b4e8962d20a": "Satuan_DIR_A__aa0e38ed-22b6-4192-8076-cadbc74a7356",
+      "file": null
     }
   ]
 }

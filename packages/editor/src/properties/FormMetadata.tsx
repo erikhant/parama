@@ -4,7 +4,7 @@ export function FormMetadata({ schema }: { schema: FormSchema }) {
   const { id, title, description, version, createdAt, createdBy } = schema;
   return (
     <div className="mt-5">
-      <h3 className="font-semibold uppercase text-xs text-gray-400 border-y border-gray-200 p-4">About</h3>
+      <h3 className="font-semibold uppercase text-xs text-gray-400 border-y border-gray-200 p-4">Details</h3>
       <div className="px-4">
         <table className="overflow-hidden">
           <tbody>

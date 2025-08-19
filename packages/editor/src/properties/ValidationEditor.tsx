@@ -314,6 +314,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
     ),
     [getValidationByType, handleValidationChange, removeValidation]
   );
+
   const renderPasswordValidation = useMemo(
     () => (
       <SectionPanel title="Validation">
@@ -345,7 +346,7 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
     () => (
       <SectionPanel title="Validation">{renderRequiredValidation}</SectionPanel>
     ),
-    [renderRequiredValidation]
+    [renderRequiredValidation, field, onChange]
   );
 
   const renderTextValidatorTemplate = useMemo(
@@ -558,6 +559,89 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
     [getValidationByType, handleValidationChange, removeValidation]
   );
 
+  const renderSelectValidations = useMemo(
+    () => (
+      <SectionPanel title="Validation">
+        {renderRequiredValidation}
+      </SectionPanel>
+    ),
+    [renderRequiredValidation, field, onChange]
+  );
+  
+  const renderRadioButtonValidations = useMemo(
+    () => (
+      <SectionPanel title="Validation">
+        {renderRequiredValidation}
+      </SectionPanel>
+    ),
+    [renderRequiredValidation, field, onChange]
+  );
+
+  const renderCheckboxValidations = useMemo(
+    () => (
+      <SectionPanel title="Validation">
+        {renderRequiredValidation}
+        <FormItem orientation="horizontal">
+          <Label className="!col-span-3">Min selected</Label>
+          <Input
+            type="number"
+            min={0}
+            title="Minimum selected"
+            value={getValidationByType('minSelected')?.value ?? ''}
+            disabled={editor.options?.validationSettings === 'readonly'}
+            placeholder="Minimum selected"
+            className="!col-span-2"
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '') {
+                removeValidation('minSelected');
+                return;
+              }
+              const minSelected = Number(val);
+              if (!isNaN(minSelected) && minSelected >= 0) {
+                handleValidationChange({
+                  trigger: 'change',
+                  type: 'minSelected',
+                  value: minSelected,
+                  message: `Minimum selected is ${minSelected}`
+                });
+              }
+            }}
+          />
+        </FormItem>
+        <FormItem orientation="horizontal">
+          <Label className="!col-span-3">Max selected</Label>
+          <Input
+            type="number"
+            min={0}
+            title="Maximum selected"
+            value={getValidationByType('maxSelected')?.value ?? ''}
+            disabled={editor.options?.validationSettings === 'readonly'}
+            placeholder="Maximum selected"
+            className="!col-span-2"
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '') {
+                removeValidation('maxSelected');
+                return;
+              }
+              const maxSelected = Number(val);
+              if (!isNaN(maxSelected) && maxSelected >= 0) {
+                handleValidationChange({
+                  trigger: 'change',
+                  type: 'maxSelected',
+                  value: maxSelected,
+                  message: `Maximum selected is ${maxSelected}`
+                });
+              }
+            }}
+          />
+        </FormItem>
+      </SectionPanel>
+    ),
+    [renderRequiredValidation, field, onChange, getValidationByType, removeValidation, handleValidationChange]
+  );
+
   const renderFileValidation = useMemo(() => {
     return (
       <SectionPanel title="Validation">
@@ -665,8 +749,16 @@ export default function ValidationEditor({ field, onChange }: ValidationEditorPr
       return renderNumberValidations;
     case 'password':
       return renderPasswordValidation;
+    case 'radio':
+      return renderRadioButtonValidations;
+    case 'checkbox':
+      return renderCheckboxValidations;
     case 'date':
       return renderDateValidations;
+    case 'select':
+    case 'multiselect':
+    case 'autocomplete':
+      return renderSelectValidations;
     case 'file':
       return renderFileValidation;
     default:

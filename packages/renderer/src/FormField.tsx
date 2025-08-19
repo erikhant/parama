@@ -129,7 +129,6 @@ const MemoizedCheckboxItems = memo(
             <Checkbox
               id={item.id as string}
               name={fieldName}
-              required={required}
               disabled={disabled || item.disabled}
               value={item.value}
               checked={(defaultValue || []).includes(item.value)}
@@ -697,6 +696,8 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
       case 'email':
       case 'password':
       case 'number':
+      case 'tel':
+      case 'url':
         const inputElement = (
           <Input
             {...commonInputProps}
@@ -946,12 +947,12 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
       {mode === 'editor' ? <Label>{field.label}</Label> : field.type !== 'hidden' ? <Label>{field.label}</Label> : null}
       {field.type === 'file' && field.helpText && <p className="form-description">{field.helpText}</p>}
       {field.type === 'file' && (!validationState.isValid || field.error) && (
-        <p className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</p>
+        <p className="text-red-500 text-xs mt-1">{validationState.messages[0] || field.error}</p>
       )}
       {renderInput}
       {field.type !== 'file' ? (
         !validationState.isValid || field.error ? (
-          <span className="text-red-500 text-sm mt-1">{validationState.messages[0] || field.error}</span>
+          <span className="text-red-500 text-xs mt-1">{validationState.messages[0] || field.error}</span>
         ) : (
           field.helpText && <span className="form-description">{field.helpText}</span>
         )

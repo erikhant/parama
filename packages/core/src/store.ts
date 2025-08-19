@@ -180,12 +180,58 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
           );
         }
         else if (Object.keys(data).length > 0 && schema?.fields) {
+          // Helper to find a value in `data` that matches a field's name, tolerating id-prefix mismatches (e.g. attr_ vs tax_)
+          const findInitialValueForField = (fieldName: string): any => {
+            // 1) Exact match by name
+            if (Object.prototype.hasOwnProperty.call(data, fieldName)) {
+              return (data as any)[fieldName];
+            }
+
+            // 2) Try matching by GUID suffix regardless of the id prefix part (attr_/tax_/etc.)
+            const sepIndex = fieldName.lastIndexOf('__');
+            if (sepIndex !== -1) {
+              const base = fieldName.slice(0, sepIndex);
+              const idToken = fieldName.slice(sepIndex + 2);
+              // Extract GUID part after the first underscore in the id token if present
+              const guidPart = (() => {
+                const underscoreIdx = idToken.indexOf('_');
+                return underscoreIdx !== -1 ? idToken.slice(underscoreIdx + 1) : idToken;
+              })();
+
+              // 2a) Prefer a key that matches the same base and GUID, ignoring the id prefix
+              const exactGuidWithSameBase = Object.keys(data).find((key) => {
+                const i = key.lastIndexOf('__');
+                if (i === -1) return false;
+                const keyBase = key.slice(0, i);
+                if (keyBase !== base) return false;
+                const keyToken = key.slice(i + 2);
+                const keyGuid = (() => {
+                  const u = keyToken.indexOf('_');
+                  return u !== -1 ? keyToken.slice(u + 1) : keyToken;
+                })();
+                return keyGuid === guidPart;
+              });
+              if (exactGuidWithSameBase) {
+                return (data as any)[exactGuidWithSameBase];
+              }
+
+              // 2b) Fall back to any key that contains the GUID (in case the base was renamed)
+              const anyGuidMatch = Object.keys(data).find((key) => key.includes(guidPart));
+              if (anyGuidMatch) {
+                return (data as any)[anyGuidMatch];
+              }
+            }
+
+            // 3) Finally, try a direct key by id (for older payloads keyed by id)
+            return undefined;
+          };
+
           schema.fields.forEach((field) => {
             // Normalize initial files from provided data or schema defaults
             if (field.type === 'file') {
               const fieldKey = field.id;
               const fieldName = (field as FileField).name || field.id;
-              const candidate =  data[field.name] ?? (field as FileField).value ?? field.defaultValue;
+              const candidate = findInitialValueForField(field.name) ?? (field as FileField).value ?? field.defaultValue;
 
               const normalize = (input: any): FileDescriptor[] => {
                 if (!input) return [];
@@ -224,7 +270,12 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
               }
             }
             else if ('name' in field && field.name) {
-              initialFormData[field.id] = data[field.name] ?? field.defaultValue;
+              const valueFromData = findInitialValueForField(field.name);
+              if (valueFromData !== undefined) {
+                initialFormData[field.id] = valueFromData;
+              } else if (field.defaultValue !== undefined) {
+                initialFormData[field.id] = field.defaultValue as any;
+              }
             }
           });
         }
@@ -280,6 +331,12 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * @note This ONLY used in the `editor` mode
        */
       addField: (field) => {
+        // Prevent adding fields with duplicate IDs
+        const exists = get().schema.fields.some((f) => f.id === field.id);
+        if (exists) {
+          console.warn(`Duplicate field id detected (addField): "${field.id}". Skipping addition.`);
+          return;
+        }
         set((state) => ({
           schema: {
             ...state.schema,
@@ -357,6 +414,12 @@ export const useFormBuilder = create<FormBuilderState>((set, get) => {
        * and sets the newly inserted field as the selected field for immediate editing.
        */
       insertField: (index, field) => {
+        // Prevent inserting fields with duplicate IDs
+        const exists = get().schema.fields.some((f) => f.id === field.id);
+        if (exists) {
+          console.warn(`Duplicate field id detected (insertField): "${field.id}". Skipping insertion.`);
+          return;
+        }
         set((state) => ({
           schema: {
             ...state.schema,

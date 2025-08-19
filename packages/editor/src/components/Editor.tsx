@@ -1,5 +1,5 @@
 import {
-  closestCenter,
+  closestCorners,
   DndContext,
   DragEndEvent,
   DragMoveEvent,
@@ -29,13 +29,43 @@ import { useEditor } from '../store/useEditor';
 import { ToolboxItemOverlay, ToolboxPanel } from '../toolbox';
 import { DragPreview } from './DragPreview';
 import { Toolbar } from './Toolbar';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import { cn } from '@parama-ui/react';
+
+// Custom collision detection prioritizing vertical proximity to improve sorting
+const verticalGridCollision = (args: any) => {
+  // Prefer intersections if available (more precise)
+  const intersections = rectIntersection(args);
+  if (intersections.length > 0) return intersections;
+
+  const { droppableContainers, pointerCoordinates } = args;
+  if (!pointerCoordinates) {
+    return closestCorners(args);
+  }
+
+  const ranked = droppableContainers
+    .map((container: any) => {
+      const rect = container.rect.current?.translated || container.rect.current;
+      if (!rect) return null;
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = Math.abs(pointerCoordinates.x - centerX);
+      const dy = Math.abs(pointerCoordinates.y - centerY);
+      // Strongly weight vertical distance, lightly weight horizontal to allow swapping within a row
+      const score = dy + dx * 0.2;
+      return { id: container.id, score };
+    })
+    .filter(Boolean)
+    .sort((a: any, b: any) => a.score - b.score)
+    .map((entry: any) => ({ id: entry.id }));
+
+  return ranked;
+};
 
 const defineDefaultValue = (type: string) => {
   const newField = {
     id: `field-${Date.now()}`,
-    name: `name_${type}`,
+    name: type === 'file' ? 'file' : `name_${type}`,
     type: type,
     label: type === 'hidden' ? 'Hidden input' : 'Text label',
     width: 12
@@ -124,7 +154,9 @@ const defineDefaultValue = (type: string) => {
         height: 2,
         content: ''
       } as BlockField;
+    case 'select':
     case 'autocomplete':
+    case 'multiselect':
       const autocompleteOptions: FieldGroupItem[] = [
         {
           id: `option-${Date.now() + 1}`,
@@ -173,7 +205,7 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Require 8px movement before drag starts
+        distance: 5, // Slightly easier to initiate drag
       },
     }),
     useSensor(KeyboardSensor, {
@@ -211,6 +243,14 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
 
   const handleDragStart = ({ active }: DragStartEvent) => {
     setActiveId(active.id as string);
+    // Track drag source to control indicator visibility
+    if (active.data?.current?.fromToolbox) {
+      editor.setDragSource('toolbox');
+    } else if (active.data?.current?.fromCanvas) {
+      editor.setDragSource('canvas');
+    } else {
+      editor.setDragSource(null);
+    }
     if (schema.fields.length === 0) {
       editor.setInsertionIndex(0);
     }
@@ -225,51 +265,54 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
     const pointerY = active.rect.current.translated?.top ?? active.rect.current.initial?.top ?? 0;
     autoScrollIfNeeded(pointerY);
     
-    // If dragging over empty canvas (no items or below the last row), set insertion index to end
-    if (!over) {
-      setInsertionIndexThrottled(schema.fields.length);
-      return;
-    }
-
-    // If hovering the synthetic end indicator, force insertion at end
-    if (over?.data?.current?.indicator) {
-      setInsertionIndexThrottled(schema.fields.length);
-      return;
-    }
-
-    // Determine insertion position in a grid (horizontal + vertical) while hovering a field
-    if (over.data.current?.fromCanvas) {
-      const overIndex = schema.fields.findIndex((f) => f.id === over.id);
-      const overElement = document.querySelector(`[data-id="${over.id}"]`) as HTMLElement | null;
-      if (!overElement) return;
-
-      const rect = overElement.getBoundingClientRect();
-      const translated = active.rect.current.translated;
-      const initial = active.rect.current.initial;
-
-      let newIndex: number;
-
-      // Fallback to vertical if translated not available
-      if (!translated) {
-        const midpointY = rect.top + rect.height / 2;
-        const pointerTop = initial?.top ?? 0;
-        const shouldInsertAfter = pointerTop > midpointY;
-        newIndex = shouldInsertAfter ? overIndex + 1 : overIndex;
-      } else {
-        const pointerX = translated.left + (active.rect.current.initial?.width ?? 0) / 2;
-        const pointerY = translated.top + (active.rect.current.initial?.height ?? 0) / 2;
-        const midpointX = rect.left + rect.width / 2;
-        const midpointY = rect.top + rect.height / 2;
-
-        // If pointer is within the same row vertically, use horizontal decision; otherwise vertical
-        // Increase vertical tolerance slightly to avoid jitter when hovering along row boundaries
-        const verticalTolerance = Math.min(12, rect.height * 0.15);
-        const isSameRow = pointerY > rect.top - verticalTolerance && pointerY < rect.bottom + verticalTolerance;
-        const shouldInsertAfter = isSameRow ? pointerX > midpointX : pointerY > midpointY;
-        newIndex = shouldInsertAfter ? overIndex + 1 : overIndex;
+    // Only compute insertion index for toolbox drags
+    if (active.data.current?.fromToolbox) {
+      // If dragging over empty canvas (no items or below the last row), set insertion index to end
+      if (!over) {
+        setInsertionIndexThrottled(schema.fields.length);
+        return;
       }
 
-      setInsertionIndexThrottled(newIndex);
+      // If hovering the synthetic end indicator, force insertion at end
+      if (over?.data?.current?.indicator) {
+        setInsertionIndexThrottled(schema.fields.length);
+        return;
+      }
+
+      // Determine insertion position in a grid (horizontal + vertical) while hovering a field
+      if (over.data.current?.fromCanvas) {
+        const overIndex = schema.fields.findIndex((f) => f.id === over.id);
+        const overElement = document.querySelector(`[data-id="${over.id}"]`) as HTMLElement | null;
+        if (!overElement) return;
+
+        const rect = overElement.getBoundingClientRect();
+        const translated = active.rect.current.translated;
+        const initial = active.rect.current.initial;
+
+        let newIndex: number;
+
+        // Fallback to vertical if translated not available
+        if (!translated) {
+          const midpointY = rect.top + rect.height / 2;
+          const pointerTop = initial?.top ?? 0;
+          const shouldInsertAfter = pointerTop > midpointY;
+          newIndex = shouldInsertAfter ? overIndex + 1 : overIndex;
+        } else {
+          const pointerX = translated.left + (active.rect.current.initial?.width ?? 0) / 2;
+          const pointerY = translated.top + (active.rect.current.initial?.height ?? 0) / 2;
+          const midpointX = rect.left + rect.width / 2;
+          const midpointY = rect.top + rect.height / 2;
+
+          // If pointer is within the same row vertically, use horizontal decision; otherwise vertical
+          // Increase vertical tolerance slightly to avoid jitter when hovering along row boundaries
+          const verticalTolerance = Math.min(12, rect.height * 0.15);
+          const isSameRow = pointerY > rect.top - verticalTolerance && pointerY < rect.bottom + verticalTolerance;
+          const shouldInsertAfter = isSameRow ? pointerX > midpointX : pointerY > midpointY;
+          newIndex = shouldInsertAfter ? overIndex + 1 : overIndex;
+        }
+
+        setInsertionIndexThrottled(newIndex);
+      }
     }
   }, [schema.fields, setInsertionIndexThrottled, autoScrollIfNeeded]);
 
@@ -282,6 +325,7 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
     // Reset refs and state
     lastInsertionIndexRef.current = null;
     editor.setInsertionIndex(null);
+    editor.setDragSource(null);
 
     // If dropping from toolbox and we have a computed insertion index but not hovering over a specific item,
     // allow inserting at the computed index (e.g., at the end of the list)
@@ -289,9 +333,26 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
       // Drop outside any item; use computed insertion index if available
       if (insertionIndex !== null) {
         if (active.data.current?.fromToolbox) {
-          const newField = defineDefaultValue(active.data.current.type as string);
-          actions.insertField(insertionIndex, newField as FormFieldType);
-          actions.selectField(newField.id as string);
+          // Handle preset drop when not hovering over a specific item
+          if (active.data.current.type === 'preset') {
+            const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
+            if (preset && preset.fields?.length) {
+              const existingIds = new Set(schema.fields.map((f) => f.id));
+              const uniqueFields = preset.fields.filter((f) => !existingIds.has(f.id));
+              if (uniqueFields.length === 0) {
+                toast.warning('Preset fields already exist in the canvas');
+                return;
+              }
+              uniqueFields.forEach((field, index) => {
+                actions.insertField(insertionIndex + index, field);
+              });
+              actions.selectField(uniqueFields[0].id);
+            }
+          } else {
+            const newField = defineDefaultValue(active.data.current.type as string);
+            actions.insertField(insertionIndex, newField as FormFieldType);
+            actions.selectField(newField.id as string);
+          }
         } else if (active.data.current?.fromCanvas) {
           const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
           const target = Math.min(schema.fields.length - 1, insertionIndex);
@@ -308,17 +369,40 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
     if (active.data.current?.fromToolbox) {
       // If hovering the end indicator, insert at computed index or at end
       if (over.data.current?.indicator) {
-        const newField = defineDefaultValue(active.data.current.type as string);
         const targetIndex = insertionIndex !== null ? insertionIndex : schema.fields.length;
-        actions.insertField(targetIndex, newField as FormFieldType);
-        actions.selectField(newField.id as string);
+        // Handle preset correctly when dropping on the indicator
+        if (active.data.current.type === 'preset') {
+          const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
+          if (preset && preset.fields?.length) {
+            const existingIds = new Set(schema.fields.map((f) => f.id));
+            const uniqueFields = preset.fields.filter((f) => !existingIds.has(f.id));
+            if (uniqueFields.length === 0) {
+              toast.warning('Preset fields already exist in the canvas');
+              return;
+            }
+            uniqueFields.forEach((field, index) => {
+              actions.insertField(targetIndex + index, field);
+            });
+            actions.selectField(uniqueFields[0].id);
+          }
+        } else {
+          const newField = defineDefaultValue(active.data.current.type as string);
+          actions.insertField(targetIndex, newField as FormFieldType);
+          actions.selectField(newField.id as string);
+        }
         return;
       }
       // Handle preset drop - expand all fields from preset
       if (active.data.current.type === 'preset') {
         const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
         if (preset && preset.fields) {
-          const fieldsToAdd = preset.fields;
+          const existingIds = new Set(schema.fields.map((f) => f.id));
+          const fieldsToAdd = preset.fields.filter((f) => !existingIds.has(f.id));
+
+          if (fieldsToAdd.length === 0) {
+            toast.warning('Preset fields already exist in the canvas');
+            return;
+          }
 
           // Insert all preset fields
           if (over.data.current?.fromCanvas) {
@@ -334,10 +418,8 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
             });
           }
 
-          // Select the first field from the preset
-          if (fieldsToAdd.length > 0) {
-            actions.selectField(fieldsToAdd[0].id);
-          }
+          // Select the first actually inserted field
+          actions.selectField(fieldsToAdd[0].id);
         }
       } else {
         // Handle regular field drop
@@ -359,7 +441,7 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
     }
     // Handle reordering existing fields
     else if (active.data.current?.fromCanvas) {
-      // Dropping over end indicator -> move to end or computed index
+      // For sorting, rely on default DnD swap behavior without indicators
       if (over.data.current?.indicator) {
         const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
         const targetIndex = Math.min(schema.fields.length - 1, insertionIndex ?? schema.fields.length - 1);
@@ -370,11 +452,11 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
       }
 
       if (over.data.current?.fromCanvas) {
-      const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
-      const newIndex = schema.fields.findIndex((f) => f.id === over.id);
-      const newFields = arrayMove(actions.getFields(), oldIndex, newIndex);
-      actions.updateFields(newFields);
-      actions.selectField(active.id as string);
+        const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
+        const newIndex = schema.fields.findIndex((f) => f.id === over.id);
+        const newFields = arrayMove(actions.getFields(), oldIndex, newIndex);
+        actions.updateFields(newFields);
+        actions.selectField(active.id as string);
       }
     }
   };
@@ -384,7 +466,7 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
       <Toolbar onSaveSchema={onSaveSchema} />
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={verticalGridCollision}
         modifiers={[restrictToWindowEdges]}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}

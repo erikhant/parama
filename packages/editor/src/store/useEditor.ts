@@ -152,10 +152,12 @@ interface FormEditorState {
   initialize: (props: Omit<FormEditorProps, 'schema'>) => void;
   editor: {
     setInsertionIndex: (index: number | null) => void;
+    setDragSource: (source: 'toolbox' | 'canvas' | null) => void;
     setLocalField: (field: FormField | null) => void;
   } & Omit<FormEditorProps, 'schema'>;
   canvas: {
     currentInsertionIndex: number | null;
+    dragSource: 'toolbox' | 'canvas' | null;
   };
   toolbox: {
     fields: FieldTypeDef[];
@@ -212,6 +214,14 @@ export const useEditor = create<FormEditorState>((set, get) => ({
         }
       }));
     },
+    setDragSource: (source) => {
+      set((state) => ({
+        canvas: {
+          ...state.canvas,
+          dragSource: source
+        }
+      }));
+    },
     setLocalField: (field) => {
       set((state) => ({
         properties: {
@@ -222,7 +232,8 @@ export const useEditor = create<FormEditorState>((set, get) => ({
     }
   },
   canvas: {
-    currentInsertionIndex: null
+    currentInsertionIndex: null,
+    dragSource: null
   },
   toolbox: {
     fields: fieldTypes,

@@ -4,6 +4,7 @@ import { FormItem, Input, Label, Slider } from '@parama-ui/react';
 import { useEffect, useState } from 'react';
 import { useEditor } from '../../store/useEditor';
 import { SectionPanel } from '../SectionPanel';
+import { MonitorIcon, SmartphoneIcon, TabletIcon } from 'lucide-react';
 
 type GeneralBlockEditorProps = {
   field: BlockField;
@@ -52,7 +53,10 @@ export const GeneralBlockEditor = ({ field, onChange }: GeneralBlockEditorProps)
   return (
     <SectionPanel title="General">
       <FormItem>
-        <Label className="block text-sm font-medium">Width</Label>
+        <Label className="block text-sm font-medium flex items-center gap-2">
+          <MonitorIcon size={16} />
+          Width
+        </Label>
         <div className="grid grid-cols-4 gap-x-3">
           <Slider
             value={[widthValue]}
@@ -81,7 +85,13 @@ export const GeneralBlockEditor = ({ field, onChange }: GeneralBlockEditorProps)
         </div>
       </FormItem>
       <FormItem>
-        <Label className="block text-sm font-medium">Width (Tablet)</Label>
+        <div className="space-y-1">
+        <Label className="block text-sm font-medium flex items-center gap-2">
+          <TabletIcon size={16} />
+          Width in Tablet
+        </Label>
+        <p className="form-description">Leave blank to inherit Desktop width.</p>
+        </div>
         <div className="grid grid-cols-4 gap-x-3 items-center">
           <Slider
             value={[widthTabletValue ?? widthValue]}
@@ -113,11 +123,16 @@ export const GeneralBlockEditor = ({ field, onChange }: GeneralBlockEditorProps)
             />
           </div>
         </div>
-        <p className="form-description">Leave blank to inherit Desktop width.</p>
       </FormItem>
 
       <FormItem>
-        <Label className="block text-sm font-medium">Width (Mobile)</Label>
+        <div className="space-y-1">
+        <Label className="block text-sm font-medium flex items-center gap-2">
+          <SmartphoneIcon size={16} />
+          Width in Mobile
+        </Label>
+        <p className="form-description">Leave blank to inherit Tablet/Desktop width.</p>
+        </div>
         <div className="grid grid-cols-4 gap-x-3 items-center">
           <Slider
             value={[widthMobileValue ?? widthTabletValue ?? widthValue]}
@@ -149,7 +164,6 @@ export const GeneralBlockEditor = ({ field, onChange }: GeneralBlockEditorProps)
             />
           </div>
         </div>
-        <p className="form-description">Leave blank to inherit Tablet/Desktop width.</p>
       </FormItem>
       <FormItem>
         <Label className="block text-sm font-medium">Height</Label>

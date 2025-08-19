@@ -287,14 +287,241 @@ const initialUserSchema: FormSchema = {
   ]
 };
 
+const initialReportSchema: FormSchema = {
+  id: "08ddd377-5298-4cf2-89d8-a2bc58c797e1",
+  title: "LAPORAN PERIODIK",
+  description: "",
+  version: "1.0",
+  layout: {
+      colSize: 12,
+      gap: 6
+  },
+  fields: [
+      {
+          events: [],
+          options: [],
+          multiple: false,
+          value: "",
+          external: {
+              url: "http://localhost:3000/api/collections/attributes-values/1f434bd0-05fa-4ae0-bc33-23ba26f75b75?isRendered=true&collectionId=08ddd377-5298-4cf2-89d8-a2bc58c797e1",
+              mapper: {
+                  dataSource: "values",
+                  dataMapper: {
+                      id: "id",
+                      label: "name",
+                      value: "id"
+                  }
+              }
+          },
+          id: "attr_1f434bd0-05fa-4ae0-bc33-23ba26f75b75",
+          name: "tema__attr_1f434bd0-05fa-4ae0-bc33-23ba26f75b75",
+          type: "select",
+          label: "Tema",
+          width: 6
+      },
+      {
+          validations: [
+              {
+                  trigger: "change",
+                  type: "required",
+                  message: "Title is required."
+              }
+          ],
+          id: "attr_0b19e614-2f8c-4ae2-a50b-3ebe690aebfd",
+          name: "title__attr_0b19e614-2f8c-4ae2-a50b-3ebe690aebfd",
+          type: "text",
+          value: "",
+          label: "Nama File",
+          width: 6
+      },
+      {
+          events: [],
+          options: [],
+          value: "",
+          external: {
+              url: "http://localhost:3000/api/collections/attributes-values/c736d6d1-08a0-436b-b98b-51c3f3aea416?isRendered=true&collectionId=08ddd377-5298-4cf2-89d8-a2bc58c797e1",
+              mapper: {
+                  dataSource: "values",
+                  dataMapper: {
+                      id: "id",
+                      label: "name",
+                      value: "id"
+                  }
+              }
+          },
+          id: "attr_c736d6d1-08a0-436b-b98b-51c3f3aea416",
+          name: "laporan_periodik__attr_c736d6d1-08a0-436b-b98b-51c3f3aea416",
+          type: "select",
+          multiple: false,
+          label: "Sub Laporan",
+          width: 6
+      },
+      {
+          mode: "single",
+          value: "",
+          options: {
+              dateFormat: "dd/MM/yyyy",
+              disabledPast: false
+          },
+          validations: [],
+          id: "attr_2fde1626-546c-421d-ae33-087ebee26c34",
+          name: "due_date__attr_2fde1626-546c-421d-ae33-087ebee26c34",
+          type: "date",
+          label: "Tanggal Laporan Yang Dikehendaki",
+          width: 6
+      },
+      {
+          events: [
+              {
+                  type: "fetch",
+                  target: "tax_423ecc6f-0847-45fc-acab-10f9d3cc94f1",
+                  params: {
+                      value: ""
+                  }
+              },
+              {
+                  type: "fetch",
+                  target: "tax_08ddc066-3eac-4eeb-87f3-0b4e8962d20a",
+                  params: {
+                      value: ""
+                  }
+              }
+          ],
+          options: [],
+          external: {
+              url: "http://localhost:3000/api/collections/node-values/08ddc066-3eac-4e8f-8a6e-a431f9297c6e?isRendered=true&collectionId=08ddd377-5298-4cf2-89d8-a2bc58c797e1",
+              mapper: {
+                  dataSource: "values",
+                  dataMapper: {
+                      id: "id",
+                      label: "name",
+                      value: "id"
+                  }
+              }
+          },
+          value: "",
+          multiple: false,
+          id: "tax_08ddc066-3eac-4e8f-8a6e-a431f9297c6e",
+          name: "direktorat__tax_08ddc066-3eac-4e8f-8a6e-a431f9297c6e",
+          type: "select",
+          label: "Direktorat",
+          width: 6
+      },
+      {
+          events: [],
+          options: [],
+          external: {
+              url: "http://localhost:3000/api/collections/attributes-values/2da42a91-eaf1-448f-b572-c07ac03c0537?isRendered=true&collectionId=08ddd377-5298-4cf2-89d8-a2bc58c797e1",
+              mapper: {
+                  dataSource: "values",
+                  dataMapper: {
+                      id: "id",
+                      label: "name",
+                      value: "id"
+                  }
+              }
+          },
+          value: "",
+          multiple: false,
+          id: "attr_2da42a91-eaf1-448f-b572-c07ac03c0537",
+          name: "security__attr_2da42a91-eaf1-448f-b572-c07ac03c0537",
+          type: "select",
+          label: "Pengguna",
+          width: 6
+      },
+      {
+          events: [],
+          options: [],
+          value: "",
+          multiple: false,
+          external: {
+              url: "http://localhost:3000/api/collections/node-values/08ddc066-3eac-4eeb-87f3-0b4e8962d20a?isRendered=true&idParent={{tax_08ddc066-3eac-4e8f-8a6e-a431f9297c6e}}&collectionId=08ddd377-5298-4cf2-89d8-a2bc58c797e1",
+              mapper: {
+                  dataSource: "values",
+                  dataMapper: {
+                      id: "id",
+                      label: "name",
+                      value: "id"
+                  }
+              }
+          },
+          id: "tax_08ddc066-3eac-4eeb-87f3-0b4e8962d20a",
+          name: "satuan__tax_08ddc066-3eac-4eeb-87f3-0b4e8962d20a",
+          type: "select",
+          label: "Satuan",
+          width: 6
+      },
+      {
+          options: {
+              multiple: false,
+              maxFiles: 5,
+              maxSize: 5242880,
+              accept: {
+                  'application/pdf': [
+                      ".pdf"
+                  ],
+                  'image/jpeg': [
+                      ".jpeg",
+                      ".jpg"
+                  ],
+                  'image/png': [
+                      ".png"
+                  ],
+                  'application/msword': [
+                      ".doc"
+                  ],
+                  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [
+                      ".docx"
+                  ],
+                  'application/vnd.ms-excel': [
+                      ".xls"
+                  ],
+                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+                      ".xlsx"
+                  ],
+                  'application/vnd.ms-powerpoint': [
+                      ".ppt"
+                  ],
+                  'application/vnd.openxmlformats-officedocument.presentationml.presentation': [
+                      ".pptx"
+                  ]
+              },
+              instantUpload: false,
+              bulkUpload: false,
+              server: "",
+          },
+          id: "field-1754326536756",
+          name: "file",
+          type: "file",
+          value: "",
+          label: "",
+          width: 12
+      },
+      {
+          action: "submit",
+          appearance: {
+              color: "primary",
+              variant: "fill",
+              size: "default"
+          },
+          loadingText: "",
+          id: "field-1754326521636",
+          type: "submit",
+          label: "Submit",
+          width: 2
+      }
+  ]
+}
+
 // Presets removed; focusing on simple user form
 
 function ProductionDemo() {
   // Schema state comes from the editor; runtimeSchema is used by renderer with current values
-  const [schema, setSchema] = useState<FormSchema>(initialUserSchema);
+  const [schema, setSchema] = useState<FormSchema>(initialReportSchema);
 
   // Users list & editing state
   const [users, setUsers] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<Record<string, any> | null>(null);
@@ -310,12 +537,12 @@ function ProductionDemo() {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await fetch('http://localhost:4000/users');
-      if (!res.ok) throw new Error(`Failed to fetch users (${res.status})`);
+      const res = await fetch('http://localhost:4000/reports');
+      if (!res.ok) throw new Error(`Failed to fetch reports (${res.status})`);
       const data = await res.json();
-      setUsers(Array.isArray(data) ? data : []);
+      setReports(Array.isArray(data) ? data : []);
     } catch (e: any) {
-      setError(e?.message ?? 'Failed to fetch users');
+      setError(e?.message ?? 'Failed to fetch reports');
     } finally {
       setIsLoading(false);
     }
@@ -329,7 +556,7 @@ function ProductionDemo() {
 
   const handleSubmitSchema = async (data: Record<string, any>) => {
     try {
-      const url = editingUser ? `http://localhost:4000/users/${editingUser.id}` : 'http://localhost:4000/users';
+      const url = editingUser ? `http://localhost:4000/reports/${editingUser.id}` : 'http://localhost:4000/reports';
       const method = editingUser ? 'PUT' : 'POST';
       const payload = editingUser ? { ...editingUser, ...data } : data;
 
@@ -371,14 +598,14 @@ function ProductionDemo() {
             <button onClick={() => {
               setEditingUser(null);
               setSchema({
-                ...initialUserSchema,
-                  fields: initialUserSchema.fields.map((f) => (f.type === 'submit' ? { ...f, label: 'Save User' } : f))
+                ...initialReportSchema,
+                  fields: initialReportSchema.fields.map((f) => (f.type === 'submit' ? { ...f, label: 'Save User' } : f))
               });
             }} style={{ marginLeft: 12, padding: '4px 8px' }}>Cancel</button>
           </div>
         ) : null}
         <FormRenderer
-          key={`${schema.id}-edit`}
+          key={`${schema.id}`}
           schema={schema}
           data={editingUser || undefined}
           onSubmit={handleSubmitSchema}
@@ -404,27 +631,44 @@ function ProductionDemo() {
               </tr>
             </thead>
             <tbody>
-              {users.length === 0 ? (
+              {reports.length === 0 ? (
                 <tr>
                   <td colSpan={userColumns.length + 2} style={{ padding: 12, color: '#666' }}>No users found.</td>
                 </tr>
               ) : (
-                users.map((u) => (
-                  <tr key={u.id}>
-                    <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{u.id}</td>
-                    {userColumns.map((col) => (
-                      <td key={col.id} style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{String(u[(col as any).name] ?? '')}</td>
+                reports.map((u, index) => (
+                  <tr key={index}>
+                    {Object.values(u).map((value) => (
+                        <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{value as string}</td>
                     ))}
-                    <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>
-                      <button onClick={() => {
-                        setEditingUser(u);
-                        setSchema({
-                          ...initialUserSchema,
-                            fields: initialUserSchema.fields.map((f) => (f.type === 'submit' ? { ...f, label: 'Update User' } : f))
-                        });
-                      }} style={{ padding: '4px 8px' }}>Edit</button>
-                    </td>
+                      <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>
+                        <button onClick={() => {
+                          setEditingUser(u);
+                          setSchema({
+                            ...initialReportSchema,
+                              fields: initialReportSchema.fields.map((f) => (f.type === 'submit' ? { ...f, label: 'Update User' } : f))
+                          });
+                        }} 
+                        style={{ padding: '4px 8px' }}>
+                          Edit
+                        </button>
+                      </td>
                   </tr>
+                  // <tr key={u.id}>
+                  //   <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{u.id}</td>
+                  //   {userColumns.map((col) => (
+                    //     <td key={col.id} style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{String(u[(col as any).name] ?? '')}</td>
+                    //   ))}
+                    //   <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>
+                    //     <button onClick={() => {
+                      //       setEditingUser(u);
+                      //       setSchema({
+                        //         ...initialUserSchema,
+                        //           fields: initialUserSchema.fields.map((f) => (f.type === 'submit' ? { ...f, label: 'Update User' } : f))
+                        //       });
+                        //     }} style={{ padding: '4px 8px' }}>Edit</button>
+                        //   </td>
+                        // </tr>
                 ))
               )}
             </tbody>

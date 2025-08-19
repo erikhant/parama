@@ -36,7 +36,7 @@ export const SortableList: React.FC<SortableListProps> = ({
         strategy={strategy === 'vertical' ? verticalListSortingStrategy : rectSortingStrategy}
         disabled={disabled}>
         {children}
-        {isUseDynamic && canvas.currentInsertionIndex === items.length && (
+        {isUseDynamic && canvas.dragSource === 'toolbox' && canvas.currentInsertionIndex === items.length && (
           <DroppableContainer
             id="indicator"
             data={{ indicator: true }}
