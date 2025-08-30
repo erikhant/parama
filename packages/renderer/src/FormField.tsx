@@ -250,7 +250,10 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
 
   // Use getFieldValue for intelligent value retrieval (handles both regular and file fields)
   const value = actions.getFieldValue(field.id) ?? field.defaultValue;
-  const existingFiles = useMemo(() => (field.type === 'file' ? actions.getExistingFiles(field.id) : []), [actions, field.id, field.type]);
+  const existingFiles = useMemo(
+    () => (field.type === 'file' ? actions.getExistingFiles(field.id) : []),
+    [actions, field.id, field.type]
+  );
   const validationState = actions.getFieldValidation(field.id);
   const [firstRender, setFirstRender] = useState(true);
 
@@ -329,16 +332,24 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
       return;
     }
     // Sync text state when store value changes
-    setTextValue((prev) => (prev !== (value || '') ? (value || '') : prev));
-    setHiddenValue((prev) => (prev !== (value || '') ? (value || '') : prev));
+    setTextValue((prev) => (prev !== (value || '') ? value || '' : prev));
+    setHiddenValue((prev) => (prev !== (value || '') ? value || '' : prev));
     // Sync date state when store value changes
     if (field.type === 'date') {
       setSingleDate(value ? (value instanceof Date ? value : new Date(value)) : undefined);
-      setMultipleDates(value ? (Array.isArray(value) ? value.map((v) => (v instanceof Date ? v : new Date(v))) : []) : undefined);
-      setDateRange(value ? (typeof value === 'object' && !Array.isArray(value) && ('from' in value || 'to' in value) ? {
-        from: value.from instanceof Date ? value.from : new Date(value.from),
-        to: value.to instanceof Date ? value.to : new Date(value.to)
-      } : undefined) : undefined);
+      setMultipleDates(
+        value ? (Array.isArray(value) ? value.map((v) => (v instanceof Date ? v : new Date(v))) : []) : undefined
+      );
+      setDateRange(
+        value
+          ? typeof value === 'object' && !Array.isArray(value) && ('from' in value || 'to' in value)
+            ? {
+                from: value.from instanceof Date ? value.from : new Date(value.from),
+                to: value.to instanceof Date ? value.to : new Date(value.to)
+              }
+            : undefined
+          : undefined
+      );
     }
     // Sync select state when store value changes
     if (field.type === 'select') {
@@ -360,7 +371,6 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     if (field.type === 'checkbox') {
       setCheckboxValue(value || []);
     }
-
   }, [value, field.id]);
 
   const renderAppearance = useCallback(
@@ -453,7 +463,9 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
     (item: any) => (checked: boolean | 'indeterminate') => {
       const isChecked = checked === true;
       const current = Array.isArray(value) ? value : [];
-      const newValue = isChecked ? [...current.filter((v: any) => v !== item.value), item.value] : current.filter((v: any) => v !== item.value);
+      const newValue = isChecked
+        ? [...current.filter((v: any) => v !== item.value), item.value]
+        : current.filter((v: any) => v !== item.value);
       handleChange(newValue);
     },
     [value, handleChange]
@@ -944,7 +956,17 @@ const InputField: React.FC<{ field: InputFieldType }> = memo(({ field }) => {
         (field as any).widthMobile ? `sm:column-span-${(field as any).widthMobile}` : ''
       )}
       orientation={field.type === 'checkbox' || field.type === 'radio' ? field.appearance?.position : 'vertical'}>
-      {mode === 'editor' ? <Label>{field.label}</Label> : field.type !== 'hidden' ? <Label>{field.label}</Label> : null}
+      {mode === 'editor' ? (
+        <Label className="relative">
+          {field.label}
+          {isRequired ? <span className="text-red-500 text-xs absolute top-0 -right-2">*</span> : null}
+        </Label>
+      ) : field.type !== 'hidden' ? (
+        <Label className="relative">
+          {field.label}
+          {isRequired ? <span className="text-red-500 text-xs absolute top-0 -right-2">*</span> : null}
+        </Label>
+      ) : null}
       {field.type === 'file' && field.helpText && <p className="form-description">{field.helpText}</p>}
       {field.type === 'file' && (!validationState.isValid || field.error) && (
         <p className="text-red-500 text-xs mt-1">{validationState.messages[0] || field.error}</p>

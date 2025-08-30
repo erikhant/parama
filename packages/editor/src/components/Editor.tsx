@@ -130,6 +130,7 @@ const defineDefaultValue = (type: string) => {
         label: 'Submit',
         type: type as ButtonField['type'],
         width: 2,
+        widthMobile: 4,
         action: 'submit',
         appearance: {
           color: 'primary',
