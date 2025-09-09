@@ -67,6 +67,7 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
   const [apiUrl, setApiUrl] = useState(external.url || '');
 
   // Sync state when external prop changes (when switching between different select fields)
+  // Guard against effect firing every render due to changing object identity
   useEffect(() => {
     setHeaders(arrayHeaders(external.headers || {}));
     setExternal(external);
@@ -75,7 +76,7 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
     setResult(null);
     setError(null);
     setTab('headers');
-  }, [external]);
+  }, [external.url, JSON.stringify(external.headers || {}), JSON.stringify(external.mapper || {})]);
 
   const addHeader = () => {
     const newHeader: Header = {

@@ -1,14 +1,48 @@
 {
-  "reports": [
+  "users": [
     {
-      "title__tax_0b19e614-2f8c-4ae2-a50b-3ebe690aebfd": "Laporan_Keadaan_Papua_Hukum_HAM",
-      "due_date__tax_2fde1626-546c-421d-ae33-087ebee26c34": "2025-08-13T17:00:00.000Z",
-      "tema__attr_1f434bd0-05fa-4ae0-bc33-23ba26f75b75": "Hukum_dan_HAM__08ddd37a-1bd8-455b-8899-cb61a4022124",
-      "laporan_periodik__attr_c736d6d1-08a0-436b-b98b-51c3f3aea416": "Laporan_Semester__08ddd35d-a515-457a-8620-cc3085785507",
-      "security__attr_2da42a91-eaf1-448f-b572-c07ac03c0537": "Confidential__08ddc061-dd0e-4a5d-8fe6-bde0ba84ea3e",
-      "direktorat__tax_08ddc066-3eac-4e8f-8a6e-a431f9297c6e": "DIR_A__a10b023c-d8f9-4ff1-90d9-85cfb8bea09b",
-      "satuan__tax_08ddc066-3eac-4eeb-87f3-0b4e8962d20a": "Satuan_DIR_A__aa0e38ed-22b6-4192-8076-cadbc74a7356",
-      "file": null
+      "id": "1",
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "+1-555-0123",
+      "address": "123 Main St, Anytown, USA 12345",
+      "dateOfBirth": "2025-05-31T17:00:00.000Z",
+      "department": "Engineering",
+      "position": "Senior Developer",
+      "joinDate": "2025-09-22T17:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "phone": "+1-555-0456",
+      "address": "456 Oak Ave, Somewhere, USA 67890",
+      "dateOfBirth": "1988-11-22",
+      "department": "Marketing",
+      "position": "Marketing Manager",
+      "joinDate": "2019-07-15"
+    },
+    {
+      "id": "3",
+      "name": "Mike Johnson",
+      "email": "mike.johnson@example.com",
+      "phone": "+1-555-0789",
+      "address": "789 Pine Rd, Elsewhere, USA 54321",
+      "dateOfBirth": "1992-02-08",
+      "department": "Sales",
+      "position": "Sales Representative",
+      "joinDate": "2021-01-10"
+    },
+    {
+      "id": "4",
+      "name": "Sarah Wilson",
+      "email": "sarah.wilson@example.com",
+      "phone": "+1-555-0321",
+      "address": "321 Elm St, Nowhere, USA 98765",
+      "dateOfBirth": "1985-09-30",
+      "department": "HR",
+      "position": "HR Director",
+      "joinDate": "2018-05-20"
     }
   ]
 }

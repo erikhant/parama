@@ -61,6 +61,77 @@ export function App() {
               message: 'Invalid email format'
             }
           ]
+        },
+        {
+          id: 'field-1756874293532',
+          name: 'product',
+          type: 'select',
+          label: 'Text label',
+          width: 12,
+          transformer: '',
+          defaultValue: '4',
+          value: '4',
+          options: [],
+          multiple: false,
+          placeholder: 'Search options...',
+          external: {
+            url: 'https://dummyjson.com/products?limit=10&select=title,price',
+            mapper: {
+              dataSource: 'products',
+              dataMapper: {
+                id: 'id',
+                label: 'title',
+                value: 'id'
+              }
+            }
+          }
+        },
+        {
+          id: 'field-1756874780350',
+          name: 'multi_product',
+          type: 'multiselect',
+          label: 'Text label',
+          width: 12,
+          transformer: '',
+          value: [4],
+          defaultValue: [4],
+          multiple: true,
+          options: [],
+          placeholder: 'Search options...',
+          external: {
+            url: 'https://dummyjson.com/products?limit=10&skip=0&select=title,price',
+            mapper: {
+              dataSource: 'products',
+              dataMapper: {
+                id: 'id',
+                label: 'title',
+                value: 'id'
+              }
+            }
+          }
+        },
+        {
+          id: 'field-1756874780352',
+          name: 'product_2',
+          type: 'autocomplete',
+          label: 'Text label',
+          width: 12,
+          transformer: '',
+          value: 4,
+          defaultValue: 4,
+          options: [],
+          placeholder: 'Search options...',
+          external: {
+            url: 'https://dummyjson.com/products?limit=10&skip=0&select=title,price',
+            mapper: {
+              dataSource: 'products',
+              dataMapper: {
+                id: 'id',
+                label: 'title',
+                value: 'id'
+              }
+            }
+          }
         }
       ]
     }
