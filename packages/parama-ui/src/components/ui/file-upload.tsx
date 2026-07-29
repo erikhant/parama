@@ -278,7 +278,11 @@ export function FileUpload({
           isDragActive || isDragging ? 'file-upload-dropzone-active' : '',
           className
         )}>
-        <input {...getInputProps()} name={name} required={required} />
+        <input
+          {...getInputProps()}
+          name={name}
+          required={Boolean(required && existing.length === 0 && files.length === 0)}
+        />
         <div className="file-upload-content">
           <CloudUploadIcon className="file-upload-icon" />
           <div>
@@ -342,10 +346,7 @@ export function FileUpload({
                     {file.size ? <p className="file-upload-file-size">{(file.size / 1024).toFixed(2)} KB</p> : null}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeExistingFile(index)}
-                  className="file-upload-remove-button">
+                <button type="button" onClick={() => removeExistingFile(index)} className="file-upload-remove-button">
                   <XIcon className="file-upload-action-icon" />
                 </button>
               </li>

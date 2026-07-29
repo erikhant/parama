@@ -8,9 +8,20 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "paths": {
-      "@/*": ["./packages/parama-ui/src/*"]
+      "@/*": [
+        "./packages/parama-ui/src/*"
+      ]
     }
   },
   "references": [],
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/testing/**"
+  ]
 }

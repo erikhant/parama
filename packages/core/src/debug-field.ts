@@ -69,7 +69,7 @@ function debugFieldLookup() {
   );
   console.log('Field lookup test for "age":', currentState.actions.getField('age'));
 
-  const intercepted = interceptExpressionTemplate(expression, currentState);
+  const intercepted = interceptExpressionTemplate(expression, currentState.actions.getField);
   console.log('After interceptExpressionTemplate:', intercepted);
 
   const interpolated = interpolate(intercepted, currentState.formData);

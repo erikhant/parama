@@ -5,10 +5,19 @@
     "rootDir": "./src"
   },
   "references": [
-    { "path": "../types" },
-    { "path": "../core" },
-    { "path": "../renderer" },
-    { "path": "../parama-ui" }
+    {
+      "path": "../types"
+    },
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../renderer"
+    },
+    {
+      "path": "../parama-ui"
+    }
   ],
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.spec.ts", "src/**/*.spec.tsx", "src/testing/**"]
 }

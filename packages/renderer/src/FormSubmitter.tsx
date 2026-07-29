@@ -1,49 +1,57 @@
-import React from 'react';
 import { useFormBuilder } from '@parama-dev/form-builder-core';
-import { FormFieldRenderer } from './FormField';
-import { FormBuilderProps } from '@parama-dev/form-builder-types';
+import type { FormBuilderProps } from '@parama-dev/form-builder-types';
 import { cn } from '@parama-ui/react';
+import React, { useCallback } from 'react';
+import { FormFieldRenderer } from './FormField';
+import { useChangeNotifier } from './hooks/useChangeNotifier';
+import { useFormActions } from './hooks/useFieldFlags';
 
 interface FormSubmitterProps extends Omit<FormBuilderProps, 'schema' | 'validators' | 'data'> {
   className?: string;
 }
 
+/**
+ * The `<form>` element: lays fields out on the schema's grid and owns submission.
+ *
+ * Submission validates first and only calls `onSubmit` when the form is valid.
+ * The submitting flag is always cleared, so a throwing handler cannot leave the
+ * form permanently locked.
+ *
+ * @remarks
+ * Subscribes with narrow selectors rather than destructuring the whole store —
+ * this component rebuilds every field on each render, so a broad subscription
+ * would re-render the entire form on every keystroke.
+ */
 export const FormSubmitter: React.FC<FormSubmitterProps> = ({ onSubmit, onChange, onCancel, className }) => {
-  const { schema, actions, formState } = useFormBuilder();
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const actions = useFormActions();
+  const fields = useFormBuilder((state) => state.schema.fields);
+  const layout = useFormBuilder((state) => state.schema.layout);
+  const isSubmitting = useFormBuilder((state) => state.formState.isSubmitting);
 
-    try {
-      actions.setSubmissionState({ isSubmitting: true });
+  useChangeNotifier(onChange);
 
-      const { data, isValid, contentType } = await actions.submitForm();
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
 
-      if (isValid) {
-        await onSubmit?.(data, contentType);
+      try {
+        actions.setSubmissionState({ isSubmitting: true });
+
+        const { data, isValid, contentType } = await actions.submitForm();
+        if (isValid) await onSubmit?.(data, contentType);
+      } catch (error) {
+        console.error('Form submission error:', error);
+      } finally {
+        actions.setSubmissionState({ isSubmitting: false });
       }
-    } catch (error) {
-      console.error('Form submission error:', error);
-    } finally {
-      actions.setSubmissionState({ isSubmitting: false });
-    }
-  };
-
-  const handleChange = (data: Record<string, any>) => {
-    onChange?.(data);
-  };
+    },
+    [actions, onSubmit]
+  );
 
   return (
-    <form
-      className={cn(`grid column-${schema.layout.colSize} gap-size-${schema.layout.gap}`, className)}
-      onSubmit={handleSubmit}>
-      {schema.fields.map((field) => (
-        <FormFieldRenderer
-          key={field.id}
-          field={field}
-          onChange={handleChange}
-          onCancel={onCancel}
-          isDisabled={formState.isSubmitting}
-        />
+    <form className={cn(`grid column-${layout.colSize} gap-size-${layout.gap}`, className)} onSubmit={handleSubmit}>
+      {fields.map((field) => (
+        <FormFieldRenderer key={field.id} field={field} onCancel={onCancel} isDisabled={isSubmitting} />
       ))}
     </form>
   );

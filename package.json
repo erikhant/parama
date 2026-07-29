@@ -40,6 +40,10 @@
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:types": "tsc -p tsconfig.test.json",
     "clean:deps": "turbo run clean && rimraf node_modules .vite",
     "clean:build": "pnpm -r exec rimraf dist node_modules/.cache",
     "clean:types": "pnpm --filter @parama-dev/form-builder-types clean",
@@ -55,15 +59,21 @@
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.26.0",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.26.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "husky": "^8.0.3",
+    "jsdom": "^30.0.0",
     "prettier": "^3.1.1",
     "rimraf": "^5.0.5",
     "turbo": "^2.5.3",
     "typescript": "^5.3.3",
-    "typescript-eslint": "^8.32.1"
+    "typescript-eslint": "^8.32.1",
+    "vitest": "^3.2.7"
   },
   "packageManager": "pnpm@10.11.0",
   "dependencies": {

@@ -98,24 +98,24 @@ export function setupWorkflowDebugger(options: DebugOptions = {}) {
 
   // 5. Options Loading Debugging
   if (logOptionsLoading) {
-    const originalRefreshOptions = useFormBuilder.getState().actions.refreshDynamicOptions.bind(workflowEngine);
     const store = useFormBuilder.getState();
-    workflowEngine.refreshDynamicOptions = async (field: FormField) => {
+    const originalRefreshOptions = store.actions.refreshDynamicOptions;
+
+    store.actions.refreshDynamicOptions = async (field: FormField) => {
       if (
         !field ||
         (field.type !== 'select' && field.type !== 'multiselect' && field.type !== 'autocomplete') ||
         !field.external
       ) {
-        console.warn(`Field ${field.id} is not a select, multiselect, or autocomplete with dynamic options`);
-        return;
+        console.warn(`Field ${field?.id} is not a select, multiselect, or autocomplete with dynamic options`);
+        return [];
       }
       console.groupCollapsed(`%c[OPTIONS LOAD]%c ${field.id}`, 'color: #00BCD4; font-weight: bold', 'color: inherit');
-      console.log('Dynamic options config:', field?.external);
-      await originalRefreshOptions(field);
-      console.log('Loaded options:', field.options);
-      console.log('Options cache:', store.optionsCache);
+      console.log('Dynamic options config:', field.external);
+      const options = await originalRefreshOptions(field);
+      console.log('Loaded options:', options);
       console.groupEnd();
-      return;
+      return options;
     };
   }
 

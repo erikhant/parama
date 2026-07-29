@@ -52,19 +52,34 @@ export class DependencyGraph {
   }
 
   /**
-   * Removes all dependencies for a field
+   * Detaches a field from the graph, in both directions.
+   *
+   * `registerDependencies` calls this before re-adding a field's edges, so it
+   * must clear incoming edges too. Previously only the outgoing ones were
+   * dropped, which meant a field that stopped depending on another kept the old
+   * edge forever: the graph grew with every edit and fired cascades for
+   * dependencies that no longer existed.
+   *
    * @param fieldId Field ID to remove
    */
   public removeField(fieldId: string): void {
-    // Remove as dependency
+    // Outgoing: fields that depended on this one.
     this.dependencies.delete(fieldId);
 
-    // Remove from reverse dependencies
-    this.reverseDependencies.forEach((deps, key) => {
-      deps.delete(fieldId);
-      if (deps.size === 0) {
-        this.reverseDependencies.delete(key);
-      }
+    // Incoming: this field as a dependant of others.
+    this.reverseDependencies.get(fieldId)?.forEach((source) => {
+      const dependents = this.dependencies.get(source);
+      if (!dependents) return;
+
+      dependents.delete(fieldId);
+      if (dependents.size === 0) this.dependencies.delete(source);
+    });
+    this.reverseDependencies.delete(fieldId);
+
+    // This field as a dependency source recorded on other fields.
+    this.reverseDependencies.forEach((sources, key) => {
+      sources.delete(fieldId);
+      if (sources.size === 0) this.reverseDependencies.delete(key);
     });
   }
 

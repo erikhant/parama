@@ -1,7 +1,6 @@
-import { FormBuilderState } from './store';
-
 // Import variable types and utilities
 import type { VariableContext } from '@parama-dev/form-builder-types';
+import type { FieldResolver } from './state/types';
 
 /**
  * Converts an object to a URL query string format.
@@ -80,7 +79,15 @@ export function interpolate(template: string, data: Record<string, unknown>): st
   });
 }
 
-export function interceptExpressionTemplate(expression: string, state: FormBuilderState) {
+/**
+ * Rewrites `{{fieldName}}` placeholders into `{{fieldId}}` so that a later
+ * {@link interpolate} pass — which reads the id-keyed form data — can resolve
+ * them. Placeholders that name no known field are left untouched.
+ *
+ * @param expression - Template containing `{{...}}` placeholders
+ * @param resolveField - Looks a field up by id or name
+ */
+export function interceptExpressionTemplate(expression: string, resolveField: FieldResolver): string {
   return expression.replace(/\{\{(.*?)\}\}/g, (match, key) => {
     const trimmedKey = key.trim();
 
@@ -90,7 +97,7 @@ export function interceptExpressionTemplate(expression: string, state: FormBuild
     }
 
     // Replace field names with their IDs
-    const fieldId = state.actions.getField(trimmedKey)?.id;
+    const fieldId = resolveField(trimmedKey)?.id;
     if (!fieldId) {
       return match;
     }

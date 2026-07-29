@@ -1,0 +1,32 @@
+{
+  "//": "Type-checks the test suite. Package tsconfigs deliberately exclude tests so they never reach dist; this config covers them instead. Run via `pnpm test:types`.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "paths": {
+      "@parama-dev/form-builder-core/testing": ["./packages/core/src/testing/storeHarness"],
+      "@parama-dev/form-builder-core": ["./packages/core/src"],
+      "@parama-dev/form-builder-editor": ["./packages/editor/src"],
+      "@parama-dev/form-builder-renderer": ["./packages/renderer/src"],
+      "@parama-dev/form-builder-types": ["./packages/types/src"],
+      "@parama-ui/react": ["./packages/parama-ui/src"],
+      "@/*": ["./packages/parama-ui/src/*"]
+    }
+  },
+  "references": [],
+  "include": [
+    "types/**/*.d.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts",
+    "packages/*/src/**/*.test.ts",
+    "packages/*/src/**/*.test.tsx",
+    "packages/*/src/**/*.spec.ts",
+    "packages/*/src/**/*.spec.tsx",
+    "packages/core/src/testing/**/*.ts"
+  ],
+  "exclude": ["node_modules", "**/dist/**"]
+}

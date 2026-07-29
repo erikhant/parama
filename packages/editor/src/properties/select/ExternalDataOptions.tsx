@@ -1,3 +1,4 @@
+import type { ExternalDataSource, FieldGroupItem } from '@parama-dev/form-builder-types';
 import {
   Badge,
   Button,
@@ -13,154 +14,116 @@ import {
   Tabs,
   TabsContent,
   TabsList,
-  TabsTrigger,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
+  TabsTrigger
 } from '@parama-ui/react';
-import type { ExternalDataSource, FieldGroupItem } from '@parama-dev/form-builder-types';
-import React, { useState, useEffect } from 'react';
-import { CircleAlertIcon, HelpCircleIcon, Loader2Icon, PlusIcon, Trash2Icon } from 'lucide-react';
-import { Editor } from '@monaco-editor/react';
+import { CircleAlertIcon } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { HeadersTable } from './externalData/HeadersTable';
+import { addHeaderRow, removeHeaderRow, toHeaderList, toHeaderMap, updateHeaderRow } from './externalData/headers';
+import { isValidApiUrl, readMapperField, withMapperField, type MapperKey } from './externalData/mapper';
+import { MapperTable } from './externalData/MapperTable';
+import { ResultViewer } from './externalData/ResultViewer';
+import { useApiProbe } from './externalData/useApiProbe';
+
+type Source = ExternalDataSource<FieldGroupItem>;
 
 type ExternalDataOptionsProps = {
   children?: React.ReactNode;
-  external?: ExternalDataSource<FieldGroupItem>;
-  onChange: (value: ExternalDataSource<FieldGroupItem>) => void;
+  external?: Source;
+  onChange: (value: Source) => void;
 };
 
-type Header = {
-  id: string;
-  key: string;
-  value: string;
-};
+type TabKey = 'headers' | 'result' | 'mapper';
 
-const mapHeaders = (headers: Header[]) => {
-  return headers.reduce(
-    (acc, header) => {
-      if (header.key.trim()) {
-        acc[header.key] = header.value;
-      }
-      return acc;
-    },
-    {} as Record<string, string>
-  );
-};
+const EMPTY_SOURCE: Source = { url: '' };
 
-const arrayHeaders = (headersObj: Record<string, string>) => {
-  return Object.entries(headersObj).map(([key, value]) => ({
-    id: Date.now().toString() + Math.random().toString(),
-    key,
-    value
-  }));
-};
-
-export const ExternalDataOptions = ({ children, external = { url: '' }, onChange }: ExternalDataOptionsProps) => {
-  const [headers, setHeaders] = useState<Header[]>(arrayHeaders(external.headers || {}));
-  const [externalData, setExternal] = useState<ExternalDataSource<FieldGroupItem>>(external);
-  const [tab, setTab] = useState<'headers' | 'result' | 'mapper'>('headers');
-  const [open, setOpen] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+/**
+ * Dialog for configuring a field's remote option source.
+ *
+ * Three steps, one per tab: set the request up (URL and headers), probe the
+ * endpoint to see a real response, then map that response onto the option
+ * shape. Saving is blocked until the probe succeeds, because a mapping written
+ * against a response nobody has seen is a guess.
+ *
+ * Edits are held locally and only published on save, so abandoning the dialog
+ * leaves the field's existing configuration untouched.
+ */
+export const ExternalDataOptions = ({ children, external = EMPTY_SOURCE, onChange }: ExternalDataOptionsProps) => {
+  const [source, setSource] = useState<Source>(external);
+  const [headerRows, setHeaderRows] = useState(() => toHeaderList(external.headers));
   const [apiUrl, setApiUrl] = useState(external.url || '');
+  const [tab, setTab] = useState<TabKey>('headers');
+  const [open, setOpen] = useState(false);
 
-  // Sync state when external prop changes (when switching between different select fields)
-  // Guard against effect firing every render due to changing object identity
+  const probe = useApiProbe();
+
+  // Re-seed when the dialog is pointed at a different field. Compared by
+  // content rather than reference: the parent rebuilds this object on every
+  // render, so a reference check would reset the form mid-edit.
+  const externalKey = JSON.stringify(external);
   useEffect(() => {
-    setHeaders(arrayHeaders(external.headers || {}));
-    setExternal(external);
+    setSource(external);
+    setHeaderRows(toHeaderList(external.headers));
     setApiUrl(external.url || '');
-    // Reset other states when switching fields
-    setResult(null);
-    setError(null);
     setTab('headers');
-  }, [external.url, JSON.stringify(external.headers || {}), JSON.stringify(external.mapper || {})]);
+    probe.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalKey]);
 
-  const addHeader = () => {
-    const newHeader: Header = {
-      id: Date.now().toString(),
-      key: '',
-      value: ''
-    };
-    const updatedHeaders = [...headers, newHeader];
-    setHeaders(updatedHeaders);
-    const mappedHeaders = mapHeaders(updatedHeaders);
-    setExternal({ ...externalData, headers: mappedHeaders });
-  };
+  /** Writes rows to local state and mirrors them into the source's header map. */
+  const commitHeaders = useCallback((rows: ReturnType<typeof toHeaderList>) => {
+    setHeaderRows(rows);
+    setSource((current) => ({ ...current, headers: toHeaderMap(rows) }));
+  }, []);
 
-  const removeHeader = (id: string) => {
-    const updatedHeaders = headers.filter((header) => header.id !== id);
-    setHeaders(updatedHeaders);
-    const mappedHeaders = mapHeaders(updatedHeaders);
-    setExternal({ ...externalData, headers: mappedHeaders });
-  };
+  const handleUrlChange = useCallback((value: string) => {
+    setApiUrl(value);
+    // Only a usable URL reaches the source, so a half-typed one cannot be saved.
+    if (isValidApiUrl(value)) setSource((current) => ({ ...current, url: value }));
+  }, []);
 
-  const updateHeader = (id: string, field: 'key' | 'value', newValue: string) => {
-    const updatedHeaders = headers.map((header) => (header.id === id ? { ...header, [field]: newValue } : header));
-    setHeaders(updatedHeaders);
-    const mappedHeaders = mapHeaders(updatedHeaders);
-    setExternal({ ...externalData, headers: mappedHeaders });
-  };
+  const handleSend = useCallback(async () => {
+    await probe.send(apiUrl, source.headers);
+    setTab('result');
+  }, [probe, apiUrl, source.headers]);
 
-  const sendRequest = async () => {
-    // Implement the logic to send the request to the data source URL
-    // This could involve using fetch or axios to make the API call
-    // and then updating the external.result with the response.
-    setError(null);
+  const handleMapperChange = useCallback(
+    (key: MapperKey, value: string) => setSource((current) => withMapperField(current, key, value)),
+    []
+  );
 
-    if (!externalData.url) {
-      console.error('No source URL provided');
-      return;
-    }
-    setLoading(true);
-    await fetch(externalData.url, {
-      method: 'GET',
-      headers: {
-        ...externalData.headers
-      }
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setResult(data);
-        setTab('result'); // Switch to result tab after sending request
-      })
-      .catch((error) => {
-        setError(error);
-        setResult(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  const handleSave = useCallback(() => {
+    onChange(source);
+    setOpen(false);
+    setTab('mapper');
+    probe.reset();
+  }, [onChange, source, probe]);
 
-  const isValidUrl = (url: string) => {
-    const urlPattern = /^(https?:\/\/)(localhost|127\.0\.0\.1|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(\/.*)?$/;
-    return urlPattern.test(url);
-  };
+  const canSend = !probe.loading && isValidApiUrl(apiUrl);
+  const canSave = canSend && Boolean(probe.result) && isValidApiUrl(source.url);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {children ? (
-        <DialogTrigger asChild>{React.isValidElement(children) ? children : <span>{children}</span>}</DialogTrigger>
-      ) : (
-        <DialogTrigger asChild>
+      <DialogTrigger asChild>
+        {children ? (
+          React.isValidElement(children) ? (
+            children
+          ) : (
+            <span>{children}</span>
+          )
+        ) : (
           <Button variant="ghost" size="sm" color="secondary">
             API source
           </Button>
-        </DialogTrigger>
-      )}
+        )}
+      </DialogTrigger>
+
       <DialogContent className="sm:!max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-gray-700">API source</DialogTitle>
           <DialogDescription>Manage API source settings</DialogDescription>
         </DialogHeader>
+
         <div className="space-y-5">
           <div className="flex items-center justify-between mb-2">
             <FormGroup prefix="GET" className="w-full">
@@ -168,30 +131,26 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
                 value={apiUrl}
                 className="!rounded-tr-none !rounded-br-none"
                 placeholder="https://api.example.com/data"
-                onChange={(e) => {
-                  setApiUrl(e.target.value);
-                  console.log('API URL changed:', isValidUrl(e.target.value));
-                  if (isValidUrl(e.target.value)) {
-                    setExternal({ ...externalData, url: e.target.value });
-                  }
-                }}
+                aria-label="API URL"
+                onChange={(event) => handleUrlChange(event.target.value)}
               />
             </FormGroup>
             <Button
               color="success"
               className="!rounded-tl-none !rounded-bl-none"
-              disabled={loading || !isValidUrl(apiUrl)}
-              onClick={sendRequest}>
+              disabled={!canSend}
+              onClick={handleSend}>
               Send
             </Button>
           </div>
-          <Tabs defaultValue={tab} className="w-full">
+
+          <Tabs value={tab} onValueChange={(next) => setTab(next as TabKey)} className="w-full">
             <TabsList className="grid w-full !grid-cols-3 bg-gray-100">
               <TabsTrigger value="headers">Headers</TabsTrigger>
               <TabsTrigger value="result">
                 Result
-                {error && <CircleAlertIcon className="ml-1 text-red-500" size={16} />}
-                {!error && result && (
+                {probe.error && <CircleAlertIcon className="ml-1 text-red-500" size={16} />}
+                {!probe.error && Boolean(probe.result) && (
                   <Badge size="xs" color="success" className="ml-1">
                     OK
                   </Badge>
@@ -199,350 +158,32 @@ export const ExternalDataOptions = ({ children, external = { url: '' }, onChange
               </TabsTrigger>
               <TabsTrigger value="mapper">Data mapper</TabsTrigger>
             </TabsList>
+
             <TabsContent value="headers">
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead>
-                    <tr>
-                      <th className="border text-sm text-gray-700 p-2">Key</th>
-                      <th className="border text-sm text-gray-700 p-2">Value</th>
-                      <th className="border text-sm text-gray-700 p-2"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {headers.map((header) => (
-                      <tr key={header.id}>
-                        <td className="border">
-                          <Input
-                            className="rounded-none shadow-none border-none focus-visible:ring-0"
-                            value={header.key}
-                            onChange={(e) => updateHeader(header.id, 'key', e.target.value)}
-                            placeholder="Header name"
-                          />
-                        </td>
-                        <td className="border">
-                          <Input
-                            className="rounded-none shadow-none border-none focus-visible:ring-0"
-                            value={header.value}
-                            onChange={(e) => updateHeader(header.id, 'value', e.target.value)}
-                            placeholder="Header value"
-                          />
-                        </td>
-                        <td className="border text-center">
-                          <Button
-                            variant="ghost"
-                            color="secondary"
-                            className="text-gray-500"
-                            size="xs"
-                            onClick={() => removeHeader(header.id)}>
-                            <Trash2Icon size={16} />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="flex justify-end mt-2">
-                  <Button variant="ghost" color="secondary" className="text-gray-700" size="xs" onClick={addHeader}>
-                    <PlusIcon size={16} />
-                    Add row
-                  </Button>
-                </div>
-              </div>
+              <HeadersTable
+                rows={headerRows}
+                onAdd={() => commitHeaders(addHeaderRow(headerRows))}
+                onUpdate={(id, property, value) => commitHeaders(updateHeaderRow(headerRows, id, property, value))}
+                onRemove={(id) => commitHeaders(removeHeaderRow(headerRows, id))}
+              />
             </TabsContent>
+
             <TabsContent value="result">
-              <div className="overflow-y-auto max-h-[calc(100vh_-_300px)]">
-                {result ? (
-                  <Editor
-                    height={600}
-                    theme="vs-light"
-                    className="border border-gray-300"
-                    language="json"
-                    value={JSON.stringify(result, null, 2)}
-                    onMount={(editor) => {
-                      editor.getModel()?.updateOptions({ tabSize: 2 });
-                    }}
-                    options={{
-                      readOnly: true,
-                      minimap: { enabled: false },
-                      scrollBeyondLastLine: false,
-                      wordWrap: 'on',
-                      automaticLayout: true
-                    }}
-                  />
-                ) : (
-                  <p
-                    className={`${error ? 'text-red-600' : 'text-gray-500'} text-center text-sm  bg-gray-50 border p-5 rounded`}>
-                    {error ? error.message : 'No result yet. Send a request to see the response.'}
-                    {loading && (
-                      <>
-                        <Loader2Icon className="animate-spin ml-2 inline-block" size={16} />
-                        Loading..
-                      </>
-                    )}
-                  </p>
-                )}
-              </div>
+              <ResultViewer result={probe.result} error={probe.error} loading={probe.loading} />
             </TabsContent>
+
             <TabsContent value="mapper">
-              <div className="overflow-x-auto">
-                {result || externalData.mapper ? (
-                  <>
-                    <p className="text-blue-700 leading-relaxed text-sm my-2 p-3 bg-blue-100 rounded border border-blue-200">
-                      <strong>Note:</strong> The mapper is used to transform the response data into a format suitable
-                      for use in the select options. <br />
-                    </p>
-                    <table className="min-w-full">
-                      <thead>
-                        <tr>
-                          <th className="border text-sm text-gray-700 p-2">Property</th>
-                          <th className="border text-sm text-gray-700 p-2">Target source</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
-                              <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
-                                value="Source"
-                                placeholder="Source"
-                                readOnly
-                              />
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
-                                      <HelpCircleIcon size={15} />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
-                                      The key in the response object that contains the array of items you want to map.
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </td>
-                          <td className="border">
-                            <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
-                              value={externalData.mapper?.dataSource || ''}
-                              onChange={(e) =>
-                                setExternal({
-                                  ...externalData,
-                                  mapper: {
-                                    dataSource: e.target.value,
-                                    dataMapper: externalData.mapper?.dataMapper || ({} as FieldGroupItem)
-                                  }
-                                })
-                              }
-                              placeholder="e.g. 'data' or 'items' in response"
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
-                              <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
-                                value="ID"
-                                placeholder="ID"
-                                readOnly
-                              />
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
-                                      <HelpCircleIcon size={15} />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
-                                      The unique identifier for each item in the array.
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </td>
-                          <td className="border">
-                            <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
-                              value={externalData.mapper?.dataMapper?.id || ''}
-                              onChange={(e) =>
-                                setExternal({
-                                  ...externalData,
-                                  mapper: {
-                                    dataSource: externalData.mapper?.dataSource || '',
-                                    dataMapper: {
-                                      ...externalData.mapper?.dataMapper,
-                                      id: e.target.value
-                                    } as FieldGroupItem
-                                  }
-                                })
-                              }
-                              placeholder="e.g. 'id' or 'key' in response"
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
-                              <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
-                                value="Label"
-                                placeholder="Label"
-                                readOnly
-                              />
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
-                                      <HelpCircleIcon size={15} />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
-                                      The text that will be displayed in the option list.
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </td>
-                          <td className="border">
-                            <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
-                              value={externalData.mapper?.dataMapper?.label || ''}
-                              onChange={(e) =>
-                                setExternal({
-                                  ...externalData,
-                                  mapper: {
-                                    dataSource: externalData.mapper?.dataSource || '',
-                                    dataMapper: {
-                                      ...externalData.mapper?.dataMapper,
-                                      label: e.target.value
-                                    } as FieldGroupItem
-                                  }
-                                })
-                              }
-                              placeholder="e.g. 'name' or 'title' in response"
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
-                              <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
-                                value="Value"
-                                placeholder="Value"
-                                readOnly
-                              />
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
-                                      <HelpCircleIcon size={15} />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
-                                      The value that will be submitted when the option is selected.
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </td>
-                          <td className="border">
-                            <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
-                              value={externalData.mapper?.dataMapper?.value || ''}
-                              onChange={(e) =>
-                                setExternal({
-                                  ...externalData,
-                                  mapper: {
-                                    dataSource: externalData.mapper?.dataSource || '',
-                                    dataMapper: {
-                                      ...externalData.mapper?.dataMapper,
-                                      value: e.target.value
-                                    } as FieldGroupItem
-                                  }
-                                })
-                              }
-                              placeholder="e.g. 'value' or 'id' in response"
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="border">
-                            <div className="flex items-center gap-2 pr-2">
-                              <Input
-                                className="rounded-none shadow-none border-none focus-visible:ring-0"
-                                value="Description (optional)"
-                                placeholder="Description (optional)"
-                                readOnly
-                              />
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-gray-600">
-                                      <HelpCircleIcon size={15} />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-64 mr-2" side="top">
-                                    <p className="form-description text-gray-700 leading-relaxed">
-                                      An optional field that can be used to provide additional information about the
-                                      option.
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </td>
-                          <td className="border">
-                            <Input
-                              className="rounded-none shadow-none border-none focus-visible:ring-0"
-                              value={externalData.mapper?.dataMapper?.description || ''}
-                              onChange={(e) =>
-                                setExternal({
-                                  ...externalData,
-                                  mapper: {
-                                    dataSource: externalData.mapper?.dataSource || '',
-                                    dataMapper: {
-                                      ...externalData.mapper?.dataMapper,
-                                      description: e.target.value
-                                    } as FieldGroupItem
-                                  }
-                                })
-                              }
-                              placeholder="e.g. 'description' or 'info' in response"
-                            />
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </>
-                ) : (
-                  <p className="bg-gray-50 border p-5 rounded text-gray-500 text-center text-sm">No mapping yet.</p>
-                )}
-              </div>
+              <MapperTable
+                readValue={(key) => readMapperField(source, key)}
+                onChange={handleMapperChange}
+                hasSomethingToMap={Boolean(probe.result || source.mapper)}
+              />
             </TabsContent>
           </Tabs>
         </div>
+
         <DialogFooter className="mt-5">
-          <Button
-            onClick={() => {
-              setTab('mapper'); // Reset to headers tab after saving
-              setError(null);
-              setResult(null);
-              setOpen(false);
-              onChange(externalData);
-            }}
-            disabled={loading || externalData.url === '' || !isValidUrl(externalData.url) || !result}>
+          <Button onClick={handleSave} disabled={!canSave}>
             Save
           </Button>
         </DialogFooter>

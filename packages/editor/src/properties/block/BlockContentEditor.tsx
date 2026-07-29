@@ -24,7 +24,6 @@ export const BlockContentEditor = ({ field, onChange }: BlockContentEditorProps)
         value={typeof field.content === 'string' ? field.content : ''}
         onChange={(value) => onChange({ content: value })}
         readOnly={editor.options?.propertiesSettings === 'readonly'}
-        placeholder="Enter your HTML content here..."
         description="You can use HTML tags and inline styles. Content will be rendered as-is in the form."
         height="120px"
         expandedHeight="400px"

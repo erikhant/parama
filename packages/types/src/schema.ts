@@ -270,23 +270,15 @@ export interface TextField extends BaseField, DataCustomization {
   placeholder?: string;
   rows?: number;
   appearance?: {
+    /** Decoration rendered inside the control, before the value. */
     prefix?: {
       type: 'text' | 'icon';
       content: string;
     };
+    /** Decoration rendered inside the control, after the value. */
     suffix?: {
       type: 'text' | 'icon';
       content: string;
-    };
-    addOnStart?: {
-      type: 'button' | 'select';
-      label: string;
-      options?: FieldGroupItem[];
-    };
-    addOnEnd?: {
-      type: 'button' | 'select';
-      label: string;
-      options?: FieldGroupItem[];
     };
   };
 }

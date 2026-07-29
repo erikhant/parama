@@ -1,31 +1,50 @@
-import type {
-  Condition,
-  Events,
-  FieldConditions,
-  FieldGroupItem,
-  FormField,
-  ValidationRule
-} from '@parama-dev/form-builder-types';
-import _, { debounce } from 'lodash';
-import { FormBuilderState } from '../store';
+import type { Condition, Events, FieldConditions, FormField, ValidationRule } from '@parama-dev/form-builder-types';
+import { logger } from '../logger';
+import type { FormBuilderState, GetState, SetState } from '../state/types';
 import {
   interceptExpressionTemplate,
   interpolate,
-  resolveInterpolatableValue,
-  resolveExpressionVariables
+  resolveExpressionVariables,
+  resolveInterpolatableValue
 } from '../utils';
 import { DependencyGraph } from './graph';
 
 interface WorkflowEngineOptions {
-  getState: () => FormBuilderState;
-  setState: (updater: (state: FormBuilderState) => FormBuilderState) => void;
-  debounceWait?: number;
+  getState: GetState;
+  setState: SetState;
 }
 
+/** Matches `{{token}}` placeholders. */
+const PLACEHOLDER_PATTERN = /\{\{(.*?)\}\}/g;
+
+/**
+ * Collects the field references inside any `{{...}}` placeholders of `source`.
+ * `{{$variable}}` placeholders are host-supplied values, not fields, so they are
+ * skipped.
+ */
+function extractFieldReferences(source: string): string[] {
+  const refs = new Set<string>();
+
+  for (const match of source.matchAll(PLACEHOLDER_PATTERN)) {
+    const token = match[1].trim();
+    if (token.length > 0 && !token.startsWith('$')) refs.add(token);
+  }
+
+  return Array.from(refs);
+}
+
+/**
+ * Propagates field changes through the form.
+ *
+ * Owns the dependency graph and the derived condition state (visible /
+ * read-only / disabled). It reads and writes the store through the accessors it
+ * is constructed with rather than importing it, so it stays independently
+ * testable and free of an import cycle with the store.
+ */
 export class WorkflowEngine {
   public graph: DependencyGraph;
-  private getState: () => FormBuilderState;
-  private setState: (updater: (state: FormBuilderState) => FormBuilderState) => void;
+  private getState: GetState;
+  private setState: SetState;
 
   constructor(options: WorkflowEngineOptions) {
     this.graph = new DependencyGraph();
@@ -34,150 +53,103 @@ export class WorkflowEngine {
   }
 
   /**
-   * Registers a field and its dependencies
-   * @param field Form field to register
+   * (Re)registers every dependency a field declares — through conditions,
+   * cross-field validations, and events — replacing any previous edges.
+   *
+   * @param field - Field whose dependencies should be indexed
    */
   public registerDependencies(field: FormField): void {
-    // Clear existing dependencies first
     this.graph.removeField(field.id);
 
-    // Register condition dependencies
     if (field.conditions) {
-      const conditionDeps = this.extractConditionDependencies(field.conditions);
-
-      conditionDeps.forEach((fieldName) => {
-        // Find field by name and get its ID
-        const state = this.getState();
-        const dependencyField = state.actions.getField(fieldName);
-        if (dependencyField) {
-          this.graph.addDependency(dependencyField.id, field.id);
-        } else {
-          // Also try to find by ID in case the expression uses ID instead of name
-          const fieldById = state.schema.fields.find((f) => f.id === fieldName);
-          if (fieldById) {
-            this.graph.addDependency(fieldById.id, field.id);
-          }
-        }
-      });
+      this.linkDependencies(extractFieldReferences(JSON.stringify(field.conditions)), field.id);
     }
 
-    // Register validation dependencies
     if ('validations' in field && field.validations) {
-      const validationDeps = this.extractValidationDependencies(field.validations);
-
-      validationDeps.forEach((fieldName) => {
-        // Find field by name and get its ID
-        const state = this.getState();
-        const dependencyField = state.actions.getField(fieldName);
-        if (dependencyField) {
-          this.graph.addDependency(dependencyField.id, field.id);
-        } else {
-          // Also try to find by ID in case the expression uses ID instead of name
-          const fieldById = state.schema.fields.find((f) => f.id === fieldName);
-          if (fieldById) {
-            this.graph.addDependency(fieldById.id, field.id);
-          }
-        }
-      });
+      this.linkDependencies(this.extractValidationDependencies(field.validations), field.id);
     }
 
-    // Register event dependencies
     if ('events' in field && field.events) {
-      const eventDeps = this.extractEventDependencies(field.events);
-
-      eventDeps.forEach((fieldDependentId) => {
-        this.graph.addDependency(fieldDependentId, field.id);
+      // Event targets are already field ids, so they need no name resolution.
+      field.events.forEach((event) => {
+        if (event.target) this.graph.addDependency(event.target, field.id);
       });
     }
   }
 
   /**
-   * Processes changes to a field and updates dependents
-   * @param fieldId Field ID that changed
+   * Adds a graph edge from each reference to `dependentId`.
+   * References may be field names or ids; both are resolved.
    */
-  async processFieldChange(fieldId: string) {
-    // 1. Get current state
+  private linkDependencies(references: string[], dependentId: string): void {
+    const state = this.getState();
+
+    references.forEach((reference) => {
+      const source =
+        state.actions.getField(reference) ?? state.schema.fields.find((field) => field.id === reference);
+
+      if (source) this.graph.addDependency(source.id, dependentId);
+    });
+  }
+
+  /**
+   * Cascades a value change: dependants re-evaluate their conditions and
+   * validations first, then the field itself validates, and only a valid field
+   * fires its events.
+   *
+   * @param fieldId - Field whose value just changed
+   */
+  async processFieldChange(fieldId: string): Promise<void> {
     const state = this.getState();
     const field = state.actions.getField(fieldId);
     if (!field) return;
 
-    // 2. Evaluate conditions FIRST
-    const dependents = this.graph.getDependents(fieldId);
+    // 1. Refresh everything that depends on this field.
+    this.graph.getDependents(fieldId).forEach((dependentId) => {
+      const dependent = state.actions.getField(dependentId);
+      if (!dependent) return;
 
-    dependents.forEach((depId) => {
-      const depField = state.actions.getField(depId);
-      if (depField?.conditions) {
-        this.evaluateDependentConditions(depField);
-      }
-
-      if (depField && 'validations' in depField && depField.validations) {
-        state.actions.validateField(depId, 'change');
-      }
+      if (dependent.conditions) this.evaluateDependentConditions(dependent);
+      if ('validations' in dependent && dependent.validations) state.actions.validateField(dependentId, 'change');
     });
 
-    // 3. Run validations SECOND
-    if ('validations' in field && field.validations && field.validations.length > 0) {
-      const isValid = await state.actions.validateField(fieldId, 'change');
+    // 2. Validate the field itself, and 3. fire its events if it holds up.
+    const hasValidations = 'validations' in field && Boolean(field.validations?.length);
+    const hasEvents = 'events' in field && Boolean(field.events?.length);
+    if (!hasEvents) return;
 
-      // 4a. Execute onValueChange actions LAST
-      if (isValid && 'events' in field && field.events && field.events.length > 0) {
-        this.executeEvents(field.events);
-      }
+    if (!hasValidations) {
+      this.executeEvents(field.events!);
+      return;
     }
 
-    // 4b. Execute onValueChange actions LAST
-    else if ('events' in field && field.events && field.events.length > 0) {
-      this.executeEvents(field.events);
+    if (await state.actions.validateField(fieldId, 'change')) {
+      this.executeEvents(field.events!);
     }
   }
 
-  private executeEvents(events: Events[]) {
-    const formData = this.getState().formData;
+  /**
+   * Runs a field's declared events against their target fields.
+   * Events naming an unknown target are skipped.
+   */
+  private executeEvents(events: Events[]): void {
     const state = this.getState();
 
     for (const event of events) {
-      const targetField = state.actions.getField(event.target);
-      if (!targetField) {
-        continue;
-      }
+      const target = state.actions.getField(event.target);
+      if (!target) continue;
+
       switch (event.type) {
         case 'fetch':
-          // Trigger dynamic options refresh by updating a refresh timestamp
-          // This will cause the useEffect in FormField to re-run
-          if (
-            (targetField.type === 'select' ||
-              targetField.type === 'multiselect' ||
-              targetField.type === 'autocomplete') &&
-            'external' in targetField &&
-            targetField.external
-          ) {
-            this.getState().actions.updateField(targetField.id, {
-              external: {
-                ...targetField.external,
-                _refreshTimestamp: Date.now() // Use current timestamp to trigger refresh
-              }
-            } as any);
-          } else {
-            console.log(
-              '[WORKFLOW ENGINE] Field does not qualify for fetch event:',
-              targetField.type,
-              'external' in targetField ? !!(targetField as any).external : false
-            );
-          }
+          this.triggerOptionsRefresh(target);
           break;
 
         case 'reset':
-          this.getState().actions.updateFieldValue(
-            targetField.id,
-            ('defaultValue' in targetField ? targetField.defaultValue : '') || ''
-          );
+          state.actions.updateFieldValue(target.id, ('defaultValue' in target ? target.defaultValue : '') || '');
           break;
 
         case 'setValue':
-          const resolvedValue = resolveInterpolatableValue(event.params?.value, state.variables);
-          const interceptedExpression = interceptExpressionTemplate(resolvedValue, this.getState());
-          const value = interpolate(interceptedExpression, formData);
-          this.getState().actions.updateFieldValue(targetField.id, JSON.parse(value));
+          this.applySetValue(target.id, event);
           break;
 
         default:
@@ -187,172 +159,115 @@ export class WorkflowEngine {
   }
 
   /**
-   * Refreshes dynamic options for a field
-   * @param field Form field to refresh
+   * Signals a select-like field to reload its remote options by bumping a
+   * timestamp its subscribers watch.
    */
-  public async refreshDynamicOptions(field: FormField): Promise<void> {
-    return;
+  private triggerOptionsRefresh(target: FormField): void {
+    const isSelectLike =
+      target.type === 'select' || target.type === 'multiselect' || target.type === 'autocomplete';
+
+    if (!isSelectLike || !('external' in target) || !target.external) {
+      logger.debug('Field does not qualify for fetch event:', target.type);
+      return;
+    }
+
+    this.getState().actions.updateField(target.id, {
+      external: { ...target.external, _refreshTimestamp: Date.now() }
+    } as Partial<FormField>);
   }
 
-  /**
-   * Evaluates all pending conditions
-   */
-  public evaluateConditions(): void {
+  /** Resolves a `setValue` event's template and writes it to the target field. */
+  private applySetValue(targetId: string, event: Events): void {
     const state = this.getState();
-    const fields = state.schema.fields;
+    const resolved = resolveInterpolatableValue(event.params?.value, state.variables);
+    const template = interceptExpressionTemplate(resolved, state.actions.getField);
+    const serialized = interpolate(template, state.formData);
 
-    fields.forEach((field) => {
-      this.evaluateDependentConditions(field);
-    });
+    try {
+      state.actions.updateFieldValue(targetId, JSON.parse(serialized));
+    } catch {
+      logger.warn(`setValue produced a non-JSON payload for field "${targetId}":`, serialized);
+    }
+  }
+
+  /** Re-evaluates conditions for every field in the schema. */
+  public evaluateConditions(): void {
+    this.getState().schema.fields.forEach((field) => this.evaluateDependentConditions(field));
   }
 
   /**
-   * Evaluates and updates the visibility, read-only, and disabled states of a form field based on its conditions.
+   * Evaluates a field's `hidden` / `readOnly` / `disabled` conditions and folds
+   * the result into the derived state sets.
    *
-   * This method processes the conditional logic for a given field and updates the engine state to reflect
-   * the field's current status. It evaluates hidden, readOnly, and disabled conditions against
-   * the current form data and updates the corresponding field sets in the state.
-   *
-   * @param field - The form field whose dependent conditions need to be evaluated
-   * @returns void
    * @remarks
-   * - Fields are visible by default unless explicitly hidden by conditions
-   * - The hidden condition controls field visibility - if true, the field is removed from visible fields
-   * - Read-only and disabled conditions are only evaluated if they exist on the field
-   * - State updates are performed immutably using the setState method
-   *
+   * Fields are visible unless explicitly hidden. A hidden field is also dropped
+   * from the read-only and disabled sets, so those flags cannot linger while it
+   * is off-screen.
    */
   public evaluateDependentConditions(field: FormField): void {
-    this.setState((s) => {
-      const newVisibleFields = new Set(s.visibleFields);
-      const newReadOnlyFields = new Set(s.readOnlyFields);
-      const newDisabledFields = new Set(s.disabledFields);
+    this.setState((state: FormBuilderState) => {
+      const visibleFields = new Set(state.visibleFields);
+      const readOnlyFields = new Set(state.readOnlyFields);
+      const disabledFields = new Set(state.disabledFields);
 
-      // Evaluate conditions
-      const shouldBeHidden = field.conditions?.hidden
-        ? this.evaluateCondition(field.conditions.hidden, s.formData)
-        : false;
+      const check = (condition: Condition | undefined) =>
+        condition ? this.evaluateCondition(condition, state.formData) : false;
 
-      const shouldBeReadOnly = field.conditions?.readOnly
-        ? this.evaluateCondition(field.conditions.readOnly, s.formData)
-        : false;
-
-      const shouldBeDisabled = field.conditions?.disabled
-        ? this.evaluateCondition(field.conditions.disabled, s.formData)
-        : false;
-
-      // Handle field visibility based on hidden condition
-      // Fields are visible by default unless explicitly hidden
-      if (shouldBeHidden) {
-        newVisibleFields.delete(field.id);
-        // When field is hidden, also remove it from read-only and disabled states
-        newReadOnlyFields.delete(field.id);
-        newDisabledFields.delete(field.id);
+      if (check(field.conditions?.hidden)) {
+        visibleFields.delete(field.id);
+        readOnlyFields.delete(field.id);
+        disabledFields.delete(field.id);
       } else {
-        // Field is visible, add it to visible fields
-        newVisibleFields.add(field.id);
-
-        // Handle read-only and disabled states for visible fields
-        if (shouldBeReadOnly) {
-          newReadOnlyFields.add(field.id);
-        } else {
-          newReadOnlyFields.delete(field.id);
-        }
-
-        if (shouldBeDisabled) {
-          newDisabledFields.add(field.id);
-        } else {
-          newDisabledFields.delete(field.id);
-        }
+        visibleFields.add(field.id);
+        toggle(readOnlyFields, field.id, check(field.conditions?.readOnly));
+        toggle(disabledFields, field.id, check(field.conditions?.disabled));
       }
 
-      return {
-        ...s,
-        visibleFields: newVisibleFields,
-        readOnlyFields: newReadOnlyFields,
-        disabledFields: newDisabledFields
-      };
+      return { ...state, visibleFields, readOnlyFields, disabledFields };
     });
   }
 
-  /**
-   * Removes a field from the workflow engine and its dependencies.
-   *
-   * @param fieldId - The unique identifier of the field to be removed
-   * @returns void
-   */
+  /** Drops a field and its graph edges. */
   public removeField(fieldId: string): void {
     this.graph.removeField(fieldId);
   }
 
+  /**
+   * Evaluates a single condition expression against current form data.
+   *
+   * Variables resolve first (quoted for JavaScript), then field names become
+   * ids, then ids become values. An expression that throws falls back to the
+   * condition's `fallback`, or `false`.
+   */
   private evaluateCondition(condition: Condition | undefined, formData: Record<string, any>): boolean {
-    console.log('Evaluating condition:', condition);
-
     if (!condition?.expression) return true;
 
     const state = this.getState();
+    const withVariables = resolveExpressionVariables(condition.expression, state.variables);
+    const withFieldIds = interceptExpressionTemplate(withVariables, state.actions.getField);
 
-    // First resolve any variables in the expression (with proper quoting for JavaScript)
-    const resolvedExpression = resolveExpressionVariables(condition.expression, state.variables);
-    console.log('resolved variables:', resolvedExpression);
-    // Intercept the expression to replace field names with IDs
-    const interceptExpression = interceptExpressionTemplate(resolvedExpression, state);
-    console.log('Intercepted expression:', interceptExpression);
     try {
-      // Replace formData references with actual values
-      const expr = interpolate(interceptExpression, formData);
-      console.log('Condition expression:', expr);
-      // Create safe evaluation
-      const result = new Function(`return ${expr}`)();
-      return result;
+      const expression = interpolate(withFieldIds, formData);
+      logger.debug('Evaluating condition:', condition.expression, '→', expression);
+      return Boolean(new Function(`return ${expression}`)());
     } catch (error) {
+      logger.debug('Condition evaluation failed:', condition.expression, error);
       return condition.fallback ?? false;
     }
   }
 
-  private extractConditionDependencies(conditions: FieldConditions): string[] {
-    const deps = new Set<string>();
-    const conditionStr = JSON.stringify(conditions);
-    const matches = conditionStr.matchAll(/\{\{(.*?)\}\}/g);
-
-    for (const match of matches) {
-      const trimmedKey = match[1].trim();
-      // Skip variable patterns ({{$variableName}})
-      if (!trimmedKey.startsWith('$')) {
-        deps.add(trimmedKey);
-      }
-    }
-
-    return Array.from(deps).filter((dep) => dep.length > 0);
-  }
-
-  private extractEventDependencies(event: Events[]): string[] {
-    const deps = new Set<string>();
-    event.forEach((e) => {
-      if (e.target) {
-        deps.add(e.target);
-      }
-    });
-
-    return Array.from(deps);
-  }
-
+  /** Collects the fields referenced by cross-field validation rules. */
   private extractValidationDependencies(rules: ValidationRule[]): string[] {
-    const deps = new Set<string>();
-
-    rules.forEach((rule) => {
-      if (rule.type === 'cross-field' && rule.expression) {
-        const matches = rule.expression.matchAll(/\{\{(.*?)\}\}/g);
-        for (const match of matches) {
-          const trimmedKey = match[1].trim();
-          // Skip variable patterns ({{$variableName}})
-          if (!trimmedKey.startsWith('$')) {
-            deps.add(trimmedKey);
-          }
-        }
-      }
-    });
-
-    return Array.from(deps);
+    return rules
+      .filter((rule) => rule.type === 'cross-field' && rule.expression)
+      .flatMap((rule) => extractFieldReferences(rule.expression!));
   }
 }
+
+/** Adds or removes `value` from `set` based on `shouldContain`. */
+function toggle(set: Set<string>, value: string, shouldContain: boolean): void {
+  if (shouldContain) set.add(value);
+  else set.delete(value);
+}
+
+export type { FieldConditions };

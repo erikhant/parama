@@ -1,477 +1,51 @@
-import {
-  closestCorners,
-  DndContext,
-  DragEndEvent,
-  DragMoveEvent,
-  DragStartEvent,
-  KeyboardSensor,
-  PointerSensor,
-  rectIntersection,
-  useSensor,
-  useSensors
-} from '@dnd-kit/core';
-import type {
-  BlockField,
-  ButtonField,
-  CheckboxField,
-  FieldGroupItem,
-  FormEditorProps,
-  FormField as FormFieldType,
-  PresetTypeDef
-} from '@parama-dev/form-builder-types';
+import { DndContext } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { setupWorkflowDebugger, useFormBuilder } from '@parama-dev/form-builder-core';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFormBuilder } from '@parama-dev/form-builder-core';
+import type { FormEditorProps } from '@parama-dev/form-builder-types';
+import { cn } from '@parama-ui/react';
+import { useEffect } from 'react';
+import { Toaster } from 'sonner';
 import { FieldOverlay, FormCanvas } from '../canvas';
 import { EditorPanel } from '../properties/EditorPanel';
 import { useEditor } from '../store/useEditor';
 import { ToolboxItemOverlay, ToolboxPanel } from '../toolbox';
+import { verticalGridCollision } from './dnd/collision';
+import { useCanvasDnd } from './dnd/useCanvasDnd';
 import { DragPreview } from './DragPreview';
 import { Toolbar } from './Toolbar';
-import { Toaster, toast } from 'sonner';
-import { cn } from '@parama-ui/react';
 
-// Custom collision detection prioritizing vertical proximity to improve sorting
-const verticalGridCollision = (args: any) => {
-  // Prefer intersections if available (more precise)
-  const intersections = rectIntersection(args);
-  if (intersections.length > 0) return intersections;
-
-  const { droppableContainers, pointerCoordinates } = args;
-  if (!pointerCoordinates) {
-    return closestCorners(args);
-  }
-
-  const ranked = droppableContainers
-    .map((container: any) => {
-      const rect = container.rect.current?.translated || container.rect.current;
-      if (!rect) return null;
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const dx = Math.abs(pointerCoordinates.x - centerX);
-      const dy = Math.abs(pointerCoordinates.y - centerY);
-      // Strongly weight vertical distance, lightly weight horizontal to allow swapping within a row
-      const score = dy + dx * 0.2;
-      return { id: container.id, score };
-    })
-    .filter(Boolean)
-    .sort((a: any, b: any) => a.score - b.score)
-    .map((entry: any) => ({ id: entry.id }));
-
-  return ranked;
-};
-
-const defineDefaultValue = (type: string) => {
-  const newField = {
-    id: `field-${Date.now()}`,
-    name: type === 'file' ? 'file' : `name_${type}`,
-    type: type,
-    label: type === 'hidden' ? 'Hidden input' : 'Text label',
-    width: 12
-  };
-
-  switch (type) {
-    case 'checkbox':
-    case 'radio':
-      const checkbox: FieldGroupItem[] = [
-        {
-          id: `field-${Date.now() + 1}`,
-          label: 'Item 1',
-          value: 'item-1'
-        },
-        {
-          id: `field-${Date.now() + 2}`,
-          label: 'Item 2',
-          value: 'item-2'
-        },
-        {
-          id: `field-${Date.now() + 3}`,
-          label: 'Item 3',
-          value: 'item-3'
-        }
-      ];
-      return {
-        ...(newField as CheckboxField),
-        items: checkbox,
-        transformer: ''
-      };
-    case 'date':
-      return {
-        ...newField,
-        transformer: '',
-        mode: 'single',
-        options: {
-          dateFormat: 'dd/MM/yyyy'
-        }
-      } as FormFieldType;
-    case 'file':
-      return {
-        ...newField,
-        options: {
-          multiple: false,
-          maxFiles: 5,
-          maxSize: 5 * 1024 * 1024, // 5MB
-          accept: {
-            'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp', '.svg', '.bmp', '.tiff', '.tif'],
-            'application/pdf': ['.pdf'],
-            'text/plain': ['.txt']
-          },
-          instantUpload: false,
-          bulkUpload: false,
-          server: ''
-        }
-      } as unknown as FormFieldType;
-    case 'button':
-    case 'submit':
-    case 'reset':
-      return {
-        id: `field-${Date.now()}`,
-        label: 'Submit',
-        type: type as ButtonField['type'],
-        width: 2,
-        widthMobile: 4,
-        action: 'submit',
-        appearance: {
-          color: 'primary',
-          variant: 'fill',
-          size: 'default'
-        }
-      } as ButtonField;
-    case 'block':
-      return {
-        id: `field-${Date.now()}`,
-        type: 'block',
-        width: 12,
-        height: 3,
-        content:
-          '<div style="padding: 20px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px;"><h3>Custom HTML Block</h3><p>Edit this content in the properties panel to add your custom HTML.</p></div>'
-      } as BlockField;
-    case 'spacer':
-      return {
-        id: `field-${Date.now()}`,
-        type: 'spacer',
-        width: 12,
-        height: 2,
-        content: ''
-      } as BlockField;
-    case 'select':
-    case 'autocomplete':
-    case 'multiselect':
-      const autocompleteOptions: FieldGroupItem[] = [
-        {
-          id: `option-${Date.now() + 1}`,
-          label: 'Option 1',
-          value: 'option-1'
-        },
-        {
-          id: `option-${Date.now() + 2}`,
-          label: 'Option 2',
-          value: 'option-2'
-        },
-        {
-          id: `option-${Date.now() + 3}`,
-          label: 'Option 3',
-          value: 'option-3'
-        }
-      ];
-      return {
-        ...newField,
-        transformer: '',
-        placeholder: 'Search options...',
-        shouldFilter: true,
-        options: autocompleteOptions
-      } as FormFieldType;
-    default:
-      return { ...newField, transformer: '' } as FormFieldType;
-  }
-};
-
+/**
+ * The form editor: toolbox, canvas and properties panel inside one drag context.
+ *
+ * Layout and wiring only. The drag interaction lives in {@link useCanvasDnd},
+ * the drop-target ranking in {@link verticalGridCollision}, and the shape of a
+ * newly dropped field in `fieldFactory` — this component previously carried all
+ * three inline, which put ~450 lines between the toolbar and the panel it
+ * renders.
+ */
 export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSaveSchema'] }) => {
-  const { actions, schema } = useFormBuilder();
-  const { editor, canvas, toolbox } = useEditor();
-  const [activeId, setActiveId] = useState<string | null>(null);
-  
-  // Use ref to track last insertion index to prevent unnecessary updates
-  const lastInsertionIndexRef = useRef<number | null>(null);
-  
-  // Throttled insertion index setter to reduce re-renders
-  const setInsertionIndexThrottled = useCallback((index: number | null) => {
-    if (lastInsertionIndexRef.current !== index) {
-      lastInsertionIndexRef.current = index;
-      editor.setInsertionIndex(index);
-    }
-  }, [editor]);
+  const changeMode = useFormBuilder((state) => state.actions.changeMode);
+  const { editor } = useEditor();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5, // Slightly easier to initiate drag
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates
-    })
-  );
+  const { sensors, activeId, handleDragStart, handleDragMove, handleDragEnd } = useCanvasDnd();
 
-  // Auto-scroll when dragging near edges of the scroll container
-  const autoScrollIfNeeded = useCallback((clientY: number) => {
-    const container = document.getElementById('canvas-scroll');
-    if (!container) return;
-    const rect = container.getBoundingClientRect();
-    const threshold = 60;
-    const scrollSpeed = 18;
-
-    if (clientY < rect.top + threshold) {
-      container.scrollTop -= scrollSpeed;
-    } else if (clientY > rect.bottom - threshold) {
-      container.scrollTop += scrollSpeed;
-    }
-  }, []);
-
+  // The store defaults to render mode; mounting the editor switches it, which
+  // is what makes conditions stop hiding fields the author is editing.
   useEffect(() => {
-    actions.changeMode('editor');
-    if (process.env.NODE_ENV !== 'development') return;
-
-    // Enable all debug features (kept disabled by default to avoid perf hit)
-    // const cleanupDebugger = setupWorkflowDebugger();
-
-    return () => {
-      // Cleanup debugger on unmount
-      // cleanupDebugger?.();
-    };
-  }, []);
-
-  const handleDragStart = ({ active }: DragStartEvent) => {
-    setActiveId(active.id as string);
-    // Track drag source to control indicator visibility
-    if (active.data?.current?.fromToolbox) {
-      editor.setDragSource('toolbox');
-    } else if (active.data?.current?.fromCanvas) {
-      editor.setDragSource('canvas');
-    } else {
-      editor.setDragSource(null);
-    }
-    if (schema.fields.length === 0) {
-      editor.setInsertionIndex(0);
-    }
-  };
-
-  const handleDragMove = useCallback((event: DragMoveEvent) => {
-    const { active, over } = event;
-
-    if (!active) return;
-
-    // Smooth auto-scroll near edges
-    const pointerY = active.rect.current.translated?.top ?? active.rect.current.initial?.top ?? 0;
-    autoScrollIfNeeded(pointerY);
-    
-    // Only compute insertion index for toolbox drags
-    if (active.data.current?.fromToolbox) {
-      // If dragging over empty canvas (no items or below the last row), set insertion index to end
-      if (!over) {
-        setInsertionIndexThrottled(schema.fields.length);
-        return;
-      }
-
-      // If hovering the synthetic end indicator, force insertion at end
-      if (over?.data?.current?.indicator) {
-        setInsertionIndexThrottled(schema.fields.length);
-        return;
-      }
-
-      // Determine insertion position in a grid (horizontal + vertical) while hovering a field
-      if (over.data.current?.fromCanvas) {
-        const overIndex = schema.fields.findIndex((f) => f.id === over.id);
-        const overElement = document.querySelector(`[data-id="${over.id}"]`) as HTMLElement | null;
-        if (!overElement) return;
-
-        const rect = overElement.getBoundingClientRect();
-        const translated = active.rect.current.translated;
-        const initial = active.rect.current.initial;
-
-        let newIndex: number;
-
-        // Fallback to vertical if translated not available
-        if (!translated) {
-          const midpointY = rect.top + rect.height / 2;
-          const pointerTop = initial?.top ?? 0;
-          const shouldInsertAfter = pointerTop > midpointY;
-          newIndex = shouldInsertAfter ? overIndex + 1 : overIndex;
-        } else {
-          const pointerX = translated.left + (active.rect.current.initial?.width ?? 0) / 2;
-          const pointerY = translated.top + (active.rect.current.initial?.height ?? 0) / 2;
-          const midpointX = rect.left + rect.width / 2;
-          const midpointY = rect.top + rect.height / 2;
-
-          // If pointer is within the same row vertically, use horizontal decision; otherwise vertical
-          // Increase vertical tolerance slightly to avoid jitter when hovering along row boundaries
-          const verticalTolerance = Math.min(12, rect.height * 0.15);
-          const isSameRow = pointerY > rect.top - verticalTolerance && pointerY < rect.bottom + verticalTolerance;
-          const shouldInsertAfter = isSameRow ? pointerX > midpointX : pointerY > midpointY;
-          newIndex = shouldInsertAfter ? overIndex + 1 : overIndex;
-        }
-
-        setInsertionIndexThrottled(newIndex);
-      }
-    }
-  }, [schema.fields, setInsertionIndexThrottled, autoScrollIfNeeded]);
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    setActiveId(null);
-    const insertionIndex = canvas.currentInsertionIndex;
-    
-    // Reset refs and state
-    lastInsertionIndexRef.current = null;
-    editor.setInsertionIndex(null);
-    editor.setDragSource(null);
-
-    // If dropping from toolbox and we have a computed insertion index but not hovering over a specific item,
-    // allow inserting at the computed index (e.g., at the end of the list)
-    if (!over) {
-      // Drop outside any item; use computed insertion index if available
-      if (insertionIndex !== null) {
-        if (active.data.current?.fromToolbox) {
-          // Handle preset drop when not hovering over a specific item
-          if (active.data.current.type === 'preset') {
-            const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
-            if (preset && preset.fields?.length) {
-              const existingIds = new Set(schema.fields.map((f) => f.id));
-              const uniqueFields = preset.fields.filter((f) => !existingIds.has(f.id));
-              if (uniqueFields.length === 0) {
-                toast.warning('Preset fields already exist in the canvas');
-                return;
-              }
-              uniqueFields.forEach((field, index) => {
-                actions.insertField(insertionIndex + index, field);
-              });
-              actions.selectField(uniqueFields[0].id);
-            }
-          } else {
-            const newField = defineDefaultValue(active.data.current.type as string);
-            actions.insertField(insertionIndex, newField as FormFieldType);
-            actions.selectField(newField.id as string);
-          }
-        } else if (active.data.current?.fromCanvas) {
-          const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
-          const target = Math.min(schema.fields.length - 1, insertionIndex);
-          const newFields = arrayMove(actions.getFields(), oldIndex, target);
-          actions.updateFields(newFields);
-          actions.selectField(active.id as string);
-        }
-      }
-      return;
-    }
-    if (active.data.current?.fromToolbox && over.data.current?.fromToolbox) return;
-
-    // Handle toolbox -> canvas drop
-    if (active.data.current?.fromToolbox) {
-      // If hovering the end indicator, insert at computed index or at end
-      if (over.data.current?.indicator) {
-        const targetIndex = insertionIndex !== null ? insertionIndex : schema.fields.length;
-        // Handle preset correctly when dropping on the indicator
-        if (active.data.current.type === 'preset') {
-          const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
-          if (preset && preset.fields?.length) {
-            const existingIds = new Set(schema.fields.map((f) => f.id));
-            const uniqueFields = preset.fields.filter((f) => !existingIds.has(f.id));
-            if (uniqueFields.length === 0) {
-              toast.warning('Preset fields already exist in the canvas');
-              return;
-            }
-            uniqueFields.forEach((field, index) => {
-              actions.insertField(targetIndex + index, field);
-            });
-            actions.selectField(uniqueFields[0].id);
-          }
-        } else {
-          const newField = defineDefaultValue(active.data.current.type as string);
-          actions.insertField(targetIndex, newField as FormFieldType);
-          actions.selectField(newField.id as string);
-        }
-        return;
-      }
-      // Handle preset drop - expand all fields from preset
-      if (active.data.current.type === 'preset') {
-        const preset = toolbox.presets.find((p) => p.id === active.id) as PresetTypeDef;
-        if (preset && preset.fields) {
-          const existingIds = new Set(schema.fields.map((f) => f.id));
-          const fieldsToAdd = preset.fields.filter((f) => !existingIds.has(f.id));
-
-          if (fieldsToAdd.length === 0) {
-            toast.warning('Preset fields already exist in the canvas');
-            return;
-          }
-
-          // Insert all preset fields
-          if (over.data.current?.fromCanvas) {
-            const targetIndex =
-              insertionIndex !== null ? insertionIndex : schema.fields.findIndex((f) => f.id === over.id);
-            fieldsToAdd.forEach((field, index) => {
-              actions.insertField(targetIndex + index, field);
-            });
-          } else {
-            // Add all fields to end if over empty canvas
-            fieldsToAdd.forEach((field) => {
-              actions.addField(field);
-            });
-          }
-
-          // Select the first actually inserted field
-          actions.selectField(fieldsToAdd[0].id);
-        }
-      } else {
-        // Handle regular field drop
-        const newField = defineDefaultValue(active.data.current.type as string);
-
-        // Insert at position if over existing field
-        if (over.data.current?.fromCanvas || insertionIndex !== null) {
-          // Use the insertion index calculated during drag move
-          const targetIndex =
-            insertionIndex !== null ? insertionIndex : schema.fields.findIndex((f) => f.id === over.id);
-          actions.insertField(targetIndex, newField as FormFieldType);
-        } else {
-          // Add to end if over empty canvas
-          actions.addField(newField as FormFieldType);
-        }
-
-        actions.selectField(newField.id as string);
-      }
-    }
-    // Handle reordering existing fields
-    else if (active.data.current?.fromCanvas) {
-      // For sorting, rely on default DnD swap behavior without indicators
-      if (over.data.current?.indicator) {
-        const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
-        const targetIndex = Math.min(schema.fields.length - 1, insertionIndex ?? schema.fields.length - 1);
-        const newFields = arrayMove(actions.getFields(), oldIndex, targetIndex);
-        actions.updateFields(newFields);
-        actions.selectField(active.id as string);
-        return;
-      }
-
-      if (over.data.current?.fromCanvas) {
-        const oldIndex = schema.fields.findIndex((f) => f.id === active.id);
-        const newIndex = schema.fields.findIndex((f) => f.id === over.id);
-        const newFields = arrayMove(actions.getFields(), oldIndex, newIndex);
-        actions.updateFields(newFields);
-        actions.selectField(active.id as string);
-      }
-    }
-  };
+    changeMode('editor');
+  }, [changeMode]);
 
   return (
     <>
       <Toolbar onSaveSchema={onSaveSchema} />
+
       <DndContext
         sensors={sensors}
         collisionDetection={verticalGridCollision}
         modifiers={[restrictToWindowEdges]}
         onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragMove={handleDragMove}>
+        onDragMove={handleDragMove}
+        onDragEnd={handleDragEnd}>
         <div
           className={cn(
             'editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden',
@@ -481,17 +55,21 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
           <FormCanvas />
           <EditorPanel />
         </div>
+
+        {/* Both overlays render; each resolves to null unless the dragged id is
+            one of its own, so the same id can come from either source. */}
         {activeId && (
-          <DragPreview>
-            <FieldOverlay id={activeId} />
-          </DragPreview>
-        )}
-        {activeId && (
-          <DragPreview>
-            <ToolboxItemOverlay id={activeId} />
-          </DragPreview>
+          <>
+            <DragPreview>
+              <FieldOverlay id={activeId} />
+            </DragPreview>
+            <DragPreview>
+              <ToolboxItemOverlay id={activeId} />
+            </DragPreview>
+          </>
         )}
       </DndContext>
+
       <Toaster position="top-center" richColors />
     </>
   );
