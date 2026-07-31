@@ -85,7 +85,7 @@ export const ChoiceProperties = memo<ChoicePropertiesProps>(({ field, onChange, 
         {isEditable &&
           (items.length > 0 ? (
             <Button
-              className="text-xs text-gray-500"
+              className="text-xs text-content-subtle"
               variant="ghost"
               size="xs"
               color="secondary"
@@ -102,7 +102,7 @@ export const ChoiceProperties = memo<ChoicePropertiesProps>(({ field, onChange, 
       <Accordion type="multiple" defaultValue={items.map((item) => String(item.id))} className="w-auto !-mt-0">
         {items.map((item, index) => (
           <AccordionItem key={String(item.id)} value={String(item.id)}>
-            <AccordionTrigger className="text-gray-700 text-sm text-start whitespace-nowrap max-w-[15rem] py-3">
+            <AccordionTrigger className="text-content text-sm text-start whitespace-nowrap max-w-[15rem] py-3">
               <span className="pr-1.5 text-ellipsis line-clamp-1">{item.label || 'Item name'}</span>
             </AccordionTrigger>
             <AccordionContent className="pt-1">
@@ -110,7 +110,7 @@ export const ChoiceProperties = memo<ChoicePropertiesProps>(({ field, onChange, 
 
               {isEditable && (
                 <div className="flex items-center ml-4 gap-2 mt-2">
-                  <Label htmlFor={item.id as string} className="text-xs text-gray-600">
+                  <Label htmlFor={item.id as string} className="text-xs text-content-muted">
                     Set as default
                   </Label>
                   <Switch

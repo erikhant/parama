@@ -1,5 +1,23 @@
+/*
+ * Design tokens.
+ *
+ * Two families live here and they behave differently:
+ *
+ *   Brand ramps (primary, success, danger, ...) carry -light / -default / -dark
+ *   suffixes that are *shades*, not modes. They exist in both themes, and the
+ *   component stylesheets compose them deliberately via `dark:` variants. They
+ *   are NOT redefined in the dark scope below.
+ *
+ *   Semantic chrome tokens (surface, stroke, content) describe application
+ *   surfaces and DO flip between themes. Anything building panels, borders or
+ *   body text should use these so it themes for free.
+ *
+ * Values are RGB triplets so Tailwind can apply its own alpha channel.
+ */
 :root {
   --radius: 0.375rem;
+
+  /* Brand ramps — identical in both themes. */
   --background-light: 248, 249, 251;
   --background-default: 248, 249, 251;
   --background-dark: 51, 53, 56;
@@ -29,4 +47,98 @@
   --warning-light: 230, 181, 101;
   --warning-default: 253, 217, 152;
   --warning-dark: 214, 128, 96;
+
+  /* Semantic chrome — light theme. */
+  --surface: 255, 255, 255; /* base panels, toolbar, canvas */
+  --surface-raised: 255, 255, 255; /* inputs and floating menus (see note) */
+  --surface-muted: 249, 250, 251; /* side panels, inset areas */
+  --surface-sunken: 243, 244, 246; /* wells, hovered rows */
+  --stroke-subtle: 243, 244, 246;
+  --stroke: 229, 231, 235;
+  --stroke-strong: 209, 213, 219;
+  --content: 55, 65, 81; /* headings, emphasised text */
+  --content-muted: 75, 85, 99; /* body text */
+  --content-subtle: 107, 114, 128; /* labels, secondary text */
+  --content-faint: 156, 163, 175; /* placeholders, decorative icons */
+
+  /* Editor canvas backdrop, used by the void and fade gradients. */
+  --canvas-void-a: 255, 255, 255;
+  --canvas-void-b: 245, 245, 245;
+}
+
+/*
+ * Baseline text colour for themed subtrees.
+ *
+ * Several components (dialogs, sheets) never set a colour of their own and
+ * relied on inheriting from `<body>`. That silently produced black text on a
+ * dark surface — most visibly inside portalled content, which inherits from
+ * the body rather than from the provider's subtree. Anchoring the default on
+ * both themed roots fixes it in one place; any component setting its own
+ * colour still wins.
+ */
+[data-parama-theme],
+[data-parama-portal] {
+  color: rgb(var(--content));
+}
+
+/*
+ * Dark theme.
+ *
+ * Applied by ThemeProvider to its own wrapper and to its body-level portal
+ * host, never to <html> — the form builder is embedded, and claiming the
+ * document element would fight the host application's own theme.
+ *
+ * The scale is "Mist": a single hue held constant while only lightness moves,
+ * derived from oklch(L 0.008 223.9). Sampling one hue at several lightnesses
+ * keeps every surface, border and label visibly related, which an ad-hoc mix of
+ * slate, zinc and neutral could not.
+ *
+ *   base   oklch(0.218 …)   surface
+ *   +0.05  oklch(0.268 …)   raised / muted / subtle strokes
+ *   +0.10  oklch(0.318 …)   sunken / strokes
+ *   +0.15  oklch(0.372 …)   strong strokes
+ */
+.dark {
+  --surface: 22, 27, 29; /* oklch(0.218 0.008 223.9) */
+  /*
+   * Raised sits *lighter* than the base here, the inverse of light mode where
+   * both are white and elevation is carried by shadow alone. A dark surface
+   * cannot cast a visible shadow, so depth has to come from lightness.
+   */
+  --surface-raised: 34, 39, 41; /* oklch(0.268) */
+  --surface-muted: 34, 39, 41;
+  --surface-sunken: 46, 51, 53; /* oklch(0.318) */
+  --stroke-subtle: 34, 39, 41;
+  --stroke: 46, 51, 53;
+  --stroke-strong: 60, 65, 67; /* oklch(0.372) */
+  --content: 226, 233, 236; /* oklch(0.93) */
+  --content-muted: 204, 210, 213; /* oklch(0.86) */
+  --content-subtle: 159, 166, 168; /* oklch(0.72) */
+  --content-faint: 123, 129, 132; /* oklch(0.60) */
+
+  /*
+   * `secondary` is a neutral ramp, not a brand colour — it means "subtle
+   * surface or border", and every one of its light-theme values is near-white
+   * (255 / 254 / 238). Leaving it out of this scope made it the single cause of
+   * the blown-out inactive tab underline, ghost-button hover and outline-button
+   * border, all of which resolved to near-white against a dark panel.
+   */
+  --secondary-light: 46, 51, 53; /* hover fills */
+  --secondary-default: 34, 39, 41; /* subtle fills */
+  --secondary-dark: 60, 65, 67; /* borders and dividers */
+
+  /* Interaction states, likewise inverted. */
+  --hover-light: 34, 39, 41;
+  --active-light: 46, 51, 53;
+
+  /* Semantic aliases the existing components already consume. */
+  --background-default: 22, 27, 29;
+  --background-light: 34, 39, 41;
+  --background-dark: 46, 51, 53;
+  --foreground-default: 226, 233, 236;
+  --sidebar-default: 34, 39, 41;
+  --sidebar-light: 46, 51, 53;
+
+  --canvas-void-a: 22, 27, 29;
+  --canvas-void-b: 34, 39, 41;
 }

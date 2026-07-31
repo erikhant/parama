@@ -22,14 +22,21 @@
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
   }
 
-  /* Background void state */
+  /* Background void state. Token-driven so the hatch follows the theme. */
   .bg-void {
-    background: repeating-linear-gradient(45deg, #ffffff, #ffffff 10px, #f5f5f5 10px, #f5f5f5 20px);
+    background: repeating-linear-gradient(
+      45deg,
+      rgb(var(--canvas-void-a)),
+      rgb(var(--canvas-void-a)) 10px,
+      rgb(var(--canvas-void-b)) 10px,
+      rgb(var(--canvas-void-b)) 20px
+    );
   }
 
+  /* Fades the canvas out behind a sticky submit button. */
   .bg-fade {
     @apply h-24 sticky bottom-0;
-    background: linear-gradient(to top, white 50%, transparent);
+    background: linear-gradient(to top, rgb(var(--surface)) 50%, transparent);
   }
 
   .sticky-btn {
@@ -37,11 +44,11 @@
   }
 
   .canvas-sm {
-    @apply max-w-sm mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
+    @apply max-w-sm mx-auto border-2 border-stroke border-dashed rounded-lg bg-surface-muted/30;
   }
 
   .canvas-md {
-    @apply max-w-2xl mx-auto border-2 border-gray-200 border-dashed rounded-lg bg-gray-50/30;
+    @apply max-w-2xl mx-auto border-2 border-stroke border-dashed rounded-lg bg-surface-muted/30;
   }
 
   .canvas-xl {

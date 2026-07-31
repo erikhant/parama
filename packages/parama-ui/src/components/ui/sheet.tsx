@@ -4,6 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { usePortalContainer } from '../../theme/useTheme';
 
 const Sheet = SheetPrimitive.Root;
 
@@ -42,18 +43,25 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = 'right', className, children, ...props }, ref) => (
-  <SheetPortal>
-    <SheetOverlay />
-    <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
-      {children}
-      <SheetPrimitive.Close className="sheet-close">
-        <X className="sheet-close-icon" />
-        <span className="sr">Close</span>
-      </SheetPrimitive.Close>
-    </SheetPrimitive.Content>
-  </SheetPortal>
-));
+>(({ side = 'right', className, children, ...props }, ref) => {
+  // Portals escape the provider's subtree, so they render into the themed host
+  // instead. Without this the sheet lands on `document.body`, outside any
+  // `.dark` ancestor, and paints light over a dark editor.
+  const container = usePortalContainer();
+
+  return (
+    <SheetPortal container={container ?? undefined}>
+      <SheetOverlay />
+      <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
+        {children}
+        <SheetPrimitive.Close className="sheet-close">
+          <X className="sheet-close-icon" />
+          <span className="sr">Close</span>
+        </SheetPrimitive.Close>
+      </SheetPrimitive.Content>
+    </SheetPortal>
+  );
+});
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

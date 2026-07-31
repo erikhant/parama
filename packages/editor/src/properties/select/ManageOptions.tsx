@@ -32,7 +32,7 @@ export const ManageOptions = ({ onChange, values, children }: ManageOptionsProps
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-gray-700">Options</DialogTitle>
+          <DialogTitle className="text-content">Options</DialogTitle>
           <DialogDescription>Manage your options here</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 mt-2 mb-5">

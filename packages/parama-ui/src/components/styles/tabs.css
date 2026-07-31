@@ -1,21 +1,30 @@
 @layer components {
   .tab-list {
-    @apply grid w-full grid-cols-2 h-10 items-center justify-center rounded-md bg-slate-100 p-1 text-slate-500 dark:bg-slate-800 dark:text-slate-400;
+    @apply grid w-full grid-cols-2 h-10 items-center justify-center rounded-md bg-surface-sunken p-1 text-content-subtle;
   }
 
   .tab-list.tab-bordered {
-    @apply bg-white p-0;
+    @apply bg-surface-raised p-0;
   }
 
   .tab-trigger {
-    @apply inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-slate-950 data-[state=active]:shadow-sm dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 dark:data-[state=active]:bg-slate-950 dark:data-[state=active]:text-slate-50;
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-surface transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-surface-raised data-[state=active]:text-content data-[state=active]:shadow-sm;
   }
 
+  /*
+   * The bordered variant marks the active tab with a primary underline and
+   * primary text, so its fill only has to recede. `surface` sits a step below
+   * the list's `surface-raised`, giving a dim well under the underline rather
+   * than a lifted panel — matching `surface-raised` made the active tab the
+   * brightest thing in the sidebar.
+   *
+   * In light mode both tokens are white, so this variant is unchanged there.
+   */
   .tab-bordered .tab-trigger {
-    @apply border-b-2 border-secondary-dark data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none dark:data-[state=active]:bg-slate-950 dark:data-[state=active]:text-primary/70 dark:data-[state=active]:border-primary/90 h-full rounded-none;
+    @apply border-b-2 border-stroke data-[state=active]:bg-surface data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none dark:data-[state=active]:text-primary/70 dark:data-[state=active]:border-primary/90 h-full rounded-none;
   }
 
   .tab-content {
-    @apply mt-2 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light/60 focus-visible:ring-offset-2 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300;
+    @apply mt-2 ring-offset-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light/60 focus-visible:ring-offset-2;
   }
 }

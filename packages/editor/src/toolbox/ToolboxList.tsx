@@ -44,18 +44,18 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
 
       <div className="space-y-2 p-4 pt-2">
         {filteredItems.length === 0 ? (
-          <div className="text-center text-gray-500 text-sm py-8">
+          <div className="text-center text-content-subtle text-sm py-8">
             {items.length === 0 ? (
               <div>
-                {!section && <div className="text-gray-400 mb-2">No items available</div>}
-                <div className="text-xs text-gray-400">
+                {!section && <div className="text-content-faint mb-2">No items available</div>}
+                <div className="text-xs text-content-faint">
                   {section === 'presets' ? 'No presets have been loaded' : !section ? 'No fields are defined' : null}
                 </div>
               </div>
             ) : (
               <div>
-                <div className="text-gray-400 mb-2">No items match your search</div>
-                <div className="text-xs text-gray-400">Try adjusting your search terms</div>
+                <div className="text-content-faint mb-2">No items match your search</div>
+                <div className="text-xs text-content-faint">Try adjusting your search terms</div>
               </div>
             )}
           </div>
@@ -71,7 +71,7 @@ export const ToolboxList: React.FC<ToolboxListProps> = ({
                 id={item.id}
                 name={item.label}
                 description={item.description}
-                className="flex-row items-center justify-start gap-3 h-auto p-2.5 bg-white rounded-lg border-gray-100 shadow-none hover:border-blue-300 hover:shadow-none leading-none transition-colors"
+                className="flex-row items-center justify-start gap-3 h-auto p-2.5 bg-surface rounded-lg border-stroke-subtle shadow-none hover:border-primary/60 hover:shadow-none leading-none transition-colors"
                 thumbnail={<ToolboxItemThumbnail item={item} size={24} className="shrink-0" />}
               />
             </SortableItem>

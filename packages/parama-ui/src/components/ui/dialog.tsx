@@ -5,6 +5,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { usePortalContainer } from '../../theme/useTheme';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -25,18 +26,25 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const DialogContent = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content ref={ref} className={cn('dialog-content', className)} {...props}>
-      {children}
-      <DialogPrimitive.Close className="dialog-close">
-        <X className="dialog-close-icon" />
-        <span className="sr">Close</span>
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-));
+>(({ className, children, ...props }, ref) => {
+  // Portals escape the provider's subtree, so they render into the themed host
+  // it maintains on the body. `null` means no provider, which Radix reads as
+  // "use document.body" — the correct untethered default.
+  const container = usePortalContainer();
+
+  return (
+    <DialogPortal container={container ?? undefined}>
+      <DialogOverlay />
+      <DialogPrimitive.Content ref={ref} className={cn('dialog-content', className)} {...props}>
+        {children}
+        <DialogPrimitive.Close className="dialog-close">
+          <X className="dialog-close-icon" />
+          <span className="sr">Close</span>
+        </DialogPrimitive.Close>
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  );
+});
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

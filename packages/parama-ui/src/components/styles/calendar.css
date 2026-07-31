@@ -1,6 +1,6 @@
 @layer components {
   .calendar-base {
-    @apply bg-secondary dark:bg-zinc-900 p-3 rounded-lg [--cell-size:theme(spacing.8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent;
+    @apply bg-secondary p-3 rounded-lg [--cell-size:theme(spacing.8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent;
   }
 
   .calendar-root {

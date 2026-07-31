@@ -216,7 +216,7 @@ export const DateProperties = memo<SectionProps<DateField>>(({ field, onChange }
             <Button
               variant="ghost"
               size="xs"
-              className="text-xs text-gray-600"
+              className="text-xs text-content-muted"
               color="secondary"
               onClick={handleResetRestricted}>
               Reset

@@ -80,7 +80,7 @@ export const OptionGroup = memo<OptionGroupProps>(({ field, group, groupIndex, o
   return (
     <Accordion key={group.id} type="multiple" defaultValue={[group.id]} className="!-mt-0">
       <AccordionItem value={group.id}>
-        <AccordionTrigger className="text-gray-700 text-sm py-2.5">
+        <AccordionTrigger className="text-content text-sm py-2.5">
           {group.label || 'Group name'}
           <div
             role="button"
@@ -100,7 +100,7 @@ export const OptionGroup = memo<OptionGroupProps>(({ field, group, groupIndex, o
               <FormItem
                 key={item.id}
                 orientation="horizontal"
-                className="space-x-0 items-center pl-3 border-l-4 border-gray-200">
+                className="space-x-0 items-center pl-3 border-l-4 border-stroke">
                 <div className="col-span-4 space-y-2">
                   <Input
                     type="text"
@@ -127,7 +127,7 @@ export const OptionGroup = memo<OptionGroupProps>(({ field, group, groupIndex, o
                 </div>
               </FormItem>
               <div className="flex items-center ml-4 gap-2 mt-2">
-                <Label htmlFor={item.id as string} className="text-xs text-gray-600">
+                <Label htmlFor={item.id as string} className="text-xs text-content-muted">
                   Set as default
                 </Label>
                 <Switch

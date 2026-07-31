@@ -9,7 +9,7 @@
   }
 
   .btn-secondary {
-    @apply bg-secondary text-foreground focus-visible:ring-gray-600 border border-gray-300 dark:bg-white hover:bg-secondary-dark dark:hover:bg-secondary-light/80 dark:focus-visible:ring-secondary-light;
+    @apply bg-secondary text-foreground focus-visible:ring-content-subtle border border-stroke-strong dark:bg-surface-raised hover:bg-secondary-dark dark:hover:bg-secondary-light/80 dark:focus-visible:ring-secondary-light;
   }
 
   .btn-success {
@@ -30,7 +30,7 @@
   }
 
   .btn-secondary-outline {
-    @apply bg-transparent text-foreground hover:bg-secondary-dark dark:border-secondary-dark dark:bg-transparent dark:text-gray-200 dark:hover:text-foreground-dark dark:hover:bg-secondary/10;
+    @apply bg-transparent text-foreground hover:bg-secondary-dark dark:border-secondary-dark dark:bg-transparent dark:text-content-muted dark:hover:text-foreground-dark dark:hover:bg-secondary/10;
   }
 
   .btn-success-outline {
@@ -47,7 +47,7 @@
 
   /* GHOST VARIANTS */
   .btn-primary-ghost {
-    @apply bg-transparent text-primary border-none hover:text-gray-50 hover:bg-primary dark:text-primary dark:bg-transparent dark:hover:text-gray-50 dark:hover:bg-primary/50;
+    @apply bg-transparent text-primary border-none hover:text-gray-50 hover:bg-primary dark:text-primary dark:bg-transparent dark:hover:text-content dark:hover:bg-primary/50;
   }
 
   .btn-secondary-ghost {

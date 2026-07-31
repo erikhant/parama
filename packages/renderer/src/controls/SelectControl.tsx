@@ -63,10 +63,10 @@ export const SelectControl = memo<ControlProps<SelectField>>(
         <SelectTrigger className="w-full">
           {loading ? (
             <span className="flex items-center animate-spin">
-              <Loader2Icon className="size-4 text-gray-400" />
+              <Loader2Icon className="size-4 text-content-faint" />
             </span>
           ) : (
-            <SelectValue className="text-slate-400" placeholder={field.placeholder || 'Select an option'}>
+            <SelectValue className="text-content-faint" placeholder={field.placeholder || 'Select an option'}>
               {selectedLabel}
             </SelectValue>
           )}

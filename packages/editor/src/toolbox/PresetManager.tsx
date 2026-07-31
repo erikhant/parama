@@ -96,19 +96,19 @@ export const PresetManager: React.FC<PresetManagerProps> = ({
       {/* Search Bar */}
       <div className="relative p-4 pb-0">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-content-faint w-4 h-4 pointer-events-none" />
           <Input
             type="text"
             value={searchTerm}
             onChange={handleSearchChange}
             placeholder="Search presets..."
-            className="pl-9 pr-9 h-9 text-sm bg-white border border-gray-200 rounded-md focus:border-blue-300 focus:ring-1 focus:ring-blue-300 transition-colors"
+            className="pl-9 pr-9 h-9 text-sm bg-surface border border-stroke rounded-md focus:border-primary focus:ring-1 focus:ring-primary/40 transition-colors"
             autoComplete="off"
           />
           {searchTerm && (
             <button
               onClick={handleClearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-0.5 rounded-sm hover:bg-gray-100"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-content-faint hover:text-content-muted transition-colors p-0.5 rounded-sm hover:bg-surface-sunken"
               aria-label="Clear search"
               type="button">
               <X className="w-3 h-3" />
@@ -130,7 +130,7 @@ export const PresetManager: React.FC<PresetManagerProps> = ({
                   ${
                     selectedCategory === category
                       ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                      : 'bg-gray-100 text-gray-700 border border-transparent hover:bg-gray-200'
+                      : 'bg-surface-sunken text-content border border-transparent hover:bg-surface-sunken'
                   }
                 `}>
                 <Tag className="w-3 h-3 mr-1" />
@@ -163,7 +163,7 @@ export const PresetManager: React.FC<PresetManagerProps> = ({
 
       {/* Statistics */}
       <div className="px-4">
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-content-subtle">
           {presets.length === 0
             ? 'No presets available'
             : `${presets.length} preset${presets.length === 1 ? '' : 's'} available`}

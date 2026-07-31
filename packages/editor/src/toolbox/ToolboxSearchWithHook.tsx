@@ -56,11 +56,11 @@ export const ToolboxSearchWithHook: React.FC<ToolboxSearchHookProps> = ({
             autoComplete="off"
           />
           <div className="toolbox-search-x">
-            {isSearching && <Loader2 className="w-3 h-3 text-gray-400 animate-spin" />}
+            {isSearching && <Loader2 className="w-3 h-3 text-content-faint animate-spin" />}
             {searchTerm && (
               <button
                 onClick={clearSearch}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-0.5 rounded-sm hover:bg-gray-100"
+                className="text-content-faint hover:text-content-muted transition-colors p-0.5 rounded-sm hover:bg-surface-sunken"
                 aria-label="Clear search"
                 type="button">
                 <X className="w-3 h-3" />
@@ -70,12 +70,12 @@ export const ToolboxSearchWithHook: React.FC<ToolboxSearchHookProps> = ({
         </FormGroup>
       </div>
       {searchTerm && (
-        <div className="text-xs text-gray-500 mt-1 px-1 flex items-center justify-between">
+        <div className="text-xs text-content-subtle mt-1 px-1 flex items-center justify-between">
           <span>
             {filteredItems.length} of {items.length} items found
           </span>
           <span>
-            Press <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Esc</kbd> to clear
+            Press <kbd className="px-1 py-0.5 bg-surface-sunken rounded text-xs">Esc</kbd> to clear
           </span>
         </div>
       )}

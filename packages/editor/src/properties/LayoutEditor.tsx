@@ -22,7 +22,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({ schema, onChange }) 
 
   return (
     <div className="">
-      <h3 className="font-semibold uppercase text-xs text-gray-400 border-b border-gray-200 p-4">Layout settings</h3>
+      <h3 className="font-semibold uppercase text-xs text-content-faint border-b border-stroke p-4">Layout settings</h3>
       <div className="space-y-3 p-4">
         {/* <FormItem>
           <Label>Grid size</Label>
@@ -68,7 +68,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({ schema, onChange }) 
         </FormItem>
         {/* <FormItem className="flex items-center space-y-0 space-x-2">
           <Checkbox id="show-grid-lines" />
-          <Label htmlFor="show-grid-lines" className="text-gray-700">
+          <Label htmlFor="show-grid-lines" className="text-content">
             Show grid lines
           </Label>
         </FormItem> */}

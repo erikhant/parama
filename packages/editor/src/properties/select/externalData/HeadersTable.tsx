@@ -16,15 +16,15 @@ export const HeadersTable = memo<HeadersTableProps>(({ rows, onUpdate, onRemove,
     <table className="min-w-full">
       <thead>
         <tr>
-          <th className="border text-sm text-gray-700 p-2">Key</th>
-          <th className="border text-sm text-gray-700 p-2">Value</th>
-          <th className="border text-sm text-gray-700 p-2"></th>
+          <th className="border border-stroke text-sm text-content p-2">Key</th>
+          <th className="border border-stroke text-sm text-content p-2">Value</th>
+          <th className="border border-stroke text-sm text-content p-2"></th>
         </tr>
       </thead>
       <tbody>
         {rows.map((row) => (
           <tr key={row.id}>
-            <td className="border">
+            <td className="border border-stroke">
               <Input
                 className="rounded-none shadow-none border-none focus-visible:ring-0"
                 value={row.key}
@@ -33,7 +33,7 @@ export const HeadersTable = memo<HeadersTableProps>(({ rows, onUpdate, onRemove,
                 onChange={(event) => onUpdate(row.id, 'key', event.target.value)}
               />
             </td>
-            <td className="border">
+            <td className="border border-stroke">
               <Input
                 className="rounded-none shadow-none border-none focus-visible:ring-0"
                 value={row.value}
@@ -42,11 +42,11 @@ export const HeadersTable = memo<HeadersTableProps>(({ rows, onUpdate, onRemove,
                 onChange={(event) => onUpdate(row.id, 'value', event.target.value)}
               />
             </td>
-            <td className="border text-center">
+            <td className="border border-stroke text-center">
               <Button
                 variant="ghost"
                 color="secondary"
-                className="text-gray-500"
+                className="text-content-subtle"
                 size="xs"
                 aria-label="Remove header"
                 onClick={() => onRemove(row.id)}>
@@ -59,7 +59,7 @@ export const HeadersTable = memo<HeadersTableProps>(({ rows, onUpdate, onRemove,
     </table>
 
     <div className="flex justify-end mt-2">
-      <Button variant="ghost" color="secondary" className="text-gray-700" size="xs" onClick={onAdd}>
+      <Button variant="ghost" color="secondary" className="text-content" size="xs" onClick={onAdd}>
         <PlusIcon size={16} />
         Add row
       </Button>

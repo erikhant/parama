@@ -3,6 +3,7 @@ import { Button } from '@parama-ui/react';
 import { MonitorIcon, SaveIcon, SmartphoneIcon, TabletIcon } from 'lucide-react';
 import { SchemaViewer } from './SchemaViewer';
 import { Preview } from './Preview';
+import { ThemeToggle } from './ThemeToggle';
 import { useEditor } from '../store/useEditor';
 import { FormEditorProps } from '@parama-dev/form-builder-types';
 import React from 'react';
@@ -19,7 +20,7 @@ export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSav
   };
 
   return (
-    <div className="w-full inline-flex justify-between items-center h-12 p-2 bg-white border-b border-gray-100">
+    <div className="w-full inline-flex justify-between items-center h-12 p-2 bg-surface border-b border-stroke-subtle">
       <div className="text-lg bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent font-semibold ml-3">
         {typeof editor.options?.brand === 'string' ? (
           editor.options.brand
@@ -57,7 +58,8 @@ export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSav
           </Button>
         </div>
       </div>
-      <div className="flex space-x-2">
+      <div className="flex items-center space-x-2">
+        <ThemeToggle />
         <Preview
           schema={schema}
           disabled={fieldLength === 0}

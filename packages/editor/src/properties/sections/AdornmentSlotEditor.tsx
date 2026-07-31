@@ -66,7 +66,7 @@ export const AdornmentSlotEditor = memo<AdornmentSlotEditorProps>(
               color="secondary"
               size="xs"
               disabled={isReadOnly}
-              className="text-xs text-gray-500"
+              className="text-xs text-content-subtle"
               onClick={handleRemove}>
               Remove
             </Button>

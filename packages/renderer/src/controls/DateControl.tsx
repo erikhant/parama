@@ -30,7 +30,7 @@ export const DateControl = memo<ControlProps<DateField>>(({ field, value, onChan
       startMonth: field.options?.restrictedMonths?.[0] ? new Date(field.options.restrictedMonths[0]) : undefined,
       endMonth: field.options?.restrictedMonths?.[1] ? new Date(field.options.restrictedMonths[1]) : undefined,
       captionLayout: field.options?.dropdownType as DatePickerProps['captionLayout'],
-      className: !validation.isValid ? 'border-red-500' : 'border-gray-300'
+      className: !validation.isValid ? 'border-red-500' : 'border-stroke-strong'
     }),
     [field.name, field.placeholder, field.options, isDisabled, disabledDates, validation.isValid]
   );

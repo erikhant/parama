@@ -12,11 +12,11 @@ export function OptionsSpinner() {
     <Select>
       <SelectTrigger className="w-full">
         <span className="flex items-center animate-spin">
-          <Loader2Icon className="size-4 text-gray-400" />
+          <Loader2Icon className="size-4 text-content-faint" />
         </span>
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="none" className="text-gray-300">
+        <SelectItem value="none" className="text-content-faint">
           Loading options...
         </SelectItem>
       </SelectContent>

@@ -164,3 +164,53 @@ describe('FormRenderer', () => {
     });
   });
 });
+
+describe('FormRenderer theming', () => {
+  beforeEach(() => {
+    resetFormBuilder();
+    window.localStorage.clear();
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn()
+    })) as unknown as typeof window.matchMedia;
+  });
+
+  it('defaults to light when no theme is given', () => {
+    const { container } = render(<FormRenderer schema={schemaWith([textField('f1', 'email')])} />);
+
+    expect(container.querySelector('.dark')).toBeNull();
+  });
+
+  it('applies the dark theme from the theme prop', () => {
+    const { container } = render(<FormRenderer schema={schemaWith([textField('f1', 'email')])} theme="dark" />);
+
+    expect(container.querySelector('.dark')).not.toBeNull();
+  });
+
+  // The wrapper must not become a layout box, or a host's flex rules would
+  // apply to it instead of to the form.
+  it('keeps the theme wrapper out of the layout', () => {
+    const { container } = render(<FormRenderer schema={schemaWith([textField('f1', 'email')])} theme="dark" />);
+
+    expect(container.firstElementChild).toHaveClass('contents');
+  });
+
+  it('still renders the form as the effective root', () => {
+    const { container } = render(<FormRenderer schema={schemaWith([textField('f1', 'email')])} theme="dark" />);
+
+    expect(container.querySelector('.contents > form')).not.toBeNull();
+  });
+
+  it('prefers a persisted theme over the prop', () => {
+    window.localStorage.setItem('theme', 'light');
+
+    const { container } = render(<FormRenderer schema={schemaWith([textField('f1', 'email')])} theme="dark" />);
+
+    expect(container.querySelector('.dark')).toBeNull();
+  });
+});

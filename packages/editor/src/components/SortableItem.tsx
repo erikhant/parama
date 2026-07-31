@@ -67,19 +67,19 @@ export const SortableItem: React.FC<SortableItemProps> = ({
         className={`sortable-item relative group ${isDragging ? 'dragging' : ''} ${!useHandle ? ' cursor-grab ' : ' '}${className}`}>
         <div
           className={cn(
-            'absolute top-1 right-1 z-10 flex items-center justify-end w-auto gap-1 transition-opacity duration-200 bg-gray-50/50',
+            'absolute top-1 right-1 z-10 flex items-center justify-end w-auto gap-1 transition-opacity duration-200 bg-surface-muted/50',
             !useHandle
               ? 'w-0 opacity-0'
-              : 'border-none ring-1 ring-gray-200 opacity-0 group-hover:opacity-100 shrink-0',
+              : 'border-none ring-1 ring-stroke opacity-0 group-hover:opacity-100 shrink-0',
             handleClassName
           )}>
           {useHandle && (
-            <button {...listeners} {...attributes} className="p-1 text-gray-500 cursor-grab">
+            <button {...listeners} {...attributes} className="p-1 text-content-subtle cursor-grab">
               <MoveIcon size={16} />
             </button>
           )}
           {removable && (
-            <button className="p-1 text-gray-500 cursor-pointer" onClick={onRemove ? () => onRemove(id) : undefined}>
+            <button className="p-1 text-content-subtle cursor-pointer" onClick={onRemove ? () => onRemove(id) : undefined}>
               <Trash2 size={16} />
             </button>
           )}

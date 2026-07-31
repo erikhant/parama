@@ -114,11 +114,32 @@ export type FormField =
   | ButtonField
   | BlockField;
 
+/**
+ * Colour scheme to render in.
+ *
+ * `system` follows the OS preference and keeps following it while mounted.
+ *
+ * @remarks
+ * Structurally identical to `ThemeMode` in `@parama-ui/react`. The two are
+ * declared separately because both packages are dependency-graph leaves — the
+ * design system does not know about form schemas, and this contract package
+ * does not depend on the design system. TypeScript treats them as assignable.
+ */
+export type ThemeMode = 'light' | 'dark' | 'system';
+
 export interface FormBuilderProps {
   schema: FormSchema;
   validators?: ValidatorRegistry;
   data?: Record<string, any>;
   variables?: VariableContext;
+  /**
+   * Initial colour scheme. Defaults to `system`.
+   *
+   * A theme the user previously chose (persisted under the `theme` key in
+   * localStorage) takes precedence over this value. When the renderer is
+   * nested inside an editor, the editor's theme wins and this is ignored.
+   */
+  theme?: ThemeMode;
   onSubmit?: (
     data: Record<string, any> | FormData,
     contentType: 'application/json' | 'multipart/form-data'
@@ -154,6 +175,21 @@ export interface FormEditorProps {
   schema?: FormSchema;
   options?: FormEditorOptions;
   variables?: VariableContext;
+  /**
+   * Initial colour scheme. Defaults to `system`.
+   *
+   * A theme the user previously chose through the toolbar toggle (persisted
+   * under the `theme` key in localStorage) takes precedence over this value,
+   * so passing a theme sets the default rather than forcing it.
+   */
+  theme?: ThemeMode;
+  /**
+   * Called when the user changes the theme from the toolbar.
+   *
+   * Not called for the initial value. Useful for mirroring the choice into a
+   * host application's own theme state.
+   */
+  onThemeChange?: (theme: ThemeMode) => void;
 }
 
 export interface FormTemplate {

@@ -28,8 +28,8 @@ export const BlockField = memo<{ field: BlockFieldType }>(({ field }) => {
     return (
       <div className={className} style={{ height: `${height * HEIGHT_UNIT_PX}px` }}>
         {mode === 'editor' && (
-          <div className="h-full bg-void border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-            <span className="text-gray-500 text-sm">Spacer ({height} units)</span>
+          <div className="h-full bg-void border-2 border-dashed border-stroke-strong rounded-lg flex items-center justify-center">
+            <span className="text-content-subtle text-sm">Spacer ({height} units)</span>
           </div>
         )}
       </div>

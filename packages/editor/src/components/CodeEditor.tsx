@@ -7,6 +7,7 @@ import { LanguageSwitch } from './codeEditor/LanguageSwitch';
 import { resolveInitialLanguage, type EditorSuggestion, type SupportedLanguage } from './codeEditor/languages';
 import { SuggestionChips } from './codeEditor/SuggestionChips';
 import { useMonacoCompletions } from './codeEditor/useMonacoCompletions';
+import { useMonacoTheme } from './codeEditor/useMonacoTheme';
 
 export type { EditorSuggestion, SupportedLanguage };
 
@@ -64,6 +65,7 @@ export const CodeEditor = ({
 
   const monacoEditorRef = useRef<any>(null);
   const { onEditorMount } = useMonacoCompletions(language, autocompleteSuggestions);
+  const monaco = useMonacoTheme();
 
   // Follow the value prop when the caller drives it, e.g. switching fields.
   useEffect(() => {
@@ -108,7 +110,8 @@ export const CodeEditor = ({
         <Editor
           height={height}
           language={language}
-          theme="light"
+          theme={monaco.theme}
+          beforeMount={monaco.beforeMount}
           value={editorValue}
           onChange={handleChange}
           onMount={handleMount}
@@ -145,7 +148,8 @@ export const CodeEditor = ({
               <Editor
                 height={expandedHeight}
                 language={language}
-                theme="light"
+                theme={monaco.theme}
+          beforeMount={monaco.beforeMount}
                 value={editorValue}
                 onChange={handleChange}
                 onMount={handleMount}

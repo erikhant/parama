@@ -53,7 +53,7 @@ export const OptionListEditor = memo<OptionListEditorProps>(
         <Accordion type="multiple" defaultValue={options.map((option) => String(option.id))} className="w-auto !-mt-0">
           {options.map((option, index) => (
             <AccordionItem key={String(option.id)} value={String(option.id)}>
-              <AccordionTrigger className="text-gray-700 text-sm py-2 text-start whitespace-nowrap max-w-[15rem]">
+              <AccordionTrigger className="text-content text-sm py-2 text-start whitespace-nowrap max-w-[15rem]">
                 <span className="pr-1.5 text-ellipsis line-clamp-1">{option.label || 'Option name'}</span>
               </AccordionTrigger>
               <AccordionContent className="pt-1">
@@ -61,7 +61,7 @@ export const OptionListEditor = memo<OptionListEditorProps>(
 
                 {isEditable && (
                   <div className="flex items-center ml-4 gap-2 mt-2">
-                    <Label htmlFor={option.id as string} className="text-xs text-gray-600">
+                    <Label htmlFor={option.id as string} className="text-xs text-content-muted">
                       Set as default
                     </Label>
                     <Switch

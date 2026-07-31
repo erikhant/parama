@@ -16,7 +16,7 @@
   }
 
   .autocomplete-body {
-    @apply shadow-lg animate-in fade-in-50 zoom-in-95 origin-top-left absolute top-0 z-10 w-full rounded-lg bg-white outline-none dark:bg-slate-900;
+    @apply shadow-lg animate-in fade-in-50 zoom-in-95 origin-top-left absolute top-0 z-10 w-full rounded-lg bg-surface-raised outline-none;
   }
 
   .autocomplete-body--open {

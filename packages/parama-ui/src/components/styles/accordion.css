@@ -1,6 +1,6 @@
 @layer components {
   .accordion-item {
-    @apply border-b;
+    @apply border-b border-stroke;
   }
 
   .accordion-header {

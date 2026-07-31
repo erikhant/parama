@@ -17,7 +17,7 @@ export const ToolboxPanel = () => {
   return (
     <div
       id="toolbox"
-      className="w-80 shrink-0 max-h-screen overflow-y-auto overflow-x-hidden bg-gray-50 border-r-2 border-gray-100/60">
+      className="w-80 shrink-0 max-h-screen overflow-y-auto overflow-x-hidden bg-surface-muted border-r-2 border-stroke-subtle/60">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
         <TabsList bordered className="rounded-none grid-cols-2 h-12 sticky top-0 z-10">
           <TabsTrigger className="h-full rounded-md" value="fields">

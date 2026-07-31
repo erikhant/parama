@@ -58,14 +58,14 @@ export const OptionSourceToolbar = memo<OptionSourceToolbarProps>(
                   {supportsGroups && <DropdownMenuItem onSelect={onAddGroup}>Group list</DropdownMenuItem>}
                   <DropdownMenuItem asChild>
                     <ExternalDataOptions external={external} onChange={onExternalChange}>
-                      <button className="dropdown-item w-full hover:bg-slate-100">API source</button>
+                      <button className="dropdown-item w-full hover:bg-surface-sunken">API source</button>
                     </ExternalDataOptions>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Button
-                className="text-xs text-gray-500"
+                className="text-xs text-content-subtle"
                 variant="ghost"
                 size="xs"
                 color="secondary"
@@ -77,14 +77,14 @@ export const OptionSourceToolbar = memo<OptionSourceToolbarProps>(
 
         {external?.url && (
           <div>
-            <Label className="text-xs text-gray-600">API Source</Label>
+            <Label className="text-xs text-content-muted">API Source</Label>
             <div className="flex items-center space-x-2">
               <Badge size="sm">
                 <p className="max-w-48 truncate">{external.url}</p>
               </Badge>
               {isEditable && (
                 <ExternalDataOptions external={external} onChange={onExternalChange}>
-                  <Button variant="ghost" size="xs" color="secondary" className="text-gray-600">
+                  <Button variant="ghost" size="xs" color="secondary" className="text-content-muted">
                     <span className="sr-only">Edit API source</span>
                     <PencilLineIcon size={15} />
                   </Button>

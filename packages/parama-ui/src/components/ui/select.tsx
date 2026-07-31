@@ -3,6 +3,7 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { usePortalContainer } from '../../theme/useTheme';
 
 const Select = SelectPrimitive.Root;
 
@@ -54,25 +55,31 @@ const SelectContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & {
     container?: Element | DocumentFragment | null | undefined;
   }
->(({ className, children, position = 'popper', container, ...props }, ref) => (
-  <SelectPrimitive.Portal container={container}>
-    <SelectPrimitive.Content
-      ref={ref}
-      className={cn('select-content', position === 'popper' && 'select-content-popper', className)}
-      position={position}
-      {...props}>
-      <SelectScrollUpButton />
-      <SelectPrimitive.Viewport
-        className={cn(
-          'select-content-viewport',
-          position === 'popper' && 'select-content-viewport-popper'
-        )}>
-        {children}
-      </SelectPrimitive.Viewport>
-      <SelectScrollDownButton />
-    </SelectPrimitive.Content>
-  </SelectPrimitive.Portal>
-));
+>(({ className, children, position = 'popper', container, ...props }, ref) => {
+  // An explicit container wins; otherwise use the theme provider's host so the
+  // menu is themed despite rendering outside the provider's subtree.
+  const themedContainer = usePortalContainer();
+
+  return (
+    <SelectPrimitive.Portal container={container ?? themedContainer ?? undefined}>
+      <SelectPrimitive.Content
+        ref={ref}
+        className={cn('select-content', position === 'popper' && 'select-content-popper', className)}
+        position={position}
+        {...props}>
+        <SelectScrollUpButton />
+        <SelectPrimitive.Viewport
+          className={cn(
+            'select-content-viewport',
+            position === 'popper' && 'select-content-viewport-popper'
+          )}>
+          {children}
+        </SelectPrimitive.Viewport>
+        <SelectScrollDownButton />
+      </SelectPrimitive.Content>
+    </SelectPrimitive.Portal>
+  );
+});
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 
 const SelectLabel = React.forwardRef<

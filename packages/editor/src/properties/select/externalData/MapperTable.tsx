@@ -14,7 +14,7 @@ interface MapperRowProps extends Omit<MapperFieldDef, 'key'> {
 /** One mapper row: a fixed property name, its help tooltip, and the path input. */
 const MapperRow = memo<MapperRowProps>(({ fieldKey, label, hint, placeholder, value, onChange }) => (
   <tr>
-    <td className="border">
+    <td className="border border-stroke">
       <div className="flex items-center gap-2 pr-2">
         <Input
           className="rounded-none shadow-none border-none focus-visible:ring-0"
@@ -25,18 +25,18 @@ const MapperRow = memo<MapperRowProps>(({ fieldKey, label, hint, placeholder, va
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-gray-600">
+              <span className="text-content-muted">
                 <HelpCircleIcon size={15} />
               </span>
             </TooltipTrigger>
             <TooltipContent className="max-w-64 mr-2" side="top">
-              <p className="form-description text-gray-700 leading-relaxed">{hint}</p>
+              <p className="form-description text-content leading-relaxed">{hint}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
     </td>
-    <td className="border">
+    <td className="border border-stroke">
       <Input
         className="rounded-none shadow-none border-none focus-visible:ring-0"
         value={value}
@@ -66,12 +66,12 @@ interface MapperTableProps {
  */
 export const MapperTable = memo<MapperTableProps>(({ readValue, onChange, hasSomethingToMap }) => {
   if (!hasSomethingToMap) {
-    return <p className="bg-gray-50 border p-5 rounded text-gray-500 text-center text-sm">No mapping yet.</p>;
+    return <p className="bg-surface-muted border border-stroke p-5 rounded text-content-subtle text-center text-sm">No mapping yet.</p>;
   }
 
   return (
     <div className="overflow-x-auto">
-      <p className="text-blue-700 leading-relaxed text-sm my-2 p-3 bg-blue-100 rounded border border-blue-200">
+      <p className="text-blue-700 dark:text-blue-200 leading-relaxed text-sm my-2 p-3 bg-blue-100 dark:bg-blue-400/10 rounded border border-blue-200 dark:border-blue-400/30">
         <strong>Note:</strong> The mapper is used to transform the response data into a format suitable for use in the
         select options. <br />
       </p>
@@ -79,8 +79,8 @@ export const MapperTable = memo<MapperTableProps>(({ readValue, onChange, hasSom
       <table className="min-w-full">
         <thead>
           <tr>
-            <th className="border text-sm text-gray-700 p-2">Property</th>
-            <th className="border text-sm text-gray-700 p-2">Target source</th>
+            <th className="border border-stroke text-sm text-content p-2">Property</th>
+            <th className="border border-stroke text-sm text-content p-2">Target source</th>
           </tr>
         </thead>
         <tbody>

@@ -63,7 +63,7 @@ export const PatternTemplateRow = memo<PatternTemplateRowProps>(({ rules, readFi
             color="secondary"
             variant="ghost"
             size="xs"
-            className="text-xs text-gray-500"
+            className="text-xs text-content-subtle"
             disabled={rules.isReadOnly}
             onClick={handleRemove}>
             Remove

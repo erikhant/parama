@@ -41,7 +41,7 @@ export const OptionItem = memo<OptionItemProps>(({ option, index, onUpdate, onDe
     <FormItem
       key={option.id || option.value}
       orientation="horizontal"
-      className="space-x-0 items-center pl-3 border-l-4 border-gray-200">
+      className="space-x-0 items-center pl-3 border-l-4 border-stroke">
       <div className="col-span-4 space-y-2">
         <Input
           type="text"

@@ -11,12 +11,14 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@parama-ui/react';
+import { useMonacoTheme } from './codeEditor/useMonacoTheme';
 
 interface SchemaViewerProps {
   schema: Record<string, any>;
 }
 
 export const SchemaViewer: React.FC<SchemaViewerProps> = ({ schema }) => {
+  const monaco = useMonacoTheme();
   const handleCopy = () => {
     toast.success('Copied to clipboard');
     navigator.clipboard.writeText(JSON.stringify(schema, null, 2));
@@ -48,8 +50,9 @@ export const SchemaViewer: React.FC<SchemaViewerProps> = ({ schema }) => {
         <div className="grid gap-4 py-4">
           <Editor
             height={600}
-            theme="light"
-            className="border border-gray-300"
+            theme={monaco.theme}
+          beforeMount={monaco.beforeMount}
+            className="border border-stroke-strong"
             language="json"
             value={JSON.stringify(schema, null, 2)}
             onMount={(editor) => {

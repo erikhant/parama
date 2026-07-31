@@ -20,7 +20,13 @@ export const FormCanvas = () => {
   };
 
   return (
-    <div id="canvas-scroll" className="grow flex-1 max-h-screen relative overflow-y-auto" onClick={() => actions.selectField(null)}>
+    // The canvas paints its own surface. It previously had no background and
+    // simply showed the host page through, which reads as white in light mode
+    // but leaves a light hole in the middle of a dark editor.
+    <div
+      id="canvas-scroll"
+      className="grow flex-1 max-h-screen relative overflow-y-auto bg-surface"
+      onClick={() => actions.selectField(null)}>
       {/* Viewport indicator */}
       {screenSize !== 'desktop' && (
         <div className="absolute top-2 right-2 z-10 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium capitalize">
@@ -42,7 +48,7 @@ export const FormCanvas = () => {
         </SortableList>
         {/* Empty state drop zone */}
         {schema.fields.length === 0 && (
-          <div className="absolute inset-0 text-gray-200/80 flex items-center justify-center text-4xl font-bold">
+          <div className="absolute inset-0 text-content-faint/80 flex items-center justify-center text-4xl font-bold">
             Drag field here
           </div>
         )}

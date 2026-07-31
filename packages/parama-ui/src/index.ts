@@ -28,3 +28,20 @@ export * from './components/ui/tooltip';
 export * from './components/ui/tabs';
 export * from './lib/utils';
 export type { DateRange } from 'react-day-picker';
+
+// Theming
+export { ThemeProvider } from './theme/ThemeProvider';
+export type { ThemeProviderProps } from './theme/ThemeProvider';
+export { useTheme, usePortalContainer } from './theme/useTheme';
+export { ThemeContext } from './theme/ThemeContext';
+export type { ThemeContextValue } from './theme/ThemeContext';
+export {
+  DEFAULT_THEME_MODE,
+  THEME_MODE_CYCLE,
+  THEME_STORAGE_KEY,
+  isThemeMode,
+  nextThemeMode,
+  resolveTheme
+} from './theme/theme';
+export type { ResolvedTheme, ThemeMode } from './theme/theme';
+export { readThemeMode, writeThemeMode } from './theme/themeStorage';

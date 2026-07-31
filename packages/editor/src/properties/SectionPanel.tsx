@@ -6,9 +6,9 @@ interface SectionProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function SectionPanel({ title, description, className, children }: SectionProps) {
   return (
-    <div className={cn('p-4 space-y-3.5 border-t border-gray-200', className)}>
-      <h6 className="font-semibold uppercase text-xs text-gray-400">{title}</h6>
-      {description && <p className="text-xs text-gray-500">{description}</p>}
+    <div className={cn('p-4 space-y-3.5 border-t border-stroke', className)}>
+      <h6 className="font-semibold uppercase text-xs text-content-faint">{title}</h6>
+      {description && <p className="text-xs text-content-subtle">{description}</p>}
       {children}
     </div>
   );

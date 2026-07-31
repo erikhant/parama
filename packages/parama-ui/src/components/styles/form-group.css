@@ -8,20 +8,20 @@
 
 .form-group:has(.form-group-addon-start ~ .form-control),
 .form-group:has(.form-control ~ .form-group-addon-end) {
-  @apply flex h-10 w-full shadow-sm rounded-lg border border-gray-300 bg-white dark:border-gray-400 dark:bg-transparent p-0 text-base ring-offset-transparent;
+  @apply flex h-10 w-full shadow-sm rounded-lg border border-stroke-strong bg-surface-raised dark:bg-transparent p-0 text-base ring-offset-transparent;
 }
 
 .form-group:has(.form-group-addon-start ~ .form-control:focus),
 .form-group:has(.form-control:focus ~ .form-group-addon-end) {
-  @apply outline-none border-primary/80 ring-2 ring-primary/40 md:text-sm dark:border-background-dark dark:text-foreground-dark dark:border-primary/60 dark:bg-transparent dark:ring-offset-transparent dark:file:text-slate-50 dark:placeholder:text-foreground-dark/50 dark:ring-primary-light/60;
+  @apply outline-none border-primary/80 ring-2 ring-primary/40 md:text-sm dark:text-foreground-dark dark:border-primary/60 dark:bg-transparent dark:ring-offset-transparent dark:file:text-slate-50 dark:placeholder:text-foreground-dark/50 dark:ring-primary-light/60;
 }
 
 .form-group-addon-start {
-  @apply inline-flex items-center pl-3 max-w-20 truncate after:content-[''] after:h-[75%] after:w-[1px] after:bg-neutral-300;
+  @apply inline-flex items-center pl-3 max-w-20 truncate after:content-[''] after:h-[75%] after:w-[1px] after:bg-stroke-strong;
 }
 
 .form-group-addon-end {
-  @apply inline-flex items-center pr-3 max-w-20 truncate before:content-[''] before:h-[75%] before:w-[1px] before:bg-neutral-300;
+  @apply inline-flex items-center pr-3 max-w-20 truncate before:content-[''] before:h-[75%] before:w-[1px] before:bg-stroke-strong;
 }
 
 .form-group-addon-start ~ .form-control,
@@ -43,11 +43,11 @@
 }
 
 .form-group-prefix:has(~ .form-group-addon-end) {
-  @apply border-0 border-r border-gray-300;
+  @apply border-0 border-r border-stroke-strong;
 }
 
 .form-group-addon-start ~ .form-group-suffix {
-  @apply border-0 border-l border-gray-300;
+  @apply border-0 border-l border-stroke-strong;
 }
 
 .form-group-addon-start:has(select),
@@ -57,15 +57,15 @@
 
 .form-group-addon-start select,
 .form-group-addon-end select {
-  @apply h-full rounded-lg border-0 bg-transparent py-0 px-3 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm;
+  @apply h-full rounded-lg border-0 bg-transparent py-0 px-3 text-content-subtle focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm;
 }
 
 .form-group-addon-start button {
-  @apply relative h-full focus-visible:outline-none focus-visible:border-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-inset -mr-px inline-flex items-center gap-x-1.5 rounded-l-lg px-3 py-[0.4rem] text-sm font-medium text-neutral-800;
+  @apply relative h-full focus-visible:outline-none focus-visible:border-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-inset -mr-px inline-flex items-center gap-x-1.5 rounded-l-lg px-3 py-[0.4rem] text-sm font-medium text-content;
 }
 
 .form-group-addon-end button {
-  @apply relative h-full focus-visible:outline-none focus-visible:border-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-inset -ml-px inline-flex items-center gap-x-1.5 rounded-r-lg px-3 py-[0.4rem] text-sm font-medium text-neutral-800;
+  @apply relative h-full focus-visible:outline-none focus-visible:border-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-inset -ml-px inline-flex items-center gap-x-1.5 rounded-r-lg px-3 py-[0.4rem] text-sm font-medium text-content;
 }
 
 .form-group-addon-start:has(button),
@@ -74,7 +74,7 @@
 }
 
 .form-group-prefix {
-  @apply inline-flex items-center rounded-l-lg border border-r-0 border-gray-300 dark:border-background-dark px-3 text-gray-500 sm:text-sm;
+  @apply inline-flex items-center rounded-l-lg border border-r-0 border-stroke-strong px-3 text-content-subtle sm:text-sm;
 }
 
 .form-group-prefix + .form-control {
@@ -82,5 +82,5 @@
 }
 
 .form-group-suffix {
-  @apply inline-flex items-center rounded-r-lg border border-l-0 border-gray-300 dark:border-background-dark px-3 text-gray-500 sm:text-sm;
+  @apply inline-flex items-center rounded-r-lg border border-l-0 border-stroke-strong px-3 text-content-subtle sm:text-sm;
 }

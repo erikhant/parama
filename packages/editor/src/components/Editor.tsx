@@ -48,7 +48,9 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
         onDragEnd={handleDragEnd}>
         <div
           className={cn(
-            'editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden',
+            // `bg-surface` backs the shell so any gap between the panels shows
+            // the themed surface rather than the host page.
+            'editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden bg-surface text-content',
             editor.options?.containerClassname
           )}>
           <ToolboxPanel />

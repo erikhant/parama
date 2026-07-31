@@ -138,7 +138,7 @@ export function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-muted">
       <FormEditor
         schema={initialSchema}
         loadPreset={initialPresets}

@@ -30,7 +30,7 @@ export const LanguageSwitch = memo<LanguageSwitchProps>(({ languages, current, d
 
         return (
           <div key={language} className="flex items-center gap-1">
-            {index > 0 && <Separator className="bg-gray-400 h-4 w-[1px]" orientation="vertical" />}
+            {index > 0 && <Separator className="bg-stroke-strong h-4 w-[1px]" orientation="vertical" />}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -46,7 +46,7 @@ export const LanguageSwitch = memo<LanguageSwitchProps>(({ languages, current, d
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p className="form-description text-gray-700 leading-relaxed">{LANGUAGE_LABELS[language]}</p>
+                  <p className="form-description text-content leading-relaxed">{LANGUAGE_LABELS[language]}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

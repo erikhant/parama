@@ -120,7 +120,7 @@ export const ExternalDataOptions = ({ children, external = EMPTY_SOURCE, onChang
 
       <DialogContent className="sm:!max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-gray-700">API source</DialogTitle>
+          <DialogTitle className="text-content">API source</DialogTitle>
           <DialogDescription>Manage API source settings</DialogDescription>
         </DialogHeader>
 
@@ -145,7 +145,7 @@ export const ExternalDataOptions = ({ children, external = EMPTY_SOURCE, onChang
           </div>
 
           <Tabs value={tab} onValueChange={(next) => setTab(next as TabKey)} className="w-full">
-            <TabsList className="grid w-full !grid-cols-3 bg-gray-100">
+            <TabsList className="grid w-full !grid-cols-3 bg-surface-sunken">
               <TabsTrigger value="headers">Headers</TabsTrigger>
               <TabsTrigger value="result">
                 Result

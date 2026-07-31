@@ -17,7 +17,7 @@ export const SuggestionChips = memo<SuggestionChipsProps>(({ suggestions, onInse
   if (suggestions.length === 0) return null;
 
   return (
-    <div className="text-sm text-gray-600">
+    <div className="text-sm text-content-muted">
       <p>
         <strong>Available Suggestions:</strong>
       </p>

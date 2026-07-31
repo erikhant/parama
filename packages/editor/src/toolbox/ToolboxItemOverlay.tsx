@@ -19,7 +19,7 @@ export const ToolboxItemOverlay: React.FC<ToolboxItemOverlayProps> = ({ id }) =>
       <ToolboxItem
         id={id}
         name={field.label}
-        className="flex-row items-center justify-start gap-3 font-medium h-auto p-2 bg-white rounded-lg border-gray-100 shadow-none hover:border-gray-200 hover:shadow-none"
+        className="flex-row items-center justify-start gap-3 font-medium h-auto p-2 bg-surface rounded-lg border-stroke-subtle shadow-none hover:border-stroke hover:shadow-none"
         thumbnail={<ToolboxItemThumbnail item={field} size={24} className="shrink-0" />}
       />
     )
