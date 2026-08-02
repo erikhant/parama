@@ -2,7 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Additional CSS for form builder demo */
+/*
+ * Demo chrome.
+ *
+ * Everything here is built from the design tokens `@parama-ui/react` ships,
+ * rather than hardcoded colours. That is deliberate: this app consumes the
+ * *built* packages, so if a token stops being exported or the `.dark` scope
+ * fails to reach a consumer, this page breaks visibly and the problem shows up
+ * here rather than in someone's application.
+ */
+
 body {
   margin: 0;
   padding: 20px;
@@ -11,6 +20,27 @@ body {
     'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+/*
+ * The library scopes its theme class to its own subtree and never touches the
+ * document element, so painting the page is the application's job. `App`
+ * mirrors the resolved theme onto <body>, which is the integration an embedding
+ * app is expected to write for itself. These two rules are the only place the
+ * demo states colours literally, because <body> sits outside the themed subtree
+ * and cannot read the custom properties.
+ */
+body.app-theme-dark {
+  background-color: rgb(22, 27, 29);
+  color: rgb(226, 233, 236);
+}
+
+body.app-theme-light {
+  background-color: rgb(255, 255, 255);
+  color: rgb(55, 65, 81);
 }
 
 #root {
@@ -27,4 +57,173 @@ h1 {
 
 .demo-container {
   margin-top: 2rem;
+}
+
+/* --- Theme bar ---------------------------------------------------------- */
+
+.theme-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  border: 1px solid rgb(var(--stroke));
+  border-radius: 8px;
+  background-color: rgb(var(--surface-muted));
+}
+
+.theme-bar__label {
+  font-size: 13px;
+  color: rgb(var(--content-subtle));
+}
+
+.theme-bar__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  color: rgb(var(--content));
+}
+
+.theme-bar__spacer {
+  flex: 1;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid rgb(var(--stroke-strong));
+  background-color: rgb(var(--surface-raised));
+  color: rgb(var(--content));
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.btn:hover {
+  background-color: rgb(var(--surface-sunken));
+}
+
+.btn--primary {
+  border-color: transparent;
+  background-color: rgb(var(--primary-default));
+  color: #fff;
+}
+
+.btn--primary:hover {
+  background-color: rgb(var(--primary-dark));
+}
+
+/* --- View switch -------------------------------------------------------- */
+
+.view-switch {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 8px;
+  border: 1px solid rgb(var(--stroke));
+  border-radius: 8px;
+  background-color: rgb(var(--surface-muted));
+}
+
+.view-switch__tab {
+  padding: 6px 14px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: transparent;
+  color: rgb(var(--content-subtle));
+  cursor: pointer;
+}
+
+.view-switch__tab:hover {
+  color: rgb(var(--content));
+}
+
+.view-switch__tab--active {
+  border-color: rgb(var(--stroke-strong));
+  background-color: rgb(var(--surface-raised));
+  color: rgb(var(--content));
+}
+
+/*
+ * Frames the editor and clips its full-height internal layout. The editor sizes
+ * itself from the viewport, so it needs a container that crops rather than one
+ * that tries to size it.
+ */
+.editor-view {
+  border: 1px solid rgb(var(--stroke));
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* --- Editing banner ----------------------------------------------------- */
+
+.editing-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgb(var(--warning-default));
+  background-color: rgb(var(--warning-light) / 0.15);
+  color: rgb(var(--content));
+}
+
+/* --- Users table -------------------------------------------------------- */
+
+.users {
+  padding: 16px 0;
+}
+
+.users__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.users__header h2 {
+  margin: 0;
+}
+
+.users__status {
+  font-size: 12px;
+  color: rgb(var(--content-subtle));
+}
+
+.users__status--error {
+  color: rgb(var(--danger-dark));
+}
+
+.users__scroll {
+  overflow-x: auto;
+}
+
+.users__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users__table th {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid rgb(var(--stroke-strong));
+  color: rgb(var(--content));
+}
+
+.users__table td {
+  padding: 8px;
+  border-bottom: 1px solid rgb(var(--stroke-subtle));
+  color: rgb(var(--content-muted));
+}
+
+.users__empty {
+  padding: 12px;
+  color: rgb(var(--content-subtle));
 }

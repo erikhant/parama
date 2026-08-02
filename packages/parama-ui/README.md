@@ -7,6 +7,7 @@ A beautiful, modern, and highly customizable React UI component library built wi
 - 🎨 **Beautiful Design**: Modern, clean, and professional UI components
 - 🎯 **TypeScript First**: Full TypeScript support with comprehensive type definitions
 - 🔧 **Highly Customizable**: Extensive theming and styling options
+- 🌗 **Dark Mode**: Light, dark and system themes, scoped so they never fight the host app
 - ♿ **Accessible**: Built on Radix UI primitives for excellent accessibility
 - 📱 **Responsive**: Mobile-first design approach
 - 🎭 **Variants**: Multiple styling variants for different use cases
@@ -113,6 +114,73 @@ export default App;
 
 - **DropdownMenu** - Contextual menus
 - **Command** - Command palette interface
+
+## 🌗 Dark Mode
+
+Wrap your app in `ThemeProvider` to give everything beneath it a colour scheme:
+
+```tsx
+import { ThemeProvider, useTheme, nextThemeMode } from '@parama-ui/react';
+
+function App() {
+  return (
+    <ThemeProvider theme="system">
+      <YourApp />
+    </ThemeProvider>
+  );
+}
+
+function ThemeToggle() {
+  const { mode, resolvedTheme, setMode } = useTheme();
+
+  // mode is what was chosen ('system'); resolvedTheme is what it resolved to.
+  return <button onClick={() => setMode(nextThemeMode(mode))}>{resolvedTheme}</button>;
+}
+```
+
+`ThemeProvider` props: `theme` (`'light' | 'dark' | 'system'`, default `system`),
+`onThemeChange`, and `className` for its wrapper element.
+
+### How it behaves
+
+- **Scoped, not global.** The theme class goes on the provider's own wrapper, not
+  on `<html>`. A library that writes to the document element fights whatever
+  theme system the host application already has. Painting the page is therefore
+  the host's job — read `resolvedTheme` from `useTheme()` and apply it yourself.
+- **Persisted.** The mode is stored under the `theme` key in `localStorage`, and a
+  stored value outranks the `theme` prop: the prop is the default for a
+  first-time visitor, storage is what this user actually picked.
+- **Portals are covered.** Radix renders dropdowns, dialogs and tooltips onto
+  `document.body`, outside the scoped subtree. The provider maintains a themed
+  host element there and publishes it via `usePortalContainer()`, which the
+  components use automatically.
+- **Nesting is a no-op.** A provider that finds an outer one renders its children
+  unchanged, so an embedded form builder follows the host's theme instead of
+  competing with it.
+- **Follows the system.** In `system` mode it tracks `prefers-color-scheme` at
+  runtime, and it syncs across tabs via the `storage` event.
+
+### Theme API
+
+| Export                | Description                                                          |
+| --------------------- | -------------------------------------------------------------------- |
+| `ThemeProvider`       | Supplies the theme and owns the portal host.                         |
+| `useTheme()`          | `{ mode, resolvedTheme, setMode, portalContainer }`.                 |
+| `usePortalContainer()`| The themed element to portal into.                                   |
+| `nextThemeMode(mode)` | Next mode in the `light → dark → system` cycle.                      |
+| `resolveTheme(mode, systemPrefersDark)` | Resolves a mode to `'light' \| 'dark'`.             |
+| `readThemeMode()` / `writeThemeMode(mode)` | Storage access, safe in SSR and private mode.    |
+| `isThemeMode(value)`  | Narrows an unknown value to `ThemeMode`.                             |
+| `THEME_STORAGE_KEY`   | `'theme'`.                                                           |
+| `THEME_MODE_CYCLE`    | The toggle order.                                                    |
+| `DEFAULT_THEME_MODE`  | `'system'`.                                                          |
+
+### Design tokens
+
+Colours are CSS custom properties holding RGB triplets, so Tailwind's
+`<alpha-value>` syntax works against them (`rgba(var(--surface), 0.5)`). The
+`.dark` scope redefines the same tokens — surfaces, strokes and content shades —
+which is why component classes need no dark variants of their own.
 
 ## 🎨 Theming & Variants
 
@@ -258,7 +326,7 @@ We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING
 
 ## 📄 License
 
-This project is licensed under the ISC License.
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
 
 ## 🔗 Related Packages
 

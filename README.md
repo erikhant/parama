@@ -1,98 +1,35 @@
-# Form Builder Monorepo - Production Ready Configuration
+# Parama Form Builder
 
-Your form builder monorepo has been successfully configured for production publishing! Here's what has been set up:
+A schema-driven form builder for React: design forms visually, render them from
+JSON, and keep both halves in one type-safe pipeline.
 
-## 📦 Published Packages
+## 📦 Packages
 
-### 1. **@parama-dev/form-builder-types** (v0.1.0)
+| Package                                                       | Version | Description                                                    |
+| ------------------------------------------------------------- | ------- | -------------------------------------------------------------- |
+| [`@parama-dev/form-builder-types`](./packages/types)          | 0.4.1   | Type definitions. Types only, zero runtime, zero dependencies.  |
+| [`@parama-ui/react`](./packages/parama-ui)                    | 1.4.1   | UI components on React, TailwindCSS and Radix UI. Owns theming. |
+| [`@parama-dev/form-builder-core`](./packages/core)            | 0.6.1   | Validation engine, workflow, variables, Zustand store.          |
+| [`@parama-dev/form-builder-renderer`](./packages/renderer)    | 0.7.1   | Renders a form from a schema.                                   |
+| [`@parama-dev/form-builder-editor`](./packages/editor)        | 0.7.1   | Visual drag-and-drop editor with Monaco and live preview.       |
 
-- Type definitions for the form builder system
-- Zero dependencies
-- Entry point: `dist/index.d.ts`
+Dependency order — each depends on the ones above it:
 
-### 2. **@parama-ui/react** (v1.0.0)
+`types` → `parama-ui` → `core` → `renderer` → `editor`
 
-- Reusable UI component library built with React, TailwindCSS and Radix UI
-- Zero dependencies (peer dependencies: react, react-dom)
-- Includes CSS styles: `dist/parama-ui.min.css`
-
-### 3. **@parama-dev/form-builder-core** (v0.1.0)
-
-- Core functionality for the form builder system
-- Depends on: `@parama-dev/form-builder-types`
-- Includes validation engine, workflow management, store management
-
-### 4. **@parama-dev/form-builder-renderer** (v0.1.0)
-
-- React components for rendering forms from schemas
-- Depends on: `@parama-dev/form-builder-core`, `@parama-dev/form-builder-types`, `@parama-ui/react`
-- Includes file upload support, custom field components
-
-### 5. **@parama-dev/form-builder-editor** (v0.1.0)
-
-- Visual form builder editor with drag-and-drop interface
-- Depends on: all above packages
-- Includes Monaco Editor, drag-and-drop functionality
-
-## 🚀 Publishing Process
-
-### Quick Start
+## 🚀 Installation
 
 ```bash
-# For Windows users
-.\publish.bat
-
-# For Unix/Linux/Mac users
-chmod +x publish.sh
-./publish.sh
-```
-
-### Manual Process
-
-```bash
-# 1. Install dependencies
-pnpm install
-
-# 2. Build all packages
-pnpm build:packages
-
-# 3. Publish all packages
-pnpm publish:packages
-```
-
-## 📋 Package Structure
-
-```
-packages/
-├── types/          # Type definitions (published)
-├── parama-ui/      # UI components (published)
-├── core/           # Core logic (published)
-├── renderer/       # Form renderer (published)
-└── editor/         # Form editor (published)
-
-apps/
-└── demo/           # Demo application (not published)
-```
-
-## 🔧 Build Order
-
-The packages are built in dependency order:
-
-1. `@parama-dev/form-builder-types` → 2. `@parama-ui/react` → 3. `@parama-dev/form-builder-core` → 4. `@parama-dev/form-builder-renderer` → 5. `@parama-dev/form-builder-editor`
-
-## 📝 Usage Examples
-
-### Installing Individual Packages
-
-```bash
-# For just the renderer
+# Just the renderer
 npm install @parama-dev/form-builder-renderer @parama-dev/form-builder-core @parama-dev/form-builder-types @parama-ui/react
 
-# For the complete editor
+# The full editor
 npm install @parama-dev/form-builder-editor @parama-dev/form-builder-renderer @parama-dev/form-builder-core @parama-dev/form-builder-types @parama-ui/react
 ```
 
-### Using the Renderer
+## 📝 Usage
+
+### Rendering a form
 
 ```tsx
 import { FormRenderer } from '@parama-dev/form-builder-renderer';
@@ -103,84 +40,112 @@ function App() {
 }
 ```
 
-### Using the Editor
+### Designing a form
 
 ```tsx
 import { FormEditor } from '@parama-dev/form-builder-editor';
-import '@parama-ui/react/styles';
+import '@parama-dev/form-builder-editor/styles';
 
 function App() {
   return <FormEditor schema={yourSchema} onSaveSchema={(schema) => console.log(schema)} />;
 }
 ```
 
-## 🧪 Testing After Publishing
+> **One page hosts one form.** The core store is a module-level singleton, so
+> `FormEditor` and `FormRenderer` cannot be mounted at the same time — they would
+> share schema, values and mode. Render one at a time.
 
-1. Switch to development workspace:
+## 🌗 Dark mode
 
-   ```bash
-   cp pnpm-workspace.dev.yaml pnpm-workspace.yaml
-   ```
+Both components accept `theme`, one of `'light' | 'dark' | 'system'`, defaulting
+to `system`. The editor also ships a toolbar toggle and an `onThemeChange`
+callback.
 
-2. Install published packages in demo:
+```tsx
+<FormRenderer schema={yourSchema} theme="dark" />
+<FormEditor schema={yourSchema} theme="system" onThemeChange={(theme) => save(theme)} />
+```
 
-   ```bash
-   cd apps/demo
-   pnpm add @parama-dev/form-builder-types@latest @parama-dev/form-builder-core@latest @parama-dev/form-builder-renderer@latest @parama-dev/form-builder-editor@latest @parama-ui/react@latest
-   ```
+The choice persists under the `theme` key in `localStorage`, and a stored value
+outranks the prop — the prop is the default for a first-time visitor, not a
+forced setting.
 
-3. Test the demo:
-   ```bash
-   pnpm dev
-   ```
+The theme is scoped to the component's own subtree and never applied to `<html>`,
+so an embedded form builder cannot fight the host application's theme. Portalled
+content (dropdowns, dialogs, the preview sheet) is themed through a host element
+maintained on `document.body`.
 
-## 📚 Documentation
+To theme a whole application, wrap it in `ThemeProvider` from `@parama-ui/react`.
+The components then defer to it, and their own `theme` / `onThemeChange` props
+are ignored — drive the theme from the provider instead. See the
+[`@parama-ui/react` README](./packages/parama-ui/README.md#-dark-mode) for the
+full theming API.
 
-Each package includes:
+## 📋 Repository layout
 
-- ✅ README.md with usage examples
-- ✅ TypeScript declarations
-- ✅ Proper exports configuration
-- ✅ Peer dependency management
+```
+packages/
+├── types/          # Type definitions (published)
+├── parama-ui/      # UI components and theming (published)
+├── core/           # Store, validation, workflow (published)
+├── renderer/       # Form renderer (published)
+└── editor/         # Form editor (published)
 
-## 🔄 Version Management
+apps/
+├── demo/             # Runs against package sources, with hot reload
+└── demo-production/  # Runs against built dist, to verify what ships
+```
 
-When updating versions:
+## 🛠️ Development
 
-1. Update version in each package's `package.json`
-2. Update peer dependency versions to match
-3. Run `pnpm build:packages`
-4. Run `pnpm publish:packages`
+```bash
+pnpm install          # Install dependencies
+pnpm dev              # Run every package in watch mode
+pnpm demo             # Demo against package sources
+pnpm demo:prepublish  # Demo against built output
+pnpm test             # Run the test suite
+pnpm type-check       # Type-check every package
+pnpm build:packages   # Build all packages in dependency order
+```
+
+## 🔄 Release
+
+Workspace dependencies are declared as `workspace:*` for development and
+rewritten to concrete version ranges only for publishing. `publish:prepare` does
+the rewrite and builds; `publish:complete` publishes and reverts.
+
+```bash
+# 1. Bump the version in each changed package's package.json
+# 2. Rewrite workspace deps to concrete ranges, then build
+pnpm publish:prepare
+
+# 3. Verify what would ship before doing it for real
+pnpm publish:renderer:dry
+
+# 4. Publish in dependency order, then restore workspace:* ranges
+pnpm publish:complete
+pnpm publish:parama-ui   # not part of publish:complete
+```
+
+Check the current state at any time with `pnpm deps:status`.
+
+> Run `pnpm deps:revert` before starting a release if the tree is still in the
+> prepared state. `deps:prepare` only rewrites `workspace:*`, so preparing twice
+> leaves already-rewritten ranges pointing at the previous versions.
 
 ## 🐛 Troubleshooting
 
-### Build Issues
+**Build issues** — verify workspace dependencies resolve and that externals are
+marked external in the Vite configs. Turbo caches aggressively; `pnpm clean:build`
+clears stale output.
 
-- Ensure TypeScript files compile correctly
-- Verify all workspace dependencies are resolved
-- Check that external dependencies are marked as external in Vite configs
+**Publishing issues** — make sure you are logged in (`npm login`) and that
+`publishConfig.access` is `"public"` for scoped packages. Publishing with 2FA
+enabled prompts for a one-time password.
 
-### Publishing Issues
+**Import issues** — confirm the published exports match your imports and that all
+peer dependencies are installed.
 
-- Make sure you're logged in: `npm login`
-- Verify package names are unique and available
-- Check that `publishConfig.access` is set to `"public"` for scoped packages
+## 📄 License
 
-### Import Issues
-
-- Verify the published package exports match your imports
-- Ensure peer dependencies are installed
-- Check that import paths match the published package structure
-
-## ✅ Ready for Production
-
-Your monorepo is now production-ready with:
-
-- ✅ Proper package.json configurations
-- ✅ Correct dependency management
-- ✅ Build scripts in proper order
-- ✅ Publishing workflow
-- ✅ Testing instructions
-- ✅ Documentation
-
-Run `./publish.bat` (Windows) or `./publish.sh` (Unix) to publish your packages to npm!
+MIT — see [LICENSE](./LICENSE).

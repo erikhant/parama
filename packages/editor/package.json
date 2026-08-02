@@ -1,7 +1,8 @@
 {
   "name": "@parama-dev/form-builder-editor",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Visual form builder editor with drag-and-drop interface",
+  "license": "MIT",
   "private": false,
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
@@ -21,7 +22,8 @@
     "./dist/editor.css": "./dist/editor.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public"

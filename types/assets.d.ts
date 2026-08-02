@@ -1,10 +1,12 @@
 /**
- * Asset module declarations for the test type-check program.
+ * Asset module declarations for programs that compile across package
+ * boundaries.
  *
- * Package builds get these from `vite/client` via each package's own
- * `vite-env.d.ts`. The root test config compiles across package boundaries
- * without a Vite environment, so it needs its own declarations for the static
- * assets `parama-ui` imports.
+ * A package building itself gets these from `vite/client` via its own
+ * `vite-env.d.ts`. Anything that reaches into another package's *source* —
+ * the root test config, and `apps/demo`, which aliases the packages to `src`
+ * for hot reloading — never picks that file up, so it needs its own
+ * declarations for the static assets `parama-ui` imports.
  */
 declare module '*.svg' {
   const src: string;

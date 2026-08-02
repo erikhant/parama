@@ -1,9 +1,10 @@
 {
   "name": "@parama-ui/react",
   "private": false,
-  "version": "1.4.0",
+  "version": "1.4.1",
   "type": "module",
   "description": "A reusable UI component library built with React, TailwindCSS and Radix UI.",
+  "license": "MIT",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
@@ -19,7 +20,8 @@
     "./parama-ui.min.css": "./dist/parama-ui.min.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public"

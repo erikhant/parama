@@ -2,6 +2,7 @@ import { useFormBuilder } from '@parama-dev/form-builder-core';
 import { FormRenderer } from '@parama-dev/form-builder-renderer';
 import { FormSchema } from '@parama-dev/form-builder-types';
 import { PlayIcon } from 'lucide-react';
+import { useRef } from 'react';
 import { toast } from 'sonner';
 import {
   Button,
@@ -22,16 +23,33 @@ interface PreviewProps {
 }
 
 export const Preview: React.FC<PreviewProps> = ({ disabled, schema, onOpenChange }) => {
-  const { actions, screenSize } = useFormBuilder();
+  const { actions, screenSize, selectedFieldId } = useFormBuilder();
   const { editor } = useEditor();
+
+  /*
+   * The renderer inside the sheet claims `render` mode on mount — that is what
+   * makes this a faithful preview, since conditions only take effect outside
+   * editor mode. The claim has to be handed back on close, or the canvas is
+   * left behaving like a live form.
+   *
+   * Switching to render mode also clears the selection, so it is captured here
+   * while it is still valid and restored with the mode.
+   */
+  const selectionBeforePreview = useRef<string | null>(null);
 
   return (
     <Sheet
       onOpenChange={(open) => {
         onOpenChange?.(open);
-        if (!open) {
-          actions.resetForm(); // Reset form when closing preview
+
+        if (open) {
+          selectionBeforePreview.current = selectedFieldId;
+          return;
         }
+
+        actions.resetForm(); // Reset form when closing preview
+        actions.changeMode('editor');
+        actions.selectField(selectionBeforePreview.current);
       }}>
       <SheetTrigger asChild>
         <Button color="secondary" size="sm" variant="ghost" disabled={disabled} className="rounded-md">

@@ -4,7 +4,9 @@ import '@parama-dev/form-builder-editor/dist/editor.css';
 
 import { createRoot } from 'react-dom/client';
 import type { FormSchema } from '@parama-dev/form-builder-types';
+import { FormEditor } from '@parama-dev/form-builder-editor';
 import { FormRenderer } from '@parama-dev/form-builder-renderer';
+import { nextThemeMode, ThemeProvider, useTheme } from '@parama-ui/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // User information schema for JSON Server `users` resource
@@ -184,9 +186,100 @@ const initialUserSchema: FormSchema = {
 
 // Presets removed; focusing on simple user form
 
+/**
+ * Paints the page to match the current theme.
+ *
+ * The library deliberately scopes its theme class to its own subtree and never
+ * touches the document element, so that an embedded form builder cannot fight
+ * the host application's theme. The flip side is that painting the page is the
+ * host's job — this is the small piece of integration a real consumer writes,
+ * reproduced here so the demo exercises it.
+ */
+function useBodyTheme() {
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    const { classList } = document.body;
+
+    classList.toggle('app-theme-dark', resolvedTheme === 'dark');
+    classList.toggle('app-theme-light', resolvedTheme === 'light');
+
+    return () => classList.remove('app-theme-dark', 'app-theme-light');
+  }, [resolvedTheme]);
+}
+
+/**
+ * Theme controls and a live readout of the theme state.
+ *
+ * The readout is the point of this bar: `mode` and `resolvedTheme` differ
+ * whenever the mode is `system`, and only seeing both makes it obvious whether
+ * the OS preference is being followed or an explicit choice is in force.
+ */
+function ThemeBar() {
+  const { mode, resolvedTheme, setMode } = useTheme();
+
+  return (
+    <div className="theme-bar">
+      <span className="theme-bar__label">Theme</span>
+      <button className="btn btn--primary" onClick={() => setMode(nextThemeMode(mode))}>
+        {mode === 'light' ? '☀️ Light' : mode === 'dark' ? '🌙 Dark' : '🖥️ System'}
+      </button>
+
+      <span className="theme-bar__label">
+        mode <span className="theme-bar__value">{mode}</span>
+      </span>
+      <span className="theme-bar__label">
+        resolved <span className="theme-bar__value">{resolvedTheme}</span>
+      </span>
+
+      <span className="theme-bar__spacer" />
+
+      <span className="theme-bar__label">
+        Persisted under the <span className="theme-bar__value">theme</span> key — reload to confirm it sticks.
+      </span>
+    </div>
+  );
+}
+
+/** Which half of the product is on screen. */
+type View = 'form' | 'editor';
+
+/**
+ * Switches between designing the form and filling it in.
+ *
+ * These are two views rather than two panes because the core store is a
+ * module-level singleton — one page hosts one form. Mounting `FormEditor` and
+ * `FormRenderer` together makes them share a single schema, form data and mode,
+ * so they have to take turns.
+ */
+function ViewSwitch({ view, onChange }: { view: View; onChange: (next: View) => void }) {
+  const tabs: Array<{ id: View; label: string }> = [
+    { id: 'form', label: 'Fill form' },
+    { id: 'editor', label: 'Design form' }
+  ];
+
+  return (
+    <div className="view-switch" role="tablist" aria-label="Demo view">
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          role="tab"
+          aria-selected={view === tab.id}
+          className={`view-switch__tab${view === tab.id ? ' view-switch__tab--active' : ''}`}
+          onClick={() => onChange(tab.id)}>
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ProductionDemo() {
+  useBodyTheme();
+
   // Schema state comes from the editor; runtimeSchema is used by renderer with current values
   const [schema, setSchema] = useState<FormSchema>(initialUserSchema);
+  const [view, setView] = useState<View>('form');
 
   // Users list & editing state
   const [users, setUsers] = useState<any[]>([]);
@@ -252,106 +345,112 @@ function ProductionDemo() {
     <div>
       <h1>🚀 Parama Form Builder - Users</h1>
       <p>
-        Manage users stored in JSON Server (`users` collection). Edit the form schema on the left, render and submit on
-        the right.
+        Manage users stored in JSON Server (`users` collection). Use the theme control to check the editor, the
+        renderer, their portalled overlays and this page's own chrome in both colour schemes.
       </p>
 
-      {/* <div className="demo-container">
-        <FormEditor schema={schema} onSaveSchema={(s) => setSchema(s)} />
-      </div> */}
+      <ThemeBar />
+      <ViewSwitch view={view} onChange={setView} />
 
-      <div className="demo-container">
-        {editingUser ? (
-          <div
-            style={{
-              marginBottom: 12,
-              padding: '8px 12px',
-              background: '#fff8e1',
-              border: '1px solid #ffe58f',
-              borderRadius: 6
-            }}>
-            Editing user #{editingUser.id}
-            <button
-              onClick={() => {
-                setEditingUser(null);
-                setSchema({
-                  ...initialUserSchema,
-                  fields: initialUserSchema.fields.map((f) => (f.type === 'submit' ? { ...f, label: 'Save User' } : f))
-                });
-              }}
-              style={{ marginLeft: 12, padding: '4px 8px' }}>
-              Cancel
-            </button>
+      {view === 'editor' ? (
+        /*
+         * `theme` and `onThemeChange` are deliberately not passed. `FormEditor`
+         * forwards them to its own `ThemeProvider`, and a provider that finds an
+         * outer one renders its children unchanged — so under this page's
+         * provider both props are inert. The editor's toolbar toggle still
+         * works: it reaches the outer provider through context, which is why it
+         * and the control above stay in step instead of disagreeing.
+         */
+        <div className="demo-container editor-view">
+          <FormEditor schema={schema} onSaveSchema={setSchema} />
+        </div>
+      ) : (
+        <>
+          <div className="demo-container">
+            {editingUser ? (
+              <div className="editing-banner">
+                <span>Editing user #{editingUser.id}</span>
+                <button
+                  className="btn"
+                  onClick={() => {
+                    setEditingUser(null);
+                    setSchema({
+                      ...initialUserSchema,
+                      fields: initialUserSchema.fields.map((f) =>
+                        f.type === 'submit' ? { ...f, label: 'Save User' } : f
+                      )
+                    });
+                  }}>
+                  Cancel
+                </button>
+              </div>
+            ) : null}
+            <FormRenderer
+              key={`${schema.id}`}
+              schema={schema}
+              data={editingUser || undefined}
+              onSubmit={handleSubmitSchema}
+            />
           </div>
-        ) : null}
-        <FormRenderer
-          key={`${schema.id}`}
-          schema={schema}
-          data={editingUser || undefined}
-          onSubmit={handleSubmitSchema}
-        />
-      </div>
 
-      <div className="list-data" style={{ padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <h2 style={{ margin: 0 }}>Users</h2>
-          <button onClick={fetchUsers} style={{ padding: '4px 8px' }}>
-            Refresh
-          </button>
-          {isLoading ? <span style={{ fontSize: 12, color: '#666' }}>Loading...</span> : null}
-          {error ? <span style={{ fontSize: 12, color: 'crimson' }}>{error}</span> : null}
-        </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>ID</th>
-                {userColumns.map((col) => (
-                  <th key={col.id} style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>
-                    {(col as any).label ?? (col as any).name}
-                  </th>
-                ))}
-                <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.length === 0 ? (
-                <tr>
-                  <td colSpan={userColumns.length + 2} style={{ padding: 12, color: '#666' }}>
-                    No users found.
-                  </td>
-                </tr>
-              ) : (
-                users.map((u) => (
-                  <tr key={u.id}>
-                    <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{u.id}</td>
+          <div className="list-data users">
+            <div className="users__header">
+              <h2>Users</h2>
+              <button className="btn" onClick={fetchUsers}>
+                Refresh
+              </button>
+              {isLoading ? <span className="users__status">Loading...</span> : null}
+              {error ? <span className="users__status users__status--error">{error}</span> : null}
+            </div>
+            <div className="users__scroll">
+              <table className="users__table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
                     {userColumns.map((col) => (
-                      <td key={col.id} style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>
-                        {String(u[(col as any).name] ?? '')}
-                      </td>
+                      <th key={col.id}>{(col as any).label ?? (col as any).name}</th>
                     ))}
-                    <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>
-                      <button
-                        onClick={() => {
-                          setEditingUser(u);
-                          setSchema({
-                            ...initialUserSchema,
-                            fields: initialUserSchema.fields.map((f) =>
-                              f.type === 'submit' ? { ...f, label: 'Update User' } : f
-                            )
-                          });
-                        }}
-                        style={{ padding: '4px 8px' }}>
-                        Edit
-                      </button>
-                    </td>
+                    <th>Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </thead>
+                <tbody>
+                  {users.length === 0 ? (
+                    <tr>
+                      <td className="users__empty" colSpan={userColumns.length + 2}>
+                        No users found.
+                      </td>
+                    </tr>
+                  ) : (
+                    users.map((u) => (
+                      <tr key={u.id}>
+                        <td>{u.id}</td>
+                        {userColumns.map((col) => (
+                          <td key={col.id}>{String(u[(col as any).name] ?? '')}</td>
+                        ))}
+                        <td>
+                          <button
+                            className="btn"
+                            onClick={() => {
+                              setEditingUser(u);
+                              setSchema({
+                                ...initialUserSchema,
+                                fields: initialUserSchema.fields.map((f) =>
+                                  f.type === 'submit' ? { ...f, label: 'Update User' } : f
+                                )
+                              });
+                            }}>
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -360,7 +459,20 @@ function ProductionDemo() {
 const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
-  root.render(<ProductionDemo />);
+
+  /*
+   * Wrapping the app in the provider is what a consumer does when more than the
+   * form needs theming. `FormRenderer` mounts its own provider when standalone
+   * and defers to an outer one, so the form here follows this provider rather
+   * than competing with it — which also means this demo exercises that nesting
+   * path. Drop the wrapper and pass `theme` straight to `FormRenderer` to test
+   * the standalone path instead.
+   */
+  root.render(
+    <ThemeProvider>
+      <ProductionDemo />
+    </ThemeProvider>
+  );
 } else {
   console.error('Root container not found');
 }

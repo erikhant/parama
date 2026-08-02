@@ -16,9 +16,17 @@
       "@parama-dev/form-builder-editor": ["../../packages/editor/src"],
       "@parama-dev/form-builder-renderer": ["../../packages/renderer/src"],
       "@parama-dev/form-builder-types": ["../../packages/types/src"],
-      "@parama-ui/react": ["../../packages/parama-ui/src"]
+      "@parama-ui/react": ["../../packages/parama-ui/src"],
+      // Aliasing the packages to their sources pulls parama-ui's own files into
+      // this program, and those use an internal `@/` alias. Without it every
+      // component fails to resolve `@/lib/utils`, and the resulting broken
+      // dependency graph surfaces as errors on the imports in src/index.tsx.
+      "@/*": ["../../packages/parama-ui/src/*"]
     }
   },
-  "include": ["src/**/*"],
+  // The shared asset declarations cover parama-ui's `.svg` imports. Its own
+  // `vite-env.d.ts` is not in this program, so the reference has to come from
+  // here.
+  "include": ["src/**/*", "../../types/**/*.d.ts"],
   "exclude": ["node_modules"]
 }

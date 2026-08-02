@@ -1,4 +1,4 @@
-import { resetFormBuilder } from '@parama-dev/form-builder-core/testing';
+import { resetFormBuilder, storeActions, storeState } from '@parama-dev/form-builder-core/testing';
 import type { FormSchema } from '@parama-dev/form-builder-types';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -133,6 +133,35 @@ describe('FormRenderer', () => {
 
       await user.click(screen.getByRole('button', { name: 'Send' }));
       expect(onSubmit).not.toHaveBeenCalled();
+    });
+  });
+
+  // The store is a module singleton shared with the editor, and the editor sets
+  // `mode: 'editor'` on mount without ever putting it back. A renderer mounted
+  // afterwards inherited editor mode, where conditions do not hide fields —
+  // silently disabling every conditional field in the form.
+  describe('mode', () => {
+    it('claims render mode on mount', () => {
+      storeActions().changeMode('editor');
+
+      render(<FormRenderer schema={schemaWith([textField('f1', 'email')])} />);
+
+      expect(storeState().mode).toBe('render');
+    });
+
+    it('applies conditions after the editor has been mounted', async () => {
+      storeActions().changeMode('editor');
+
+      const fields = [
+        textField('trigger', 'trigger'),
+        textField('secret', 'secret', {
+          conditions: { hidden: { expression: '{{trigger}} === "hide"' } }
+        })
+      ];
+
+      render(<FormRenderer schema={schemaWith(fields)} data={{ trigger: 'hide' }} />);
+
+      await waitFor(() => expect(screen.queryByText('secret')).not.toBeInTheDocument());
     });
   });
 

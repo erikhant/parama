@@ -38,3 +38,9 @@ Thumbs.db
 
 # Miscellaneous
 **/.turbo
+
+# TypeScript incremental build state
+*.tsbuildinfo
+
+# Local agent/editor tooling
+.claude/
