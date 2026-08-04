@@ -6,14 +6,14 @@ import {
   DialogHeader,
   DialogTitle
 } from '@parama-ui/react';
+import type { FallbackProps } from 'react-error-boundary';
 
-export function FallbackException({
-  error,
-  resetErrorBoundary
-}: {
-  error: Error;
-  resetErrorBoundary: (...args: any[]) => void;
-}) {
+/*
+ * Typed from `FallbackProps` rather than restated. `error` is `unknown` there —
+ * anything can be thrown, not just an `Error` — and declaring it narrower makes
+ * the component unassignable to `FallbackComponent`.
+ */
+export function FallbackException({ error, resetErrorBoundary }: FallbackProps) {
   console.error('Error in Form Editor:', error);
   return (
     <Dialog open={true}>
