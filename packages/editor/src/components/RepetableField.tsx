@@ -8,7 +8,7 @@ import {
   useSensors
 } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import React, { cloneElement, ReactElement, useCallback, useState } from 'react';
+import React, { cloneElement, ReactElement, ReactNode, useCallback, useState } from 'react';
 import { SortableItem } from './SortableItem';
 import { SortableList } from './SortableList';
 import { Button, cn } from '@parama-ui/react';
@@ -180,13 +180,27 @@ export function RepetableField<TValue>({
   );
 }
 
+/**
+ * The props of an arbitrary element, as much as is knowable.
+ *
+ * `ReactElement` defaults its props to `unknown` under React 19's types, which
+ * is honest — nothing guarantees what an arbitrary child was given. This states
+ * the two keys we actually read, so the traversal below type-checks without
+ * asserting anything about the rest.
+ */
+type TraversedProps = { 'data-field'?: unknown; children?: ReactNode };
+
 const cloneElementDeep = (element: ReactElement, props: any): ReactElement => {
-  if (element.props['data-field']) {
+  // Narrowed once, here, rather than constraining every caller: the element
+  // arrives from `children`, whose props are genuinely unknown.
+  const { 'data-field': dataField, children: elementChildren } = element.props as TraversedProps;
+
+  if (dataField) {
     return cloneElement(element, props);
   }
 
-  if (element.props.children) {
-    const children = React.Children.map(element.props.children, (child) => {
+  if (elementChildren) {
+    const children = React.Children.map(elementChildren, (child) => {
       if (React.isValidElement(child)) {
         return cloneElementDeep(child, props);
       }
