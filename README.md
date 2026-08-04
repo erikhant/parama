@@ -72,14 +72,41 @@ forced setting.
 
 The theme is scoped to the component's own subtree and never applied to `<html>`,
 so an embedded form builder cannot fight the host application's theme. Portalled
-content (dropdowns, dialogs, the preview sheet) is themed through a host element
-maintained on `document.body`.
+content (dropdowns, dialogs, the preview sheet) carries the theme on its own
+content element, so it is styled wherever it lands.
 
 To theme a whole application, wrap it in `ThemeProvider` from `@parama-ui/react`.
 The components then defer to it, and their own `theme` / `onThemeChange` props
 are ignored — drive the theme from the provider instead. See the
 [`@parama-ui/react` README](./packages/parama-ui/README.md#-dark-mode) for the
 full theming API.
+
+## 🤝 Living beside your own UI library
+
+The form builder is built to drop into an application that already has a design
+system — including one built on Tailwind and Radix, like shadcn/ui.
+
+**Styles do not leak, in either direction.** Every rule in the bundled stylesheet
+is scoped to `data-parama-scope`, which marks only what the library draws. In
+place of Tailwind's global preflight it ships a reset confined to the same
+subtree, written at zero specificity so any component class of yours still wins.
+Your buttons, borders, padding and typography are untouched, and your own
+Tailwind utilities keep their values inside your markup.
+
+**Overlays cooperate with your modals.** Mount a form inside a dialog of your own
+and its dropdowns and date pickers portal into that dialog, so they sit within its
+focus trap, stacking context and pointer-events handling. This matters most when
+your copy of Radix is not the same instance as ours — two copies keep separate
+focus-scope stacks, and a menu rendered beside your dialog instead of inside it
+appears behind it, refuses clicks, and loses keyboard navigation.
+
+**Design tokens are namespaced.** Corner radius is `--parama-radius`, not the bare
+`--radius` that shadcn/ui and most Tailwind systems put on `:root`. The rest of
+the palette is suffixed (`--primary-default`, not `--primary`) for the same
+reason.
+
+`apps/demo-production` runs shadcn/ui and the form builder on one page against the
+built packages, which is where these guarantees are exercised.
 
 ## 📋 Repository layout
 

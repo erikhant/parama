@@ -1,10 +1,18 @@
 @layer components {
   .select-trigger {
     @apply form-control flex items-center justify-between dark:placeholder:text-foreground-dark/50 dark:border-background-dark dark:text-foreground-dark;
+    /* The value is a flex child, so it would otherwise wrap onto a second line
+       and overlap the chevron once the label is longer than the trigger. */
+    @apply gap-2 whitespace-nowrap;
+  }
+
+  .select-trigger > span {
+    @apply overflow-hidden text-ellipsis;
   }
 
   .select-trigger-icon {
-    @apply h-4 w-4 opacity-50;
+    /* Never let the chevron be the thing that gives way to a long value. */
+    @apply h-4 w-4 shrink-0 opacity-50;
   }
 
   .select-scroll-up,
@@ -38,7 +46,18 @@
   }
 
   .select-item {
-    @apply relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none select-none [&_svg:not([class*='text-'])]:text-[#62748e] focus:bg-surface-sunken focus:text-slate-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:text-slate-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4;
+    @apply relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none select-none [&_svg:not([class*='text-'])]:text-[#62748e] data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4;
+
+    /*
+     * `data-highlighted` is what Radix sets on the active option, for both
+     * pointer and keyboard navigation — it is the documented styling hook.
+     * Keying off `:focus` alone worked only while the option held real DOM
+     * focus, so the highlight vanished the moment anything else on the page
+     * competed for it. Both are matched: `:focus` keeps the item styled if a
+     * consumer drives focus directly.
+     */
+    @apply focus:bg-surface-sunken focus:text-slate-900 dark:focus:text-slate-50;
+    @apply data-[highlighted]:bg-surface-sunken data-[highlighted]:text-slate-900 dark:data-[highlighted]:text-slate-50;
   }
 
   .select-item-indicator {

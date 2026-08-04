@@ -6,8 +6,21 @@ This project tests the Parama Form Builder packages **as if they were installed 
 
 - ✅ **Validate published packages**: Ensure the built packages work correctly
 - ✅ **Test import paths**: Verify all imports resolve properly
-- ✅ **Check styling**: Confirm CSS and TailwindCSS integration works
 - ✅ **Simulate npm installation**: Use dist builds instead of workspace source
+- ✅ **Prove coexistence**: shadcn/ui runs on the same page, so a style or portal
+  regression in either direction shows up here rather than in someone's app
+
+### Why shadcn/ui is installed here
+
+It stands in for whatever design system a real host already has, and it brings
+exactly the things that collide: **Tailwind v4** with its own global preflight,
+its own `.dark` token scope, and its own copy of Radix with a separate
+focus-scope stack. The page is arranged so a regression is visible immediately —
+shadcn controls and the form builder sit side by side, and the form itself opens
+inside a **shadcn dialog**, which is the hardest case for portalled overlays.
+
+Note the version skew is deliberate: the library's CSS is compiled with Tailwind
+v3 and the host runs v4. That is the realistic modern integration.
 
 ## Architecture
 
@@ -16,12 +29,19 @@ This demo project uses:
 ### Package Structure
 
 ```
-@form-builder/types      → ../../packages/types/dist/index.js
-@form-builder/core       → ../../packages/core/dist/index.es.js
-@form-builder/renderer   → ../../packages/renderer/dist/index.es.js
-@form-builder/editor     → ../../packages/editor/dist/index.es.js
-@parama-ui/react         → ../../packages/parama-ui/dist/index.es.js
-@parama-ui/css           → ../../packages/parama-ui/dist/parama-ui.min.css
+@parama-dev/form-builder-types     → ../../packages/types/dist
+@parama-dev/form-builder-core      → ../../packages/core/dist
+@parama-dev/form-builder-renderer  → ../../packages/renderer/dist
+@parama-dev/form-builder-editor    → ../../packages/editor/dist
+@parama-ui/react                   → ../../packages/parama-ui/dist
+```
+
+Styles come from two imports — the design tokens and component classes, then the
+editor's scoped utilities and reset:
+
+```ts
+import '@parama-ui/react/dist/parama-ui.min.css';
+import '@parama-dev/form-builder-editor/styles';
 ```
 
 ### Key Differences from Development Demo
@@ -100,10 +120,10 @@ pnpm run build
 This project structure mimics how the packages would be used after:
 
 1. Publishing to npm: `npm publish` for each package
-2. Installing in a new project: `npm install @form-builder/editor @parama-ui/react`
-3. Importing in application code: `import { FormEditor } from '@form-builder/editor'`
+2. Installing in a new project: `npm install @parama-dev/form-builder-editor @parama-ui/react`
+3. Importing in application code: `import { FormEditor } from '@parama-dev/form-builder-editor'`
 
-The aliases in `vite.config.ts` simulate the node_modules resolution that would happen in a real npm installation.
+The `paths` in `tsconfig.json` point at each package's `dist`, simulating the node_modules resolution of a real npm installation.
 
 ## JSON Server Integration
 

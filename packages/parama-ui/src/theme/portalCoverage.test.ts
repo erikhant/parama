@@ -17,7 +17,7 @@ const components: Component[] = readdirSync(UI_DIR)
 const portalled = components.filter((c) => /Primitive\.Portal|\bPortal\b/.test(c.source));
 
 /**
- * Theming reaches portalled content only if it is told where to render.
+ * Theming reaches portalled content only if it is carried there.
  *
  * React context follows the React tree, so `useTheme()` works inside a portal
  * regardless. CSS does not: a portal attaches to `document.body`, outside the
@@ -25,27 +25,41 @@ const portalled = components.filter((c) => /Primitive\.Portal|\bPortal\b/.test(c
  * property resolves to its light value. The result is a fully light dialog or
  * sheet floating over a dark editor.
  *
+ * The fix is `useThemeScope`, which marks the portalled element itself, and
+ * deliberately not a shared container on the body. Relocating content into one
+ * host was the original approach and it broke embedding: that host is created
+ * when the provider mounts, so it precedes any dialog a host application opens
+ * later, and with equal z-index the overlay paints behind. A modal also
+ * disables pointer events on the body and re-enables them per layer, which
+ * skips a layer rendered into a foreign container — leaving the content visible
+ * but unclickable.
+ *
  * This is easy to miss, because a new portalled component looks correct in
  * light mode and in isolation. Enumerating them here means the next one cannot
- * be added without wiring the container.
+ * be added without the marker.
  */
 describe('portal theming coverage', () => {
   it('found the portalled components to check', () => {
     expect(portalled.length).toBeGreaterThan(0);
   });
 
-  it.each(portalled.map((c) => c.name))('%s renders into the themed portal host', (name) => {
+  it.each(portalled.map((c) => c.name))('%s marks its portalled content with the theme scope', (name) => {
+    const component = portalled.find((c) => c.name === name)!;
+
+    expect(
+      component.source.includes('useThemeScope'),
+      `${name} portals without useThemeScope, so it will render unthemed on document.body`
+    ).toBe(true);
+  });
+
+  // Guards the regression directly: forcing a container is what took portalled
+  // content out of the host application's layer stack.
+  it.each(portalled.map((c) => c.name))('%s does not force a portal container', (name) => {
     const component = portalled.find((c) => c.name === name)!;
 
     expect(
       component.source.includes('usePortalContainer'),
-      `${name} portals without usePortalContainer, so it will render unthemed on document.body`
-    ).toBe(true);
-  });
-
-  it.each(portalled.map((c) => c.name))('%s passes the container to its Portal', (name) => {
-    const component = portalled.find((c) => c.name === name)!;
-
-    expect(component.source, `${name} resolves a container but never passes it to Portal`).toMatch(/container=\{/);
+      `${name} forces a portal container, which breaks stacking and pointer events inside a host modal`
+    ).toBe(false);
   });
 });

@@ -15,7 +15,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
     "paths": {
+      // shadcn/ui resolves its generated components through this alias.
+      "@/*": ["./src/*"],
       "@parama-dev/form-builder-types": ["../../packages/types/dist"],
       "@parama-dev/form-builder-core": ["../../packages/core/dist"],
       "@parama-dev/form-builder-renderer": ["../../packages/renderer/dist"],

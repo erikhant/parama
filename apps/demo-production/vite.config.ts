@@ -4,6 +4,13 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      // Mirrors the `@/*` path in tsconfig.json, which shadcn/ui generates its
+      // component imports against.
+      '@': path.resolve(__dirname, './src')
+    }
+  },
   // resolve: {
   //   alias: {
   //     // Point to the built packages instead of source

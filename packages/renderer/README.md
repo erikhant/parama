@@ -51,9 +51,13 @@ Three things follow from that, and they matter when embedding:
   `theme` key in `localStorage`. If a value is present, it takes precedence over
   the `theme` prop, which acts as the default for a first-time visitor rather
   than a forced setting.
-- **Portalled content is themed too.** Dropdowns, dialogs and date pickers render
-  through a portal on `document.body`, outside the wrapper. The renderer keeps a
-  themed host element there for them, so they do not fall back to light.
+- **Portalled content is themed too.** Dropdowns and date pickers render through a
+  portal, outside the wrapper, so each one carries the theme on its own content
+  element rather than inheriting it.
+- **The form works inside your modal.** Mount `FormRenderer` in a dialog of your
+  own and its dropdowns portal into that dialog, so they stay inside its focus
+  trap and stacking context. Rendered beside it instead, a menu appears behind the
+  dialog, refuses clicks, and loses keyboard navigation and hover highlighting.
 - **An outer provider wins.** If you already wrap your app in `ThemeProvider`
   from `@parama-ui/react`, the renderer defers to it and the `theme` prop is
   ignored. Drive the theme from the provider in that case.

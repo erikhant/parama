@@ -13,9 +13,15 @@
  *   body text should use these so it themes for free.
  *
  * Values are RGB triplets so Tailwind can apply its own alpha channel.
+ *
+ * Every name is prefixed or suffixed enough to be unambiguous on a page that
+ * also loads another design system. `--radius` was the exception: shadcn/ui
+ * defines the same name on `:root`, and whichever stylesheet loaded last won
+ * for *both* libraries — parama silently reshaped shadcn's corners, or the
+ * reverse, depending on import order.
  */
 :root {
-  --radius: 0.375rem;
+  --parama-radius: 0.375rem;
 
   /* Brand ramps — identical in both themes. */
   --background-light: 248, 249, 251;
@@ -73,11 +79,18 @@
  * relied on inheriting from `<body>`. That silently produced black text on a
  * dark surface — most visibly inside portalled content, which inherits from
  * the body rather than from the provider's subtree. Anchoring the default on
- * both themed roots fixes it in one place; any component setting its own
+ * the themed roots fixes it in one place; any component setting its own
  * colour still wins.
+ *
+ * `[data-parama-scope]` covers portalled overlays, which now carry the marker
+ * themselves rather than being relocated into the shared host. A host
+ * application that sets a page-wide text colour — shadcn's `text-foreground`
+ * on `<body>`, say — would otherwise have it inherited straight through the
+ * portal into a dark overlay.
  */
 [data-parama-theme],
-[data-parama-portal] {
+[data-parama-portal],
+[data-parama-scope] {
   color: rgb(var(--content));
 }
 

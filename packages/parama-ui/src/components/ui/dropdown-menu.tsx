@@ -3,11 +3,29 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronRight, Circle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { usePortalContainer } from '../../theme/useTheme';
+import { PortalAnchorProvider, useAnchoredRef, useModalContainer } from '../../theme/modalContainer';
+import { useThemeScope } from '../../theme/ThemeScope';
 
-const DropdownMenu = DropdownMenuPrimitive.Root;
+/** Wrapped so the trigger can tell the portalled menu which modal it is in. */
+const DropdownMenu: React.FC<React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>> = ({
+  children,
+  ...props
+}) => (
+  <PortalAnchorProvider>
+    <DropdownMenuPrimitive.Root {...props}>{children}</DropdownMenuPrimitive.Root>
+  </PortalAnchorProvider>
+);
+DropdownMenu.displayName = DropdownMenuPrimitive.Root.displayName;
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+const DropdownMenuTrigger = React.forwardRef<
+  React.ComponentRef<typeof DropdownMenuPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
+>((props, ref) => {
+  const anchoredRef = useAnchoredRef<HTMLButtonElement>(ref);
+
+  return <DropdownMenuPrimitive.Trigger ref={anchoredRef} {...props} />;
+});
+DropdownMenuTrigger.displayName = DropdownMenuPrimitive.Trigger.displayName;
 
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 
@@ -49,16 +67,18 @@ const DropdownMenuContent = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
 >(({ className, sideOffset = 4, ...props }, ref) => {
-  // Renders into the theme provider's body-level host so the menu is themed
-  // even though it sits outside the provider's subtree.
-  const container = usePortalContainer();
+  const { scopeProps, themeClass } = useThemeScope();
+  const modalContainer = useModalContainer();
 
   return (
-    <DropdownMenuPrimitive.Portal container={container ?? undefined}>
+    // Inside the enclosing modal, so the menu sits within its focus trap and
+    // stacking context; `undefined` outside one is Radix's default, the body.
+    <DropdownMenuPrimitive.Portal container={modalContainer ?? undefined}>
       <DropdownMenuPrimitive.Content
         ref={ref}
+        {...scopeProps}
         sideOffset={sideOffset}
-        className={cn('dropdown-content', className)}
+        className={cn('dropdown-content', themeClass, className)}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>

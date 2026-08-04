@@ -91,8 +91,13 @@ first-time visitor, not a forced setting.
 
 The theme is scoped to the editor's own subtree and never applied to `<html>`,
 so an embedded editor cannot fight the host application's theme. Portalled
-content — dropdowns, dialogs, the preview sheet — is themed through a host
-element the editor maintains on `document.body`.
+content — dropdowns, dialogs, the preview sheet — carries the theme on its own
+content element, so it is styled wherever it lands.
+
+The bundled stylesheet is safe alongside a host that already uses Tailwind: every
+rule is scoped to `data-parama-scope`, and the reset it ships in place of
+Tailwind's global preflight is confined to the same subtree. Nothing reaches
+markup the host wrote, in either direction.
 
 > **Embedding under your own provider:** if you already wrap your app in
 > `ThemeProvider` from `@parama-ui/react`, the editor defers to it, and **both

@@ -4,7 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { usePortalContainer } from '../../theme/useTheme';
+import { useThemeScope } from '../../theme/ThemeScope';
 
 const Sheet = SheetPrimitive.Root;
 
@@ -44,15 +44,17 @@ const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
 >(({ side = 'right', className, children, ...props }, ref) => {
-  // Portals escape the provider's subtree, so they render into the themed host
-  // instead. Without this the sheet lands on `document.body`, outside any
-  // `.dark` ancestor, and paints light over a dark editor.
-  const container = usePortalContainer();
+  const { scopeProps, themeClass } = useThemeScope();
 
   return (
-    <SheetPortal container={container ?? undefined}>
+    // Radix's default container, so the sheet joins the host's layer stack.
+    <SheetPortal>
       <SheetOverlay />
-      <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
+      <SheetPrimitive.Content
+        ref={ref}
+        {...scopeProps}
+        className={cn(sheetVariants({ side }), themeClass, className)}
+        {...props}>
         {children}
         <SheetPrimitive.Close className="sheet-close">
           <X className="sheet-close-icon" />

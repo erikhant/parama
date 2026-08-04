@@ -151,9 +151,16 @@ function ThemeToggle() {
   stored value outranks the `theme` prop: the prop is the default for a
   first-time visitor, storage is what this user actually picked.
 - **Portals are covered.** Radix renders dropdowns, dialogs and tooltips onto
-  `document.body`, outside the scoped subtree. The provider maintains a themed
-  host element there and publishes it via `usePortalContainer()`, which the
-  components use automatically.
+  `document.body`, outside the scoped subtree. Each overlay carries the theme
+  class and the scope marker on its own content element, so it is themed wherever
+  it lands — rather than being relocated into a shared host, which breaks
+  embedding (see below).
+- **Overlays render inside an enclosing modal.** If a trigger sits inside a host
+  application's dialog, its menu portals into that dialog rather than beside it
+  on the body. Without this, a menu is stranded outside the modal's focus trap,
+  stacking context and pointer-events bookkeeping — it renders behind the dialog,
+  cannot be clicked, and keyboard navigation and hover highlighting stop working.
+  Pass `container` on the content to override.
 - **Nesting is a no-op.** A provider that finds an outer one renders its children
   unchanged, so an embedded form builder follows the host's theme instead of
   competing with it.
@@ -166,7 +173,9 @@ function ThemeToggle() {
 | --------------------- | -------------------------------------------------------------------- |
 | `ThemeProvider`       | Supplies the theme and owns the portal host.                         |
 | `useTheme()`          | `{ mode, resolvedTheme, setMode, portalContainer }`.                 |
-| `usePortalContainer()`| The themed element to portal into.                                   |
+| `useThemeScope()`     | `{ scopeProps, themeClass }` to put on portalled content.            |
+| `usePortalContainer()`| The provider's themed body-level element. Still available for a host's own portals; the bundled components no longer use it. |
+| `PARAMA_SCOPE_ATTRIBUTE` / `paramaScope` | Marks a subtree as library-drawn — see below.     |
 | `nextThemeMode(mode)` | Next mode in the `light → dark → system` cycle.                      |
 | `resolveTheme(mode, systemPrefersDark)` | Resolves a mode to `'light' \| 'dark'`.             |
 | `readThemeMode()` / `writeThemeMode(mode)` | Storage access, safe in SSR and private mode.    |
@@ -181,6 +190,31 @@ Colours are CSS custom properties holding RGB triplets, so Tailwind's
 `<alpha-value>` syntax works against them (`rgba(var(--surface), 0.5)`). The
 `.dark` scope redefines the same tokens — surfaces, strokes and content shades —
 which is why component classes need no dark variants of their own.
+
+Corner radius is `--parama-radius`, and `rounded-sm` / `rounded-md` / `rounded-lg`
+derive from it:
+
+```css
+:root {
+  --parama-radius: 0.5rem; /* override to reshape every corner */
+}
+```
+
+> **Renamed in 1.5.0.** It used to be `--radius`, which shadcn/ui and most
+> Tailwind design systems also define on `:root` — whichever stylesheet loaded
+> last silently won for *both* libraries. If you were overriding `--radius` to
+> restyle these components, switch to `--parama-radius`.
+
+### The scope marker
+
+Everything the bundled stylesheet styles sits under `data-parama-scope`: the
+editor shell, a rendered form, and each portalled overlay. The reset and the
+utilities are keyed to it, which is what stops them reaching a host's own markup.
+
+It is deliberately **not** the theme attribute. `data-parama-theme` answers "which
+colour scheme applies here", and hosts are told to wrap their whole application in
+`ThemeProvider` — so it sits above their markup, and CSS keyed to it flattens
+their buttons, borders and padding.
 
 ## 🎨 Theming & Variants
 

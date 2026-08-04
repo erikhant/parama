@@ -43,13 +43,10 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
        * utilities off the host's own markup — the theme wrapper above is no
        * good for that, since a host is expected to wrap its whole app in it.
        *
-       * The height is an inline style, not `h-full`. Utilities compile to
-       * `[data-parama-scope] .h-full`, a *descendant* selector, so a class on
-       * the marker element itself would never match. It stands in for the
-       * `h-full` `FormEditor` puts on its ThemeProvider, which disappears
-       * whenever a nested provider renders no element at all.
+       * `h-full` stands in for the one `FormEditor` puts on its ThemeProvider,
+       * which disappears whenever a nested provider renders no element at all.
        */}
-      <div {...paramaScope} style={{ height: '100%' }}>
+      <div {...paramaScope} className="h-full">
         <Toolbar onSaveSchema={onSaveSchema} />
 
         <DndContext

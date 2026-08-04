@@ -27,9 +27,11 @@ module.exports = {
   theme: {
     extend: {
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
+        // Namespaced: shadcn/ui and most Tailwind design systems define a bare
+        // `--radius` on `:root`, and the later stylesheet used to win for both.
+        lg: 'var(--parama-radius)',
+        md: 'calc(var(--parama-radius) - 2px)',
+        sm: 'calc(var(--parama-radius) - 4px)'
       },
       borderColor: {
         /*

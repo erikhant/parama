@@ -11,6 +11,21 @@ import { FormRenderer } from '@parama-dev/form-builder-renderer';
 import { nextThemeMode, ThemeProvider, useTheme } from '@parama-ui/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+// shadcn/ui — stands in for whatever component library a host already uses.
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 // User information schema for JSON Server `users` resource
 const initialUserSchema: FormSchema = {
   id: 'user-form',
@@ -202,11 +217,28 @@ function useBodyTheme() {
 
   useEffect(() => {
     const { classList } = document.body;
+    const root = document.documentElement.classList;
 
     classList.toggle('app-theme-dark', resolvedTheme === 'dark');
     classList.toggle('app-theme-light', resolvedTheme === 'light');
 
-    return () => classList.remove('app-theme-dark', 'app-theme-light');
+    /*
+     * `dark` on the document element is shadcn's convention, and it is the host
+     * application's to own — the library never writes there. It matters for
+     * more than the page chrome: shadcn portals its dialogs and selects to
+     * document.body, outside the library's provider, so without this they would
+     * render light on a dark page.
+     *
+     * The two schemes coexist rather than compete. parama-ui scopes its `.dark`
+     * to its own wrapper and defines `--surface`/`--content`; shadcn's defines
+     * `--background`/`--foreground`. Same class, disjoint variables.
+     */
+    root.toggle('dark', resolvedTheme === 'dark');
+
+    return () => {
+      classList.remove('app-theme-dark', 'app-theme-light');
+      root.remove('dark');
+    };
   }, [resolvedTheme]);
 }
 
@@ -243,20 +275,86 @@ function ThemeBar() {
   );
 }
 
+/**
+ * shadcn/ui components, rendered next to the form builder.
+ *
+ * The point is the collision surface. shadcn brings Tailwind v4 with its own
+ * global preflight, its own `.dark` token scope and its own Radix/Base UI
+ * portals — the exact things a real host application brings. Anything the
+ * library leaks shows up here as shadcn chrome that looks wrong, or as parama
+ * chrome that a host stylesheet has flattened.
+ *
+ * Both sides carry their own controls so a broken reset is visible immediately:
+ * padding, borders and radii are what a stray global reset destroys first.
+ */
+function ShadcnPanel() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  return (
+    <Card className="mb-8">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          shadcn/ui <Badge variant="secondary">host library</Badge>
+        </CardTitle>
+        <CardDescription>
+          Tailwind v4, its own preflight and its own <code>.dark</code> tokens. These controls must stay correct while
+          the form builder is on the page — and vice versa.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="flex flex-wrap items-center gap-3">
+        <Button>Primary</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Button variant="outline">Outline</Button>
+        <Button variant="destructive">Destructive</Button>
+        <Input className="max-w-56" placeholder="shadcn input" />
+
+        <Select>
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="shadcn select" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="one">Portalled item one</SelectItem>
+            <SelectItem value="two">Portalled item two</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* A portalled overlay from the *host* library, to sit alongside the
+            library's own portal host on document.body. */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline">Open dialog</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>shadcn dialog</DialogTitle>
+              <DialogDescription>
+                Portalled to document.body, same as the form builder's overlays. Both should be themed and neither
+                should restyle the other.
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
+  );
+}
+
 /** Which half of the product is on screen. */
-type View = 'form' | 'editor';
+type View = 'users' | 'editor';
 
 /**
- * Switches between designing the form and filling it in.
+ * Switches between the users list and the form designer.
  *
  * These are two views rather than two panes because the core store is a
  * module-level singleton — one page hosts one form. Mounting `FormEditor` and
  * `FormRenderer` together makes them share a single schema, form data and mode,
- * so they have to take turns.
+ * so they have to take turns. The renderer only mounts inside the dialog, which
+ * keeps that constraint satisfied without thinking about it.
  */
 function ViewSwitch({ view, onChange }: { view: View; onChange: (next: View) => void }) {
   const tabs: Array<{ id: View; label: string }> = [
-    { id: 'form', label: 'Fill form' },
+    { id: 'users', label: 'Users' },
     { id: 'editor', label: 'Design form' }
   ];
 
@@ -281,13 +379,47 @@ function ProductionDemo() {
 
   // Schema state comes from the editor; runtimeSchema is used by renderer with current values
   const [schema, setSchema] = useState<FormSchema>(initialUserSchema);
-  const [view, setView] = useState<View>('form');
+  const [view, setView] = useState<View>('users');
 
   // Users list & editing state
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<Record<string, any> | null>(null);
+
+  /*
+   * The form now lives in a shadcn dialog, which makes this the sharpest test
+   * in the app: the renderer is mounted inside a *host library's* portal, not
+   * its own. Its scope marker travels with it, so the bundled CSS still
+   * applies; its own dropdowns and date pickers still portal to parama's host
+   * on the body, which is outside this dialog.
+   */
+  const [formOpen, setFormOpen] = useState(false);
+
+  /** Restores the blank schema and labels the submit button for the mode. */
+  const resetSchema = useCallback((mode: 'create' | 'edit') => {
+    setSchema({
+      ...initialUserSchema,
+      fields: initialUserSchema.fields.map((f) =>
+        f.type === 'submit' ? { ...f, label: mode === 'edit' ? 'Update User' : 'Save User' } : f
+      )
+    });
+  }, []);
+
+  const openCreate = useCallback(() => {
+    setEditingUser(null);
+    resetSchema('create');
+    setFormOpen(true);
+  }, [resetSchema]);
+
+  const openEdit = useCallback(
+    (user: Record<string, any>) => {
+      setEditingUser(user);
+      resetSchema('edit');
+      setFormOpen(true);
+    },
+    [resetSchema]
+  );
 
   const userColumns = useMemo(() => {
     return schema.fields.filter((f) => f.type !== 'submit');
@@ -331,12 +463,10 @@ function ProductionDemo() {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       await fetchUsers();
-      // reset form to blank state and editing
+      // Close on success, so the refreshed row is visible behind the dialog.
+      setFormOpen(false);
       setEditingUser(null);
-      setSchema({
-        ...initialUserSchema,
-        fields: initialUserSchema.fields.map((f) => (f.type === 'submit' ? { ...f, label: 'Save User' } : f))
-      });
+      resetSchema('create');
     } catch (error) {
       console.error('Error saving user:', error);
       alert('Error saving user. Make sure JSON Server is running on port 4000.');
@@ -352,6 +482,7 @@ function ProductionDemo() {
       </p>
 
       <ThemeBar />
+      <ShadcnPanel />
       <ViewSwitch view={view} onChange={setView} />
 
       {view === 'editor' ? (
@@ -367,92 +498,83 @@ function ProductionDemo() {
           <FormEditor schema={schema} onSaveSchema={setSchema} />
         </div>
       ) : (
-        <>
-          <div className="demo-container">
-            {editingUser ? (
-              <div className="editing-banner">
-                <span>Editing user #{editingUser.id}</span>
-                <button
-                  className="btn"
-                  onClick={() => {
-                    setEditingUser(null);
-                    setSchema({
-                      ...initialUserSchema,
-                      fields: initialUserSchema.fields.map((f) =>
-                        f.type === 'submit' ? { ...f, label: 'Save User' } : f
-                      )
-                    });
-                  }}>
-                  Cancel
-                </button>
-              </div>
-            ) : null}
-            <FormRenderer
-              key={`${schema.id}`}
-              schema={schema}
-              data={editingUser || undefined}
-              onSubmit={handleSubmitSchema}
-            />
+        <div className="list-data users">
+          <div className="users__header">
+            <h2>Users</h2>
+            <button className="btn" onClick={fetchUsers}>
+              Refresh
+            </button>
+            <Button size="sm" onClick={openCreate}>
+              New user
+            </Button>
+            {isLoading ? <span className="users__status">Loading...</span> : null}
+            {error ? <span className="users__status users__status--error">{error}</span> : null}
           </div>
-
-          <div className="list-data users">
-            <div className="users__header">
-              <h2>Users</h2>
-              <button className="btn" onClick={fetchUsers}>
-                Refresh
-              </button>
-              {isLoading ? <span className="users__status">Loading...</span> : null}
-              {error ? <span className="users__status users__status--error">{error}</span> : null}
-            </div>
-            <div className="users__scroll">
-              <table className="users__table">
-                <thead>
+          <div className="users__scroll">
+            <table className="users__table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  {userColumns.map((col) => (
+                    <th key={col.id}>{(col as any).label ?? (col as any).name}</th>
+                  ))}
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.length === 0 ? (
                   <tr>
-                    <th>ID</th>
-                    {userColumns.map((col) => (
-                      <th key={col.id}>{(col as any).label ?? (col as any).name}</th>
-                    ))}
-                    <th>Actions</th>
+                    <td className="users__empty" colSpan={userColumns.length + 2}>
+                      No users found.
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {users.length === 0 ? (
-                    <tr>
-                      <td className="users__empty" colSpan={userColumns.length + 2}>
-                        No users found.
+                ) : (
+                  users.map((u) => (
+                    <tr key={u.id}>
+                      <td>{u.id}</td>
+                      {userColumns.map((col) => (
+                        <td key={col.id}>{String(u[(col as any).name] ?? '')}</td>
+                      ))}
+                      <td>
+                        <button className="btn" onClick={() => openEdit(u)}>
+                          Edit
+                        </button>
                       </td>
                     </tr>
-                  ) : (
-                    users.map((u) => (
-                      <tr key={u.id}>
-                        <td>{u.id}</td>
-                        {userColumns.map((col) => (
-                          <td key={col.id}>{String(u[(col as any).name] ?? '')}</td>
-                        ))}
-                        <td>
-                          <button
-                            className="btn"
-                            onClick={() => {
-                              setEditingUser(u);
-                              setSchema({
-                                ...initialUserSchema,
-                                fields: initialUserSchema.fields.map((f) =>
-                                  f.type === 'submit' ? { ...f, label: 'Update User' } : f
-                                )
-                              });
-                            }}>
-                            Edit
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        </>
+        </div>
       )}
+
+      {/*
+       * The form builder's renderer inside the host library's dialog.
+       *
+       * Two libraries' portals are in play at once here: shadcn owns this
+       * dialog, and the fields' own dropdowns and date pickers portal to
+       * parama's host elsewhere on the body. Mounted only while open, which
+       * also keeps the renderer and the editor from sharing the singleton
+       * store.
+       */}
+      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingUser ? `Edit user #${editingUser.id}` : 'New user'}</DialogTitle>
+            <DialogDescription>
+              {editingUser ? 'Update the record and save.' : 'Fill in the details to add a user.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <FormRenderer
+            key={`${schema.id}-${editingUser?.id ?? 'new'}`}
+            schema={schema}
+            data={editingUser || undefined}
+            onSubmit={handleSubmitSchema}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

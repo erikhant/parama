@@ -50,28 +50,20 @@ describe('FormRenderer scope marker', () => {
   });
 
   /*
-   * Utilities compile to `[data-parama-scope] .grid` — a descendant selector —
-   * so any class on the marker element itself is never matched. The marker has
-   * to be a bare wrapper; marking the `<form>` directly cost it its own `grid`
-   * and collapsed the layout to `display: block`.
+   * The marker sits on the `<form>` itself, which also carries the layout
+   * classes. That only works because the build rewrites each scoped rule to
+   * `:is([data-parama-scope], [data-parama-scope] *)`, matching the root as
+   * well as its descendants — Tailwind's own `important` selector emits a plain
+   * descendant combinator, under which a scope root loses every class it holds.
+   *
+   * No wrapper element, so a host's flex or grid rules still land on the form.
    */
-  it('keeps the marker off the styled element', () => {
+  it('marks the form itself, without an intermediate wrapper', () => {
     const { container } = render(<FormRenderer schema={schema} />);
 
     const form = container.querySelector('form')!;
-    expect(form.hasAttribute(PARAMA_SCOPE_ATTRIBUTE)).toBe(false);
+    expect(form.hasAttribute(PARAMA_SCOPE_ATTRIBUTE)).toBe(true);
     expect(form.className).toContain('grid');
-
-    const scopeRoot = form.closest(`[${PARAMA_SCOPE_ATTRIBUTE}]`)!;
-    expect(scopeRoot.className).toBe('');
-  });
-
-  // The wrapper must not become a layout box, or a host's flex/grid rules would
-  // apply to it instead of to the form.
-  it('keeps the scope wrapper out of the layout', () => {
-    const { container } = render(<FormRenderer schema={schema} />);
-
-    const scopeRoot = container.querySelector(`[${PARAMA_SCOPE_ATTRIBUTE}]`) as HTMLElement;
-    expect(scopeRoot.style.display).toBe('contents');
+    expect(form.closest(`[${PARAMA_SCOPE_ATTRIBUTE}]`)).toBe(form);
   });
 });

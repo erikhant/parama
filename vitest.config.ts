@@ -13,8 +13,10 @@ const pkg = (name: string) => path.resolve(root, 'packages', name, 'src');
  * **sources**, not built `dist` output, so a run never depends on build order
  * and always exercises the code being edited.
  *
- * Two projects: `core` runs the pure engine logic in Node, `ui` runs anything
- * that renders React in jsdom.
+ * Three projects: `core` runs the pure engine logic in Node, `ui` runs anything
+ * that renders React in jsdom, and `build` covers the PostCSS tooling that
+ * shapes the published stylesheet — which lives outside any package's `src`
+ * because it is not shipped.
  */
 export default defineConfig({
   plugins: [react()],
@@ -57,6 +59,15 @@ export default defineConfig({
           name: 'ui',
           environment: 'jsdom',
           include: ['packages/{renderer,editor,parama-ui}/src/**/*.{test,spec}.{ts,tsx}'],
+          setupFiles: [path.resolve(root, 'vitest.setup.ts')]
+        }
+      },
+      {
+        extends: true,
+        test: {
+          name: 'build',
+          environment: 'node',
+          include: ['packages/*/postcss/**/*.{test,spec}.ts'],
           setupFiles: [path.resolve(root, 'vitest.setup.ts')]
         }
       }
