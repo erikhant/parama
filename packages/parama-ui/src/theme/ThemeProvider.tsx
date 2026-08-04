@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ThemeContext, type ThemeContextValue } from './ThemeContext';
 import { DEFAULT_THEME_MODE, isThemeMode, resolveTheme, THEME_STORAGE_KEY, type ThemeMode } from './theme';
+import { PARAMA_SCOPE_ATTRIBUTE } from './scope';
 import { readThemeMode, writeThemeMode } from './themeStorage';
 
 const DARK_QUERY = '(prefers-color-scheme: dark)';
@@ -110,6 +111,9 @@ export function ThemeProvider({ children, theme, onThemeChange, className }: The
 
     const host = document.createElement('div');
     host.setAttribute(PORTAL_ATTRIBUTE, '');
+    // Everything portalled here is library chrome, and it sits outside every
+    // other scoped root, so the host element has to carry the marker itself.
+    host.setAttribute(PARAMA_SCOPE_ATTRIBUTE, '');
     document.body.appendChild(host);
     setPortalContainer(host);
 

@@ -1,6 +1,8 @@
 import './index.css';
 import '@parama-ui/react/dist/parama-ui.min.css';
-import '@parama-dev/form-builder-editor/dist/editor.css';
+// `/styles` now resolves to the complete bundle (editor.css): scoped utilities
+// plus a reset confined to the theme wrapper. Nothing here leaks to the page.
+import '@parama-dev/form-builder-editor/styles';
 
 import { createRoot } from 'react-dom/client';
 import type { FormSchema } from '@parama-dev/form-builder-types';

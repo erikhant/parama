@@ -2,6 +2,277 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Scoped preflight.
+ *
+ * Tailwind's own preflight is switched off in `tailwind.config.js` because it
+ * is a *global* reset: it restyles `html`, `body` and every element in the
+ * document, so importing the editor's stylesheet would retypeset the host
+ * application and rewrite its default border colour. These are the same rules
+ * confined to the subtrees this library draws.
+ *
+ * The anchor is `data-parama-scope`, never `data-parama-theme`. The theme
+ * attribute answers "which colour scheme applies here", and a host is expected
+ * to wrap its whole application in `ThemeProvider` — so it sits above the
+ * host's own markup, and a reset keyed to it flattens the host's buttons,
+ * borders and padding. `data-parama-scope` marks only what the library
+ * renders: the editor shell, a rendered form, and the portal host.
+ *
+ * Both the root and the `*` variants are listed because an element is not its
+ * own descendant.
+ *
+ * Every selector is wrapped in `:where()`, which contributes no specificity, so
+ * these rules weigh (0,0,0) and lose to any class. A reset has to be the
+ * weakest author-level thing on the page: Tailwind's preflight gets away with
+ * plain `*` only because it sits at the top of the same stylesheet as the
+ * classes that override it, whereas this file loads *after* `parama-ui.min.css`
+ * — so `[data-parama-scope] *` tied `.form-control` on specificity, won on
+ * source order, and stripped the border off every field. Specificity, not
+ * position, is what makes the ordering irrelevant.
+ */
+@layer base {
+  :where([data-parama-scope]) {
+    /* Was on `html`. Applied here so it inherits into the subtree rather than
+       changing the host page's typography. */
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    font-family: theme('fontFamily.sans');
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where([data-parama-scope]),
+  :where([data-parama-scope]) *,
+  :where([data-parama-scope]) *::before,
+  :where([data-parama-scope]) *::after {
+    box-sizing: border-box;
+    /* Width-only utilities (`border`, `border-l`) set neither style nor colour,
+       so without these they render invisible. */
+    border-width: 0;
+    border-style: solid;
+    border-color: rgba(var(--stroke), 1);
+  }
+
+  :where([data-parama-scope]) *::before,
+  :where([data-parama-scope]) *::after {
+    --tw-content: '';
+  }
+
+  :where([data-parama-scope]) blockquote,
+  :where([data-parama-scope]) dl,
+  :where([data-parama-scope]) dd,
+  :where([data-parama-scope]) h1,
+  :where([data-parama-scope]) h2,
+  :where([data-parama-scope]) h3,
+  :where([data-parama-scope]) h4,
+  :where([data-parama-scope]) h5,
+  :where([data-parama-scope]) h6,
+  :where([data-parama-scope]) hr,
+  :where([data-parama-scope]) figure,
+  :where([data-parama-scope]) p,
+  :where([data-parama-scope]) pre {
+    margin: 0;
+  }
+
+  :where([data-parama-scope]) h1,
+  :where([data-parama-scope]) h2,
+  :where([data-parama-scope]) h3,
+  :where([data-parama-scope]) h4,
+  :where([data-parama-scope]) h5,
+  :where([data-parama-scope]) h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  :where([data-parama-scope]) a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  :where([data-parama-scope]) b,
+  :where([data-parama-scope]) strong {
+    font-weight: bolder;
+  }
+
+  :where([data-parama-scope]) code,
+  :where([data-parama-scope]) kbd,
+  :where([data-parama-scope]) samp,
+  :where([data-parama-scope]) pre {
+    font-family: theme('fontFamily.mono');
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+    font-size: 1em;
+  }
+
+  :where([data-parama-scope]) small {
+    font-size: 80%;
+  }
+
+  :where([data-parama-scope]) sub,
+  :where([data-parama-scope]) sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  :where([data-parama-scope]) sub {
+    bottom: -0.25em;
+  }
+  :where([data-parama-scope]) sup {
+    top: -0.5em;
+  }
+
+  :where([data-parama-scope]) hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+
+  :where([data-parama-scope]) abbr:where([title]) {
+    text-decoration: underline dotted;
+  }
+
+  :where([data-parama-scope]) table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+
+  :where([data-parama-scope]) button,
+  :where([data-parama-scope]) input,
+  :where([data-parama-scope]) optgroup,
+  :where([data-parama-scope]) select,
+  :where([data-parama-scope]) textarea {
+    font-family: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+  }
+
+  :where([data-parama-scope]) button,
+  :where([data-parama-scope]) select {
+    text-transform: none;
+  }
+
+  :where([data-parama-scope]) button,
+  :where([data-parama-scope]) input:where([type='button']),
+  :where([data-parama-scope]) input:where([type='reset']),
+  :where([data-parama-scope]) input:where([type='submit']) {
+    -webkit-appearance: button;
+    background-color: transparent;
+    background-image: none;
+  }
+
+  :where([data-parama-scope]) :-moz-focusring {
+    outline: auto;
+  }
+  :where([data-parama-scope]) :-moz-ui-invalid {
+    box-shadow: none;
+  }
+
+  :where([data-parama-scope]) progress {
+    vertical-align: baseline;
+  }
+
+  :where([data-parama-scope]) ::-webkit-inner-spin-button,
+  :where([data-parama-scope]) ::-webkit-outer-spin-button {
+    height: auto;
+  }
+
+  :where([data-parama-scope]) [type='search'] {
+    -webkit-appearance: textfield;
+    outline-offset: -2px;
+  }
+
+  :where([data-parama-scope]) ::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+
+  :where([data-parama-scope]) ::-webkit-file-upload-button {
+    -webkit-appearance: button;
+    font: inherit;
+  }
+
+  :where([data-parama-scope]) summary {
+    display: list-item;
+  }
+
+  :where([data-parama-scope]) fieldset {
+    margin: 0;
+    padding: 0;
+  }
+  :where([data-parama-scope]) legend {
+    padding: 0;
+  }
+
+  :where([data-parama-scope]) ol,
+  :where([data-parama-scope]) ul,
+  :where([data-parama-scope]) menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  :where([data-parama-scope]) dialog {
+    padding: 0;
+  }
+
+  :where([data-parama-scope]) textarea {
+    resize: vertical;
+  }
+
+  :where([data-parama-scope]) input::-moz-placeholder,
+  :where([data-parama-scope]) textarea::-moz-placeholder {
+    opacity: 1;
+    color: #9ca3af;
+  }
+  :where([data-parama-scope]) input::placeholder,
+  :where([data-parama-scope]) textarea::placeholder {
+    opacity: 1;
+    color: #9ca3af;
+  }
+
+  :where([data-parama-scope]) button,
+  :where([data-parama-scope]) [role='button'] {
+    cursor: pointer;
+  }
+
+  :where([data-parama-scope]) :disabled {
+    cursor: default;
+  }
+
+  :where([data-parama-scope]) img,
+  :where([data-parama-scope]) svg,
+  :where([data-parama-scope]) video,
+  :where([data-parama-scope]) canvas,
+  :where([data-parama-scope]) audio,
+  :where([data-parama-scope]) iframe,
+  :where([data-parama-scope]) embed,
+  :where([data-parama-scope]) object {
+    display: block;
+    vertical-align: middle;
+  }
+
+  :where([data-parama-scope]) img,
+  :where([data-parama-scope]) video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  :where([data-parama-scope]) [hidden]:where(:not([hidden='until-found'])) {
+    display: none;
+  }
+}
+
 @layer utilities {
   /* Better drag handle visibility */
   [data-draggable-handle] {

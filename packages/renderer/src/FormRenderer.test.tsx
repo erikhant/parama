@@ -229,10 +229,21 @@ describe('FormRenderer theming', () => {
     expect(container.firstElementChild).toHaveClass('contents');
   });
 
+  /*
+   * The form must stay the effective layout root. Asserted as a property of
+   * every wrapper rather than as a fixed DOM shape: the scope marker the
+   * bundled stylesheet keys on is one such wrapper, and more may follow.
+   */
   it('still renders the form as the effective root', () => {
     const { container } = render(<FormRenderer schema={schemaWith([textField('f1', 'email')])} theme="dark" />);
 
-    expect(container.querySelector('.contents > form')).not.toBeNull();
+    const form = container.querySelector('form');
+    expect(form).not.toBeNull();
+
+    for (let node = form!.parentElement; node && node !== container; node = node.parentElement) {
+      const isTransparent = node.classList.contains('contents') || node.style.display === 'contents';
+      expect(isTransparent, `${node.tagName}.${node.className} is a layout box between host and form`).toBe(true);
+    }
   });
 
   it('prefers a persisted theme over the prop', () => {

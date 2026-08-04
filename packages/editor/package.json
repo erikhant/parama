@@ -15,6 +15,10 @@
       "require": "./dist/index.umd.js"
     },
     "./styles": {
+      "import": "./dist/editor.css",
+      "require": "./dist/editor.css"
+    },
+    "./styles/layout": {
       "import": "./dist/styles.css",
       "require": "./dist/styles.css"
     },

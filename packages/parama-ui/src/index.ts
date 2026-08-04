@@ -45,3 +45,4 @@ export {
 } from './theme/theme';
 export type { ResolvedTheme, ThemeMode } from './theme/theme';
 export { readThemeMode, writeThemeMode } from './theme/themeStorage';
+export { PARAMA_SCOPE_ATTRIBUTE, paramaScope } from './theme/scope';

@@ -65,7 +65,7 @@ export const Toolbar = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSav
           disabled={fieldLength === 0}
           onOpenChange={(isOpen) => actions.changeMode(isOpen ? 'render' : 'editor')}
         />
-        <Button size="sm" className="rounded-md" disabled={fieldLength === 0} onClick={handleSaveSchema}>
+        <Button size="sm" disabled={fieldLength === 0} onClick={handleSaveSchema}>
           <SaveIcon size={16} />
           Save
         </Button>

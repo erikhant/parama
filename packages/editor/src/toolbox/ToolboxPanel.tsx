@@ -20,10 +20,10 @@ export const ToolboxPanel = () => {
       className="w-80 shrink-0 max-h-screen overflow-y-auto overflow-x-hidden bg-surface-muted border-r-2 border-stroke-subtle/60">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
         <TabsList bordered className="rounded-none grid-cols-2 h-12 sticky top-0 z-10">
-          <TabsTrigger className="h-full rounded-md" value="fields">
+          <TabsTrigger className="h-full" value="fields">
             Fields
           </TabsTrigger>
-          <TabsTrigger className="h-full rounded-md" value="presets">
+          <TabsTrigger className="h-full" value="presets">
             Presets
           </TabsTrigger>
         </TabsList>

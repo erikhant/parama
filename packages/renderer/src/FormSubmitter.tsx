@@ -1,6 +1,6 @@
 import { useFormBuilder } from '@parama-dev/form-builder-core';
 import type { FormBuilderProps } from '@parama-dev/form-builder-types';
-import { cn } from '@parama-ui/react';
+import { cn, paramaScope } from '@parama-ui/react';
 import React, { useCallback } from 'react';
 import { FormFieldRenderer } from './FormField';
 import { useChangeNotifier } from './hooks/useChangeNotifier';
@@ -49,10 +49,25 @@ export const FormSubmitter: React.FC<FormSubmitterProps> = ({ onSubmit, onChange
   );
 
   return (
-    <form className={cn(`grid column-${layout.colSize} gap-size-${layout.gap}`, className)} onSubmit={handleSubmit}>
-      {fields.map((field) => (
-        <FormFieldRenderer key={field.id} field={field} onCancel={onCancel} isDisabled={isSubmitting} />
-      ))}
-    </form>
+    /*
+     * A bare scope marker, not a styled element.
+     *
+     * The bundled utilities compile to `[data-parama-scope] .grid`, a
+     * *descendant* selector — so anything on the marker element itself is never
+     * matched. Putting the marker on the `<form>` cost it its own `grid`.
+     *
+     * `display: contents` is set inline rather than with the `contents` utility
+     * for the same reason, and it keeps this wrapper out of the layout, so a
+     * host's flex or grid rules still apply to the `<form>` as before.
+     */
+    <div {...paramaScope} style={{ display: 'contents' }}>
+      <form
+        className={cn(`grid column-${layout.colSize} gap-size-${layout.gap}`, className)}
+        onSubmit={handleSubmit}>
+        {fields.map((field) => (
+          <FormFieldRenderer key={field.id} field={field} onCancel={onCancel} isDisabled={isSubmitting} />
+        ))}
+      </form>
+    </div>
   );
 };

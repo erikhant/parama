@@ -2,7 +2,7 @@ import { DndContext } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useFormBuilder } from '@parama-dev/form-builder-core';
 import type { FormEditorProps } from '@parama-dev/form-builder-types';
-import { cn } from '@parama-ui/react';
+import { cn, paramaScope } from '@parama-ui/react';
 import { useEffect } from 'react';
 import { Toaster } from 'sonner';
 import { FieldOverlay, FormCanvas } from '../canvas';
@@ -37,40 +37,54 @@ export const Editor = ({ onSaveSchema }: { onSaveSchema: FormEditorProps['onSave
 
   return (
     <>
-      <Toolbar onSaveSchema={onSaveSchema} />
+      {/*
+       * The editor's scoped root. Everything the bundled stylesheet styles
+       * lives under this marker, which is what keeps the reset and the
+       * utilities off the host's own markup — the theme wrapper above is no
+       * good for that, since a host is expected to wrap its whole app in it.
+       *
+       * The height is an inline style, not `h-full`. Utilities compile to
+       * `[data-parama-scope] .h-full`, a *descendant* selector, so a class on
+       * the marker element itself would never match. It stands in for the
+       * `h-full` `FormEditor` puts on its ThemeProvider, which disappears
+       * whenever a nested provider renders no element at all.
+       */}
+      <div {...paramaScope} style={{ height: '100%' }}>
+        <Toolbar onSaveSchema={onSaveSchema} />
 
-      <DndContext
+        <DndContext
         sensors={sensors}
         collisionDetection={verticalGridCollision}
         modifiers={[restrictToWindowEdges]}
-        onDragStart={handleDragStart}
-        onDragMove={handleDragMove}
-        onDragEnd={handleDragEnd}>
-        <div
-          className={cn(
-            // `bg-surface` backs the shell so any gap between the panels shows
-            // the themed surface rather than the host page.
-            'editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden bg-surface text-content',
-            editor.options?.containerClassname
-          )}>
-          <ToolboxPanel />
-          <FormCanvas />
-          <EditorPanel />
-        </div>
+          onDragStart={handleDragStart}
+          onDragMove={handleDragMove}
+          onDragEnd={handleDragEnd}>
+          <div
+            className={cn(
+              // `bg-surface` backs the shell so any gap between the panels shows
+              // the themed surface rather than the host page.
+              'editor-container flex h-[calc(100vh_-_3rem)] overflow-hidden bg-surface text-content',
+              editor.options?.containerClassname
+            )}>
+            <ToolboxPanel />
+            <FormCanvas />
+            <EditorPanel />
+          </div>
 
-        {/* Both overlays render; each resolves to null unless the dragged id is
-            one of its own, so the same id can come from either source. */}
-        {activeId && (
-          <>
-            <DragPreview>
-              <FieldOverlay id={activeId} />
-            </DragPreview>
-            <DragPreview>
-              <ToolboxItemOverlay id={activeId} />
-            </DragPreview>
-          </>
-        )}
-      </DndContext>
+          {/* Both overlays render; each resolves to null unless the dragged id is
+              one of its own, so the same id can come from either source. */}
+          {activeId && (
+            <>
+              <DragPreview>
+                <FieldOverlay id={activeId} />
+              </DragPreview>
+              <DragPreview>
+                <ToolboxItemOverlay id={activeId} />
+              </DragPreview>
+            </>
+          )}
+        </DndContext>
+      </div>
 
       <Toaster position="top-center" richColors />
     </>

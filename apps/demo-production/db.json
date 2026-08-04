@@ -6,10 +6,10 @@
       "email": "john.doe@example.com",
       "phone": "+1-555-0123",
       "address": "123 Main St, Anytown, USA 12345",
-      "dateOfBirth": "2025-05-31T17:00:00.000Z",
+      "dateOfBirth": "2026-05-15T17:00:00.000Z",
       "department": "Marketing",
       "position": "Senior Developer",
-      "joinDate": "2025-09-22T17:00:00.000Z"
+      "joinDate": "2026-07-29T17:00:00.000Z"
     },
     {
       "id": "2",
@@ -43,6 +43,17 @@
       "department": "HR",
       "position": "HR Director",
       "joinDate": "2018-05-20"
+    },
+    {
+      "id": "b83f",
+      "name": "demo",
+      "email": "superadmin@idproo.id",
+      "phone": "",
+      "address": "",
+      "dateOfBirth": "",
+      "department": "Sales",
+      "position": "",
+      "joinDate": ""
     }
   ]
 }
