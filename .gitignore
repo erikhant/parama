@@ -1,11 +1,17 @@
 # Node modules
 node_modules/
 
-# pnpm lock file
-pnpm-lock.yaml
-
-# pnpm workspace file
-pnpm-workspace.yaml
+# The lockfile and the workspace definition are committed on purpose.
+#
+# Without the workspace file a fresh clone is not a workspace at all: `pnpm
+# install` links nothing and every cross-package import fails. Without the
+# lockfile each install resolves whatever is newest inside the declared ranges,
+# which is how a clean reinstall once pulled a react-error-boundary that had
+# changed `FallbackProps` and broke the build with no source change behind it.
+#
+# `pnpm-workspace.dev.yaml` and `.prod.yaml` remain as manual variants to copy
+# over this file; the committed default is the dev one, so clone-install-build
+# works with no extra step.
 
 # Build output directories
 dist/
