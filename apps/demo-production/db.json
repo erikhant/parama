@@ -54,6 +54,17 @@
       "department": "Sales",
       "position": "",
       "joinDate": ""
+    },
+    {
+      "id": "27b6",
+      "name": "demo",
+      "email": "superadmin@idproo.id",
+      "phone": "",
+      "address": "Jalan Sunyaragi Kp. Lebu No. 17 C",
+      "dateOfBirth": "2026-07-25T17:00:00.000Z",
+      "department": "Marketing",
+      "position": "Sales Trainee",
+      "joinDate": "2026-08-01T17:00:00.000Z"
     }
   ]
 }

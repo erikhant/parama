@@ -41,6 +41,7 @@ Thumbs.db
 
 # TypeScript incremental build state
 *.tsbuildinfo
+**/.rollup.cache/
 
 # Overwritten by each `pnpm publish --report-summary`; records only the last package
 pnpm-publish-summary.json

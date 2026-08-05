@@ -11,11 +11,42 @@ import { useThemeScope } from '../../theme/ThemeScope';
  * needs to render inside an enclosing modal rather than beside it. See
  * `modalContainer.ts` for what breaks otherwise.
  */
-const Select: React.FC<React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>> = ({ children, ...props }) => (
-  <PortalAnchorProvider>
-    <SelectPrimitive.Root {...props}>{children}</SelectPrimitive.Root>
-  </PortalAnchorProvider>
-);
+const Select: React.FC<React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>> = ({
+  children,
+  onValueChange,
+  ...props
+}) => {
+  /*
+   * Swallow empty value changes.
+   *
+   * A single-choice select has no way for a user to choose "nothing" — the
+   * primitive rejects an item with an empty value outright — so `''` never
+   * represents an intent. It is emitted spuriously while the primitive
+   * reconciles a controlled `value` that changed against an item collection it
+   * has not caught up with, and forwarding it wrote the empty string straight
+   * back into the caller's state.
+   *
+   * That is how a form lost a selection it had just hydrated: opening a record
+   * whose value differed from the previously opened one cleared the field, so
+   * the bug only appeared once two records in a row did not match. Callers that
+   * genuinely need to clear the field can still set `value` themselves.
+   */
+  const handleValueChange = React.useCallback(
+    (value: string) => {
+      if (value === '') return;
+      onValueChange?.(value);
+    },
+    [onValueChange]
+  );
+
+  return (
+    <PortalAnchorProvider>
+      <SelectPrimitive.Root {...props} onValueChange={handleValueChange}>
+        {children}
+      </SelectPrimitive.Root>
+    </PortalAnchorProvider>
+  );
+};
 Select.displayName = SelectPrimitive.Root.displayName;
 
 const SelectGroup = SelectPrimitive.Group;

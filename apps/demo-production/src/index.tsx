@@ -123,7 +123,8 @@ const initialUserSchema: FormSchema = {
       transformer: '',
       mode: 'single',
       options: {
-        dateFormat: 'yyyy-MM-dd'
+        dateFormat: 'yyyy-MM-dd',
+        dropdownType: 'dropdown'
       }
     },
     {
@@ -183,7 +184,8 @@ const initialUserSchema: FormSchema = {
       transformer: '',
       mode: 'single',
       options: {
-        dateFormat: 'yyyy-MM-dd'
+        dateFormat: 'yyyy-MM-dd',
+        dropdownType: 'dropdown'
       }
     },
     {

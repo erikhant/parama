@@ -69,8 +69,16 @@ export function useModalContainer(): HTMLElement | null {
   const anchorRef = usePortalAnchor();
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
 
-  React.useEffect(() => {
-    setContainer(findModalContainer(anchorRef?.current));
+  /*
+   * Resolved in a layout effect, not during render: the content is portalled,
+   * so it cannot walk up to find the modal itself, and the trigger's ref has
+   * not attached yet on the first render. Running before paint keeps the extra
+   * commit invisible, and the guarded update means the common case — no modal,
+   * or the same one — re-renders nothing.
+   */
+  React.useLayoutEffect(() => {
+    const next = findModalContainer(anchorRef?.current);
+    setContainer((current) => (current === next ? current : next));
   }, [anchorRef]);
 
   return container;

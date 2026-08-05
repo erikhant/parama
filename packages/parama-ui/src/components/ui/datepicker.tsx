@@ -17,6 +17,29 @@ type DatePickerProps = React.ComponentProps<typeof Calendar> & {
   modalPopover?: boolean; // If true, use Popover for modal behavior
 };
 
+/**
+ * The month a calendar should open on, given whatever is selected.
+ *
+ * Covers all three selection modes, and tolerates the values a form actually
+ * carries — a date-like value can arrive as a string from a JSON payload, and
+ * an `Invalid Date` must not be handed to the calendar.
+ */
+function monthOfSelection(selected: unknown): Date | undefined {
+  const first =
+    selected instanceof Date || typeof selected === 'string'
+      ? selected
+      : Array.isArray(selected)
+        ? selected[0]
+        : selected && typeof selected === 'object' && 'from' in selected
+          ? (selected as { from?: unknown }).from
+          : undefined;
+
+  if (first === undefined || first === null) return undefined;
+
+  const date = first instanceof Date ? first : new Date(first as string);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
 const DatePicker: React.FC<DatePickerProps> = ({
   container,
   placeholder,
@@ -27,6 +50,17 @@ const DatePicker: React.FC<DatePickerProps> = ({
   disabledInput = false,
   ...props
 }: DatePickerProps) => {
+  /*
+   * Open on the selected date's month rather than today's. Without this, editing
+   * a record with a 1998 birth date opens the calendar on the current month and
+   * the user navigates back two decades to see what is already selected.
+   *
+   * `defaultMonth` is uncontrolled, so the user can still page away freely; an
+   * explicit `defaultMonth` or a controlled `month` from the caller still wins.
+   */
+  const defaultMonth =
+    props.defaultMonth ?? monthOfSelection('selected' in props ? props.selected : undefined);
+
   return (
     <Popover modal={modalPopover}>
       <PopoverTrigger asChild>
@@ -55,7 +89,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         </FormGroup>
       </PopoverTrigger>
       <PopoverContent container={container} align="start" className={cn('datepicker', popoverClassName)}>
-        <Calendar {...props} />
+        <Calendar {...props} defaultMonth={defaultMonth} />
       </PopoverContent>
     </Popover>
   );
