@@ -1,7 +1,14 @@
 import './index.css';
-import '@parama-ui/react/dist/parama-ui.min.css';
-// `/styles` now resolves to the complete bundle (editor.css): scoped utilities
-// plus a reset confined to the theme wrapper. Nothing here leaks to the page.
+
+/*
+ * Both stylesheets, via the documented subpaths — this app is the reference
+ * integration, so it imports them exactly as the READMEs tell a consumer to.
+ *
+ * parama-ui defines the tokens and component classes; the editor's `/styles`
+ * resolves to `editor.css`, the scoped utilities and the reset that read them.
+ * Neither is enough on its own, and nothing here leaks to the host page.
+ */
+import '@parama-ui/react/styles';
 import '@parama-dev/form-builder-editor/styles';
 
 import { createRoot } from 'react-dom/client';

@@ -14,7 +14,9 @@ npm install @parama-dev/form-builder-editor @parama-dev/form-builder-core @param
 
 ```tsx
 import { FormEditor } from '@parama-dev/form-builder-editor';
-// Import the required styles
+
+// Both are required — see below.
+import '@parama-ui/react/styles';
 import '@parama-dev/form-builder-editor/styles';
 
 function App() {
@@ -26,21 +28,39 @@ function App() {
 }
 ```
 
-### Alternative CSS Import
+### The two stylesheets
 
-If you prefer to import CSS from your bundler configuration or CSS file:
+Neither is optional, and they do different jobs:
+
+| Import | Contains |
+| ------ | -------- |
+| `@parama-ui/react/styles` | Design tokens (including `--parama-radius`) and the component classes — inputs, selects, dialogs. |
+| `@parama-dev/form-builder-editor/styles` | The editor's scoped utilities and its reset, which *reference* those tokens. |
+
+Load only the editor stylesheet and every token resolves to nothing; load only
+parama-ui and the editor has no layout. Order does not matter — they target
+different selectors.
+
+Neither is injected by the JavaScript bundle, so a bundler that tree-shakes
+unused imports will not drop them.
+
+### Alternative CSS import
+
+If you prefer to pull them in from a stylesheet or bundler config, use the same
+two entry points:
 
 ```css
 /* In your main CSS file */
-@import '@parama-dev/form-builder-editor/dist/styles.css';
+@import '@parama-ui/react/styles';
+@import '@parama-dev/form-builder-editor/styles';
 ```
 
-Or in your bundler (webpack, vite, etc.):
-
-```js
-// In your main.js or app.js
-import '@parama-dev/form-builder-editor/dist/styles.css';
-```
+`/styles` resolves to `dist/editor.css`. There is also
+`@parama-dev/form-builder-editor/styles/layout`, a 6 kB subset holding only the
+grid classes (`column-span-*`, `gap-size-*`, `height-*`) that a form's markup
+emits. It exists for a host that renders **only** `FormRenderer` and generates
+the rest of the utilities with its own Tailwind — it is not enough on its own to
+style the editor.
 
 ### CSS Integration
 

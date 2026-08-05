@@ -33,17 +33,25 @@ npm install @parama-dev/form-builder-editor @parama-dev/form-builder-renderer @p
 
 ```tsx
 import { FormRenderer } from '@parama-dev/form-builder-renderer';
+
 import '@parama-ui/react/styles';
+import '@parama-dev/form-builder-editor/styles';
 
 function App() {
   return <FormRenderer schema={yourSchema} onSubmit={(data) => console.log(data)} />;
 }
 ```
 
+> Both stylesheets are required, and the editor package is where the compiled CSS
+> lives even if you only render forms — see the
+> [renderer README](./packages/renderer/README.md#why-the-editor-package-appears-in-a-renderer-only-install).
+
 ### Designing a form
 
 ```tsx
 import { FormEditor } from '@parama-dev/form-builder-editor';
+
+import '@parama-ui/react/styles';
 import '@parama-dev/form-builder-editor/styles';
 
 function App() {

@@ -12,12 +12,40 @@ npm install @parama-dev/form-builder-renderer @parama-dev/form-builder-core @par
 
 ```tsx
 import { FormRenderer } from '@parama-dev/form-builder-renderer';
+
 import '@parama-ui/react/styles';
+import '@parama-dev/form-builder-editor/styles';
 
 function App() {
   return <FormRenderer schema={yourSchema} onSubmit={(data) => console.log(data)} />;
 }
 ```
+
+### Why the editor package appears in a renderer-only install
+
+Because that is where the compiled stylesheet lives. This package ships no CSS
+of its own: `@parama-ui/react/styles` carries the design tokens and the input,
+select and dialog classes, but the grid a form lays itself out on —
+`grid`, `column-*`, `gap-size-*` — is compiled into the editor's bundle.
+
+So a renderer-only application still needs the editor package installed for its
+CSS:
+
+```bash
+npm install @parama-dev/form-builder-editor
+```
+
+It costs a stylesheet, not a bundle: importing `/styles` pulls in no JavaScript,
+and `FormEditor` is never imported, so nothing from it reaches your build.
+
+There is a smaller `@parama-dev/form-builder-editor/styles/layout` holding the
+`column-*` / `gap-size-*` / `height-*` classes on their own. It is **not**
+sufficient by itself — it omits `grid` and every other utility — and exists only
+for a host that generates the rest with its own Tailwind build, using
+[the parama-ui preset](../parama-ui/README.md).
+
+This is a known wart in how the packages are split rather than a deliberate
+requirement.
 
 ## `FormRenderer` props
 
