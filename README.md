@@ -8,10 +8,10 @@ JSON, and keep both halves in one type-safe pipeline.
 | Package                                                       | Version | Description                                                    |
 | ------------------------------------------------------------- | ------- | -------------------------------------------------------------- |
 | [`@parama-dev/form-builder-types`](./packages/types)          | 0.4.1   | Type definitions. Types only, zero runtime, zero dependencies.  |
-| [`@parama-ui/react`](./packages/parama-ui)                    | 1.4.1   | UI components on React, TailwindCSS and Radix UI. Owns theming. |
+| [`@parama-ui/react`](./packages/parama-ui)                    | 1.5.0   | UI components on React, TailwindCSS and Radix UI. Owns theming. |
 | [`@parama-dev/form-builder-core`](./packages/core)            | 0.6.1   | Validation engine, workflow, variables, Zustand store.          |
-| [`@parama-dev/form-builder-renderer`](./packages/renderer)    | 0.7.1   | Renders a form from a schema.                                   |
-| [`@parama-dev/form-builder-editor`](./packages/editor)        | 0.7.1   | Visual drag-and-drop editor with Monaco and live preview.       |
+| [`@parama-dev/form-builder-renderer`](./packages/renderer)    | 0.8.0   | Renders a form from a schema.                                   |
+| [`@parama-dev/form-builder-editor`](./packages/editor)        | 0.8.0   | Visual drag-and-drop editor with Monaco and live preview.       |
 
 Dependency order — each depends on the ones above it:
 

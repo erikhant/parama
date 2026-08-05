@@ -1,6 +1,6 @@
 {
   "name": "@parama-dev/form-builder-editor",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Visual form builder editor with drag-and-drop interface",
   "license": "MIT",
   "private": false,
